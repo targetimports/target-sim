@@ -11,13 +11,17 @@ let qrCodeData = null;
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
-        const user = await base44.auth.me();
         
-        if (!user || user.role !== 'admin') {
-            return Response.json({ error: 'Unauthorized' }, { status: 401 });
+        // Para ação 'status', não requer autenticação (usado para polling)
+        const body = await req.json();
+        const { action } = body;
+        
+        if (action !== 'status') {
+            const user = await base44.auth.me();
+            if (!user || user.role !== 'admin') {
+                return Response.json({ error: 'Unauthorized' }, { status: 401 });
+            }
         }
-
-        const { action } = await req.json();
 
         if (action === 'connect') {
             if (globalSocket && connectionState === 'connected') {
