@@ -8,17 +8,20 @@ let phoneNumber = null;
 
 async function startVenom(base44) {
     try {
-        console.log('[Venom] Starting...');
+        console.log('[Venom] Starting Venom Bot...');
+        qrCode = null;
+        connectionStatus = 'connecting';
 
         client = await venom.create(
             'targetsim-session',
             (base64Qr, asciiQR) => {
-                console.log('[Venom] QR Code generated');
+                console.log('[Venom] ✅ QR Code generated!');
+                console.log('[Venom] QR length:', base64Qr?.length);
                 qrCode = base64Qr;
                 connectionStatus = 'qrReadSuccess';
             },
             (statusSession) => {
-                console.log('[Venom] Status:', statusSession);
+                console.log('[Venom] Status changed to:', statusSession);
                 connectionStatus = statusSession;
                 
                 if (statusSession === 'isLogged' || statusSession === 'qrReadSuccess') {
@@ -28,9 +31,10 @@ async function startVenom(base44) {
             {
                 headless: true,
                 useChrome: false,
-                logQR: false,
+                logQR: true,
                 disableWelcome: true,
-                updatesLog: false
+                updatesLog: true,
+                browserArgs: ['--no-sandbox', '--disable-setuid-sandbox']
             }
         );
 
@@ -67,8 +71,10 @@ async function startVenom(base44) {
 
         return client;
     } catch (error) {
-        console.error('[Venom] Error starting:', error);
+        console.error('[Venom] ❌ Error starting:', error.message);
+        console.error('[Venom] Stack:', error.stack);
         connectionStatus = 'disconnected';
+        qrCode = null;
         throw error;
     }
 }
@@ -124,10 +130,16 @@ Deno.serve(async (req) => {
         }
 
         if (action === 'status') {
+            console.log('[Venom] Status check - Status:', connectionStatus, 'QR exists:', !!qrCode, 'Client exists:', !!client);
             return Response.json({
                 status: connectionStatus,
                 qrCode: qrCode,
-                phoneNumber: phoneNumber
+                phoneNumber: phoneNumber,
+                debug: {
+                    hasClient: !!client,
+                    hasQrCode: !!qrCode,
+                    qrLength: qrCode?.length || 0
+                }
             });
         }
 

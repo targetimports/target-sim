@@ -183,11 +183,20 @@ export default function WhatsAppVenom() {
                           src={status.qrCode}
                           alt="QR Code"
                           className="w-full max-w-[280px] mx-auto"
+                          onError={(e) => {
+                            console.error('QR Code image error');
+                            e.target.style.display = 'none';
+                          }}
                         />
                       </div>
                       <p className="text-xs text-yellow-700 mt-3">
                         WhatsApp → Menu → Aparelhos Conectados
                       </p>
+                      {status.debug && (
+                        <p className="text-xs text-slate-500 mt-2">
+                          Debug: QR length {status.debug.qrLength}
+                        </p>
+                      )}
                     </div>
                     <Button 
                       variant="outline" 
@@ -196,6 +205,14 @@ export default function WhatsAppVenom() {
                     >
                       Atualizar Status
                     </Button>
+                  </>
+                ) : status?.status === 'connecting' ? (
+                  <>
+                    <div className="p-4 bg-blue-50 rounded-xl text-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                      <p className="font-semibold text-blue-900">Iniciando navegador...</p>
+                      <p className="text-xs text-blue-700 mt-2">Aguarde, gerando QR Code</p>
+                    </div>
                   </>
                 ) : (
                   <>
