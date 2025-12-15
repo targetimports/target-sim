@@ -263,6 +263,9 @@ export default function WhatsAppEvolution() {
                   value={instanceName}
                   onChange={(e) => setInstanceName(e.target.value)}
                 />
+                <p className="text-xs text-slate-500 mt-1">
+                  Qualquer nome sem espaços (ex: meuwhatsapp, targetsim)
+                </p>
               </div>
 
               <Button onClick={saveConfig} className="w-full bg-blue-600 hover:bg-blue-700">
