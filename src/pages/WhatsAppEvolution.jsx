@@ -191,20 +191,42 @@ export default function WhatsAppEvolution() {
             <CardContent className="space-y-4">
               <Alert>
                 <AlertDescription>
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <div>
-                      <strong>🚀 Opção 1 - Servidor próprio (recomendado):</strong>
-                      <div className="mt-2 p-3 bg-slate-900 text-white rounded-lg text-sm font-mono overflow-x-auto">
+                      <strong className="text-lg">📋 Passo a Passo:</strong>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <strong>1️⃣ Instale a Evolution API no servidor:</strong>
+                      <div className="p-3 bg-slate-900 text-white rounded-lg text-sm font-mono overflow-x-auto">
                         docker run -d --name evolution-api -p 8080:8080 atendai/evolution-api:latest
                       </div>
-                      <p className="text-xs text-slate-600 mt-1">URL: http://SEU-IP:8080</p>
                     </div>
-                    <div>
-                      <strong>💡 Opção 2 - Testar com API demo:</strong>
-                      <div className="mt-2 p-3 bg-blue-50 rounded-lg">
-                        <p className="text-sm">URL: <code className="bg-white px-2 py-1 rounded">https://evo-api-demo.com</code></p>
-                        <p className="text-xs text-slate-600 mt-1">⚠️ Apenas para testes, não use em produção</p>
+
+                    <div className="space-y-2">
+                      <strong>2️⃣ Configure aqui embaixo:</strong>
+                      <div className="p-3 bg-blue-50 rounded-lg space-y-2 text-sm">
+                        <div>
+                          <strong>URL da Evolution API:</strong>
+                          <ul className="list-disc ml-4 mt-1">
+                            <li>No mesmo computador: <code className="bg-white px-1.5 py-0.5 rounded">http://localhost:8080</code></li>
+                            <li>Em outro servidor: <code className="bg-white px-1.5 py-0.5 rounded">http://IP-DO-SERVIDOR:8080</code></li>
+                            <li>Exemplo: <code className="bg-white px-1.5 py-0.5 rounded">http://192.168.1.100:8080</code></li>
+                          </ul>
+                        </div>
+                        
+                        <div>
+                          <strong>API Key:</strong> Deixe vazio (a menos que você tenha configurado)
+                        </div>
+                        
+                        <div>
+                          <strong>Nome da Instância:</strong> Qualquer nome, ex: <code className="bg-white px-1.5 py-0.5 rounded">meu-whatsapp</code>
+                        </div>
                       </div>
+                    </div>
+
+                    <div>
+                      <strong>3️⃣ Clique em "Salvar" e depois "Conectar"</strong>
                     </div>
                   </div>
                 </AlertDescription>
