@@ -9,6 +9,7 @@ import SupportCenter from './pages/SupportCenter';
 import ServiceOrders from './pages/ServiceOrders';
 import AdminServiceOrders from './pages/AdminServiceOrders';
 import AdminAnalytics from './pages/AdminAnalytics';
+import CreditSystem from './pages/CreditSystem';
 import __Layout from './Layout.jsx';
 
 
@@ -24,6 +25,7 @@ export const PAGES = {
     "ServiceOrders": ServiceOrders,
     "AdminServiceOrders": AdminServiceOrders,
     "AdminAnalytics": AdminAnalytics,
+    "CreditSystem": CreditSystem,
 }
 
 export const pagesConfig = {
