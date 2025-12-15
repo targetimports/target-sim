@@ -35,6 +35,8 @@ export default function AdminPowerPlants() {
     name: '',
     type: 'solar',
     capacity_kw: '',
+    monthly_generation_kwh: '',
+    annual_generation_kwh: '',
     location: '',
     city: '',
     state: '',
@@ -51,7 +53,9 @@ export default function AdminPowerPlants() {
   const createPlant = useMutation({
     mutationFn: (data) => base44.entities.PowerPlant.create({
       ...data,
-      capacity_kw: parseFloat(data.capacity_kw)
+      capacity_kw: parseFloat(data.capacity_kw),
+      monthly_generation_kwh: data.monthly_generation_kwh ? parseFloat(data.monthly_generation_kwh) : undefined,
+      annual_generation_kwh: data.annual_generation_kwh ? parseFloat(data.annual_generation_kwh) : undefined
     }),
     onSuccess: () => {
       queryClient.invalidateQueries(['powerplants']);
@@ -63,7 +67,9 @@ export default function AdminPowerPlants() {
   const updatePlant = useMutation({
     mutationFn: ({ id, data }) => base44.entities.PowerPlant.update(id, {
       ...data,
-      capacity_kw: parseFloat(data.capacity_kw)
+      capacity_kw: parseFloat(data.capacity_kw),
+      monthly_generation_kwh: data.monthly_generation_kwh ? parseFloat(data.monthly_generation_kwh) : undefined,
+      annual_generation_kwh: data.annual_generation_kwh ? parseFloat(data.annual_generation_kwh) : undefined
     }),
     onSuccess: () => {
       queryClient.invalidateQueries(['powerplants']);
@@ -82,6 +88,8 @@ export default function AdminPowerPlants() {
       name: '',
       type: 'solar',
       capacity_kw: '',
+      monthly_generation_kwh: '',
+      annual_generation_kwh: '',
       location: '',
       city: '',
       state: '',
@@ -98,6 +106,8 @@ export default function AdminPowerPlants() {
       name: plant.name,
       type: plant.type,
       capacity_kw: plant.capacity_kw?.toString() || '',
+      monthly_generation_kwh: plant.monthly_generation_kwh?.toString() || '',
+      annual_generation_kwh: plant.annual_generation_kwh?.toString() || '',
       location: plant.location || '',
       city: plant.city || '',
       state: plant.state || '',
@@ -268,6 +278,12 @@ export default function AdminPowerPlants() {
                       <Zap className="w-4 h-4" />
                       <span>{plant.capacity_kw?.toLocaleString()} kW</span>
                     </div>
+                    {plant.monthly_generation_kwh && (
+                      <div className="flex items-center gap-2 text-sm font-semibold text-amber-700">
+                        <Zap className="w-4 h-4" />
+                        <span>{plant.monthly_generation_kwh?.toLocaleString()} kWh/mês</span>
+                      </div>
+                    )}
                     {plant.start_date && (
                       <div className="flex items-center gap-2 text-sm text-slate-600">
                         <Calendar className="w-4 h-4" />
@@ -332,13 +348,35 @@ export default function AdminPowerPlants() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Capacidade (kW) *</Label>
+                <Label>Capacidade Instalada (kW) *</Label>
                 <Input
                   type="number"
                   value={formData.capacity_kw}
                   onChange={(e) => setFormData(prev => ({ ...prev, capacity_kw: e.target.value }))}
                   placeholder="Ex: 5000"
                   required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Geração Mensal (kWh)</Label>
+                <Input
+                  type="number"
+                  value={formData.monthly_generation_kwh}
+                  onChange={(e) => setFormData(prev => ({ ...prev, monthly_generation_kwh: e.target.value }))}
+                  placeholder="Ex: 150000"
+                />
+                <p className="text-xs text-slate-500">Energia gerada por mês para rateio</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Geração Anual (kWh)</Label>
+                <Input
+                  type="number"
+                  value={formData.annual_generation_kwh}
+                  onChange={(e) => setFormData(prev => ({ ...prev, annual_generation_kwh: e.target.value }))}
+                  placeholder="Ex: 1800000"
                 />
               </div>
             </div>
