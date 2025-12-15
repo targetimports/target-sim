@@ -99,15 +99,27 @@ Deno.serve(async (req) => {
             }
 
             connectionStatus = 'connecting';
+            qrCode = null;
+            
+            // Inicia conexão em background
             startVenom(base44).catch(err => {
                 console.error('[Venom] Connection error:', err);
                 connectionStatus = 'disconnected';
             });
 
+            // Aguarda QR code ser gerado (máximo 15 segundos)
+            for (let i = 0; i < 30; i++) {
+                if (qrCode || connectionStatus === 'connected') {
+                    break;
+                }
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
             return Response.json({ 
                 success: true,
-                message: 'Connecting...',
-                status: 'connecting' 
+                message: qrCode ? 'QR Code gerado' : 'Gerando QR Code...',
+                status: connectionStatus,
+                qrCode: qrCode
             });
         }
 

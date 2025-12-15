@@ -28,6 +28,10 @@ export default function WhatsAppVenom() {
       return res.data;
     },
     refetchInterval: (data) => {
+      // Faz polling mais agressivo quando conectando
+      if (data?.status === 'connecting') {
+        return 2000;
+      }
       if (data?.status === 'connected' || data?.qrCode) {
         return 5000;
       }
@@ -46,9 +50,13 @@ export default function WhatsAppVenom() {
       const res = await base44.functions.invoke('venomConnect', { action: 'connect' });
       return res.data;
     },
-    onSuccess: () => {
-      toast.success('Iniciando conexão...');
-      setTimeout(() => refetchStatus(), 2000);
+    onSuccess: (data) => {
+      if (data.qrCode) {
+        toast.success('QR Code gerado!');
+      } else {
+        toast.success('Gerando QR Code...');
+      }
+      refetchStatus();
     },
     onError: (error) => {
       toast.error('Erro: ' + error.message);
