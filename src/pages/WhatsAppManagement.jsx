@@ -173,24 +173,15 @@ export default function WhatsAppManagement() {
                       <p className="font-semibold text-yellow-900 mb-3">
                         {connectionStatus?.qr_code ? 'Escaneie o QR Code' : 'Gerando QR Code...'}
                       </p>
-                      {connectionStatus?.qr_code ? (
+                      {connectionStatus?.qr_code || connectionStatus?.session?.qr_code ? (
                         <>
-                          <img 
-                            src={connectionStatus.qr_code} 
-                            alt="QR Code" 
-                            className="mx-auto border-4 border-white shadow-lg rounded-lg max-w-[280px]"
-                          />
-                          <p className="text-xs text-slate-500 mt-3">
-                            Abra o WhatsApp no celular e escaneie este código
-                          </p>
-                        </>
-                      ) : connectionStatus?.session?.qr_code ? (
-                        <>
-                          <img 
-                            src={connectionStatus.session.qr_code} 
-                            alt="QR Code" 
-                            className="mx-auto border-4 border-white shadow-lg rounded-lg max-w-[280px]"
-                          />
+                          <div className="mx-auto max-w-[280px]">
+                            <div 
+                              dangerouslySetInnerHTML={{ 
+                                __html: `<img src="https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(connectionStatus?.qr_code || connectionStatus?.session?.qr_code)}" alt="QR Code" class="w-full border-4 border-white shadow-lg rounded-lg" />` 
+                              }}
+                            />
+                          </div>
                           <p className="text-xs text-slate-500 mt-3">
                             Abra o WhatsApp no celular e escaneie este código
                           </p>
@@ -198,6 +189,7 @@ export default function WhatsAppManagement() {
                       ) : (
                         <div className="flex items-center justify-center py-8">
                           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600"></div>
+                          <p className="text-xs text-yellow-600 ml-3">Gerando QR Code...</p>
                         </div>
                       )}
                     </div>
