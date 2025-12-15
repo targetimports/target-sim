@@ -52,7 +52,7 @@ export default function FAQ() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="inline-block px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium mb-4">
+          <span className="inline-block px-4 py-2 bg-amber-100 text-amber-900 rounded-full text-sm font-medium mb-4">
             Dúvidas frequentes
           </span>
           <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">

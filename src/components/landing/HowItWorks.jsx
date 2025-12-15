@@ -31,16 +31,16 @@ const steps = [
 
 const colorClasses = {
   emerald: {
-    bg: 'bg-emerald-500/10',
-    icon: 'text-emerald-500',
-    border: 'border-emerald-500/20',
-    gradient: 'from-emerald-500'
+    bg: 'bg-amber-500/10',
+    icon: 'text-amber-500',
+    border: 'border-amber-500/20',
+    gradient: 'from-amber-500'
   },
   violet: {
-    bg: 'bg-violet-500/10',
-    icon: 'text-violet-500',
-    border: 'border-violet-500/20',
-    gradient: 'from-violet-500'
+    bg: 'bg-amber-600/10',
+    icon: 'text-amber-600',
+    border: 'border-amber-600/20',
+    gradient: 'from-amber-600'
   },
   yellow: {
     bg: 'bg-yellow-500/10',
@@ -60,7 +60,7 @@ export default function HowItWorks() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="inline-block px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium mb-4">
+          <span className="inline-block px-4 py-2 bg-amber-100 text-amber-900 rounded-full text-sm font-medium mb-4">
             Como funciona
           </span>
           <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">

@@ -23,12 +23,12 @@ export default function Hero() {
   const savings = calculateSavings();
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-emerald-500/5 to-violet-500/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-amber-500/5 to-yellow-500/5 rounded-full blur-3xl"></div>
       </div>
 
       {/* Floating Elements */}
@@ -48,14 +48,14 @@ export default function Hero() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-6">
-              <Leaf className="w-4 h-4 text-emerald-400" />
-              <span className="text-emerald-400 text-sm font-medium">Energia 100% Renovável</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-full mb-6">
+              <Leaf className="w-4 h-4 text-amber-400" />
+              <span className="text-amber-400 text-sm font-medium">Energia 100% Renovável</span>
             </div>
             
             <h1 className="text-4xl lg:text-6xl font-bold text-white leading-tight mb-6">
               Economize até{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-violet-400">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-400">
                 20%
               </span>{' '}
               na sua conta de luz
@@ -73,8 +73,8 @@ export default function Hero() {
                 { icon: Smartphone, text: '100% Digital' }
               ].map((item, idx) => (
                 <div key={idx} className="flex items-center gap-2 text-slate-300">
-                  <div className="p-2 bg-emerald-500/10 rounded-lg">
-                    <item.icon className="w-4 h-4 text-emerald-400" />
+                  <div className="p-2 bg-amber-500/10 rounded-lg">
+                    <item.icon className="w-4 h-4 text-amber-400" />
                   </div>
                   <span className="text-sm">{item.text}</span>
                 </div>
@@ -83,7 +83,7 @@ export default function Hero() {
 
             <div className="flex flex-wrap gap-4">
               <Link to={createPageUrl('Subscribe')}>
-                <Button size="lg" className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-8 h-14 text-lg rounded-xl shadow-lg shadow-emerald-500/25">
+                <Button size="lg" className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-8 h-14 text-lg rounded-xl shadow-lg shadow-amber-500/25">
                   Assinar agora
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
@@ -148,24 +148,24 @@ export default function Hero() {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="p-6 bg-gradient-to-br from-emerald-500/20 to-violet-500/20 border border-emerald-500/30 rounded-2xl"
+                    className="p-6 bg-gradient-to-br from-amber-500/20 to-yellow-500/20 border border-amber-500/30 rounded-2xl"
                   >
                     <p className="text-slate-400 text-sm mb-2">Sua economia estimada:</p>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-3xl font-bold text-white">R$ {savings.monthly}</p>
-                        <p className="text-emerald-400 text-sm">por mês</p>
+                        <p className="text-amber-400 text-sm">por mês</p>
                       </div>
                       <div>
                         <p className="text-3xl font-bold text-white">R$ {savings.yearly}</p>
-                        <p className="text-emerald-400 text-sm">por ano</p>
+                        <p className="text-amber-400 text-sm">por ano</p>
                       </div>
                     </div>
                   </motion.div>
                 )}
 
                 <Link to={createPageUrl('Subscribe')} className="block">
-                  <Button className="w-full h-14 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-lg rounded-xl shadow-lg shadow-emerald-500/25">
+                  <Button className="w-full h-14 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-lg rounded-xl shadow-lg shadow-amber-500/25">
                     Começar a economizar
                     <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>

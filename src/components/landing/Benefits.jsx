@@ -64,7 +64,7 @@ export default function Benefits() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="inline-block px-4 py-2 bg-violet-100 text-violet-700 rounded-full text-sm font-medium mb-4">
+          <span className="inline-block px-4 py-2 bg-amber-100 text-amber-900 rounded-full text-sm font-medium mb-4">
             Vantagens
           </span>
           <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
@@ -85,8 +85,8 @@ export default function Benefits() {
               transition={{ delay: idx * 0.05 }}
               className="group"
             >
-              <div className="h-full p-6 rounded-2xl bg-slate-50 hover:bg-gradient-to-br hover:from-emerald-50 hover:to-violet-50 border border-transparent hover:border-emerald-100 transition-all duration-300">
-                <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-violet-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+              <div className="h-full p-6 rounded-2xl bg-slate-50 hover:bg-gradient-to-br hover:from-amber-50 hover:to-yellow-50 border border-transparent hover:border-amber-100 transition-all duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-slate-900 to-amber-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                   <benefit.icon className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold text-slate-900 mb-2">{benefit.title}</h3>

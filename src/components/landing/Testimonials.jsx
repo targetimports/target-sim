@@ -31,7 +31,7 @@ const testimonials = [
 
 export default function Testimonials() {
   return (
-    <section className="py-24 bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950">
+    <section className="py-24 bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -39,7 +39,7 @@ export default function Testimonials() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="inline-block px-4 py-2 bg-emerald-500/10 text-emerald-400 rounded-full text-sm font-medium mb-4 border border-emerald-500/20">
+          <span className="inline-block px-4 py-2 bg-amber-500/10 text-amber-400 rounded-full text-sm font-medium mb-4 border border-amber-500/20">
             Depoimentos
           </span>
           <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
@@ -60,7 +60,7 @@ export default function Testimonials() {
               transition={{ delay: idx * 0.1 }}
             >
               <div className="h-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300">
-                <Quote className="w-10 h-10 text-emerald-500/30 mb-4" />
+                <Quote className="w-10 h-10 text-amber-500/30 mb-4" />
                 
                 <div className="flex gap-1 mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
