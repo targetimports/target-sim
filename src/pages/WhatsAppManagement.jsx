@@ -36,15 +36,22 @@ export default function WhatsAppManagement() {
 
   const connectMutation = useMutation({
     mutationFn: async (action) => {
-      const res = await base44.functions.invoke('whatsappConnect', { action });
-      return res.data;
+      try {
+        const res = await base44.functions.invoke('whatsappConnect', { action });
+        return res.data;
+      } catch (error) {
+        console.error('Error connecting WhatsApp:', error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
+      console.log('Connect success:', data);
       toast.success(data.message || 'Ação executada com sucesso');
       refetchStatus();
     },
     onError: (error) => {
-      toast.error(error.message || 'Erro ao executar ação');
+      console.error('Connect error:', error);
+      toast.error('Erro: ' + (error?.response?.data?.error || error.message || 'Erro ao conectar'));
     }
   });
 
