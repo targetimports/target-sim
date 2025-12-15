@@ -3,45 +3,43 @@ import makeWASocket, {
     DisconnectReason, 
     useMultiFileAuthState, 
     fetchLatestBaileysVersion
-} from 'npm:@whiskeysockets/baileys@6.5.0';
+} from 'npm:@whiskeysockets/baileys@6.4.0';
 import pino from 'npm:pino@8.16.2';
 
 const logger = pino({ level: 'silent' });
 
-const state = {
+const globalState = {
     sock: null,
     qr: null,
     status: 'disconnected'
 };
 
-async function connect(base44) {
-    console.log('[WA] Conectando...');
+async function startConnection(base44) {
+    console.log('[WA] Iniciando...');
     
-    const authFolder = '/tmp/baileys_auth';
-    await Deno.mkdir(authFolder, { recursive: true }).catch(() => {});
+    const authPath = '/tmp/wa_session';
+    await Deno.mkdir(authPath, { recursive: true }).catch(() => {});
 
-    const { state: authState, saveCreds } = await useMultiFileAuthState(authFolder);
-    const { version } = await fetchLatestBaileysVersion();
+    const { state, saveCreds } = await useMultiFileAuthState(authPath);
 
-    state.sock = makeWASocket({
-        version,
-        auth: authState,
+    globalState.sock = makeWASocket({
+        auth: state,
         logger,
         printQRInTerminal: true,
-        browser: ['Ubuntu', 'Chrome', '20.0.04'],
-        syncFullHistory: false,
-        markOnlineOnConnect: true
+        browser: ['Chrome (Linux)', '', '']
     });
 
-    state.sock.ev.on('creds.update', saveCreds);
+    globalState.sock.ev.on('creds.update', saveCreds);
 
-    state.sock.ev.on('connection.update', async (update) => {
+    globalState.sock.ev.on('connection.update', async (update) => {
         const { connection, lastDisconnect, qr } = update;
 
+        console.log('[WA] Update:', connection);
+
         if (qr) {
-            state.qr = qr;
-            state.status = 'qr_code';
-            console.log('[WA] QR gerado');
+            globalState.qr = qr;
+            globalState.status = 'qr_code';
+            console.log('[WA] ✅ QR Code pronto');
 
             const sessions = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
             if (sessions.length > 0) {
@@ -59,60 +57,64 @@ async function connect(base44) {
         }
 
         if (connection === 'close') {
-            const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
-            console.log('[WA] Fechou. Reconectar?', shouldReconnect);
+            const statusCode = lastDisconnect?.error?.output?.statusCode;
+            const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+            
+            console.log('[WA] Desconectado. StatusCode:', statusCode);
 
             if (shouldReconnect) {
-                setTimeout(() => connect(base44), 3000);
+                console.log('[WA] Reconectando em 5s...');
+                setTimeout(() => startConnection(base44), 5000);
             } else {
-                state.sock = null;
-                state.status = 'disconnected';
-                state.qr = null;
+                globalState.sock = null;
+                globalState.status = 'disconnected';
+                globalState.qr = null;
             }
         }
 
         if (connection === 'open') {
-            state.status = 'connected';
-            state.qr = null;
-            const phone = state.sock.user?.id?.split(':')[0];
-            console.log('[WA] ✅ Conectado:', phone);
+            globalState.status = 'connected';
+            globalState.qr = null;
+            
+            const phone = globalState.sock.user?.id?.split(':')[0];
+            console.log('[WA] ✅✅✅ CONECTADO! Telefone:', phone);
 
             const sessions = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
+            const data = {
+                status: 'connected',
+                qr_code: null,
+                phone_number: phone,
+                last_connection: new Date().toISOString()
+            };
+
             if (sessions.length > 0) {
-                await base44.asServiceRole.entities.WhatsAppSession.update(sessions[0].id, {
-                    status: 'connected',
-                    qr_code: null,
-                    phone_number: phone,
-                    last_connection: new Date().toISOString()
-                });
+                await base44.asServiceRole.entities.WhatsAppSession.update(sessions[0].id, data);
             } else {
                 await base44.asServiceRole.entities.WhatsAppSession.create({
                     session_id: 'main',
-                    status: 'connected',
-                    qr_code: null,
-                    phone_number: phone,
-                    last_connection: new Date().toISOString()
+                    ...data
                 });
             }
         }
     });
 
-    state.sock.ev.on('messages.upsert', async ({ messages, type }) => {
+    globalState.sock.ev.on('messages.upsert', async ({ messages, type }) => {
         if (type !== 'notify') return;
 
-        for (const m of messages) {
-            if (!m.message || m.key.fromMe) continue;
+        for (const msg of messages) {
+            if (!msg.message || msg.key.fromMe) continue;
 
-            const phone = m.key.remoteJid?.replace('@s.whatsapp.net', '');
-            const text = m.message.conversation || m.message.extendedTextMessage?.text || '';
+            const phone = msg.key.remoteJid?.replace('@s.whatsapp.net', '');
+            const text = msg.message.conversation || msg.message.extendedTextMessage?.text || '';
 
             if (phone && text) {
+                console.log('[WA] Mensagem de:', phone);
                 await base44.asServiceRole.entities.WhatsAppMessage.create({
                     phone_number: phone,
                     message: text,
                     status: 'delivered',
                     direction: 'inbound'
-                }).catch(e => console.error('[WA] Erro salvar msg:', e));
+                }).catch(e => console.error('[WA] Erro msg:', e));
             }
         }
     });
@@ -132,31 +134,31 @@ Deno.serve(async (req) => {
         }
 
         if (action === 'connect') {
-            if (state.status === 'connected') {
-                return Response.json({ status: 'connected', message: 'Já conectado' });
+            if (globalState.status === 'connected') {
+                return Response.json({ status: 'connected' });
             }
-            connect(base44);
-            return Response.json({ status: 'connecting', message: 'Conectando...' });
+            startConnection(base44);
+            return Response.json({ status: 'connecting' });
         }
 
         if (action === 'status') {
             const sessions = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
             return Response.json({
-                status: state.status,
-                qr_code: state.qr,
+                status: globalState.status,
+                qr_code: globalState.qr,
                 session: sessions[0] || null
             });
         }
 
         if (action === 'disconnect') {
-            if (state.sock) {
-                await state.sock.logout().catch(() => {});
+            if (globalState.sock) {
+                await globalState.sock.logout().catch(() => {});
             }
-            state.sock = null;
-            state.status = 'disconnected';
-            state.qr = null;
+            globalState.sock = null;
+            globalState.status = 'disconnected';
+            globalState.qr = null;
 
-            await Deno.remove('/tmp/baileys_auth', { recursive: true }).catch(() => {});
+            await Deno.remove('/tmp/wa_session', { recursive: true }).catch(() => {});
 
             const sessions = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
             if (sessions.length > 0) {
@@ -170,7 +172,7 @@ Deno.serve(async (req) => {
         }
 
         if (action === 'send') {
-            if (!state.sock || state.status !== 'connected') {
+            if (!globalState.sock || globalState.status !== 'connected') {
                 return Response.json({ error: 'Não conectado' }, { status: 400 });
             }
 
@@ -179,7 +181,7 @@ Deno.serve(async (req) => {
                 jid += '@s.whatsapp.net';
             }
 
-            await state.sock.sendMessage(jid, { text: message });
+            await globalState.sock.sendMessage(jid, { text: message });
             return Response.json({ success: true });
         }
 
@@ -191,4 +193,4 @@ Deno.serve(async (req) => {
     }
 });
 
-export { state };
+export { globalState };
