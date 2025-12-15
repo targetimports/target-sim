@@ -67,7 +67,8 @@ export default function WhatsAppEvolution() {
       }
       return false; // Não faz polling automático
     },
-    retry: false
+    retry: 3,
+    retryDelay: 2000
   });
 
   const { data: messages = [] } = useQuery({
