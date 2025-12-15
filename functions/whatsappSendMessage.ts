@@ -13,29 +13,25 @@ Deno.serve(async (req) => {
         const { phone_number, message } = body;
         
         if (!phone_number || !message) {
-            return Response.json({ error: 'phone_number and message required' }, { status: 400 });
+            return Response.json({ error: 'Campos obrigatórios' }, { status: 400 });
         }
 
-        console.log('[Send] Enviando para:', phone_number);
-
-        // Registrar mensagem
         const msgRecord = await base44.asServiceRole.entities.WhatsAppMessage.create({
-            phone_number: phone_number,
-            message: message,
+            phone_number,
+            message,
             status: 'pending',
             direction: 'outbound'
         });
 
         try {
-            // Enviar via whatsappConnect
-            const sendRes = await base44.functions.invoke('whatsappConnect', {
-                action: 'send_message',
-                phone_number,
+            const res = await base44.functions.invoke('whatsappConnect', {
+                action: 'send',
+                phone: phone_number,
                 message
             });
 
-            if (!sendRes.data.success) {
-                throw new Error('Falha ao enviar');
+            if (!res.data.success) {
+                throw new Error('Falha no envio');
             }
             
             await base44.asServiceRole.entities.WhatsAppMessage.update(msgRecord.id, {
@@ -52,14 +48,10 @@ Deno.serve(async (req) => {
                 status: 'failed',
                 error_message: error.message
             });
-
             throw error;
         }
 
     } catch (error) {
-        console.error('[Send] Error:', error);
-        return Response.json({ 
-            error: error.message 
-        }, { status: 500 });
+        return Response.json({ error: error.message }, { status: 500 });
     }
 });
