@@ -29,6 +29,7 @@ import AdvancedAnalytics from './pages/AdvancedAnalytics';
 import Chatbot from './pages/Chatbot';
 import CRMDashboard from './pages/CRMDashboard';
 import PlantMonitoring from './pages/PlantMonitoring';
+import WhatsAppManagement from './pages/WhatsAppManagement';
 import __Layout from './Layout.jsx';
 
 
@@ -64,6 +65,7 @@ export const PAGES = {
     "Chatbot": Chatbot,
     "CRMDashboard": CRMDashboard,
     "PlantMonitoring": PlantMonitoring,
+    "WhatsAppManagement": WhatsAppManagement,
 }
 
 export const pagesConfig = {

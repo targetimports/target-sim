@@ -112,14 +112,14 @@ export default function AdminDashboard() {
                   Financeiro
                 </Button>
               </Link>
+              <Link to={createPageUrl('WhatsAppManagement')}>
+                <Button variant="ghost" className="text-slate-300 hover:text-amber-400">
+                  WhatsApp
+                </Button>
+              </Link>
               <Link to={createPageUrl('AdvancedAnalytics')}>
                 <Button variant="ghost" className="text-slate-300 hover:text-amber-400">
                   Analytics
-                </Button>
-              </Link>
-              <Link to={createPageUrl('MaintenanceManagement')}>
-                <Button variant="ghost" className="text-slate-300 hover:text-amber-400">
-                  Manutenção
                 </Button>
               </Link>
               <Button variant="outline" className="border-slate-700 text-white hover:bg-slate-800" onClick={() => base44.auth.logout()}>
