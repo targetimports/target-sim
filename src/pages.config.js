@@ -11,6 +11,8 @@ import AdminServiceOrders from './pages/AdminServiceOrders';
 import AdminAnalytics from './pages/AdminAnalytics';
 import PowerPlantManager from './pages/PowerPlantManager';
 import EnergyCreditsMarket from './pages/EnergyCreditsMarket';
+import ProsumerDashboard from './pages/ProsumerDashboard';
+import ConsumerGroups from './pages/ConsumerGroups';
 import __Layout from './Layout.jsx';
 
 
@@ -28,6 +30,8 @@ export const PAGES = {
     "AdminAnalytics": AdminAnalytics,
     "PowerPlantManager": PowerPlantManager,
     "EnergyCreditsMarket": EnergyCreditsMarket,
+    "ProsumerDashboard": ProsumerDashboard,
+    "ConsumerGroups": ConsumerGroups,
 }
 
 export const pagesConfig = {
