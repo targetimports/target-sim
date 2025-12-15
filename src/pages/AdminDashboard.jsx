@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from "@/utils";
+import WhatsAppStatusIndicator from '../components/WhatsAppStatusIndicator';
 
 export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -95,6 +96,9 @@ export default function AdminDashboard() {
               <div>
                 <h1 className="text-lg font-bold">Target Sim - Admin</h1>
                 <p className="text-xs text-slate-400">Gestão de assinaturas</p>
+              </div>
+              <div className="ml-4">
+                <WhatsAppStatusIndicator />
               </div>
             </div>
 
