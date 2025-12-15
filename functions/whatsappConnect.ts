@@ -1,10 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
-import makeWASocket, { DisconnectReason, useMultiFileAuthState } from 'npm:@whiskeysockets/baileys@6.7.8';
-import QRCode from 'npm:qrcode@1.5.3';
+import pkg from 'npm:whatsapp-web.js@1.23.0';
+const { Client, LocalAuth } = pkg;
 
-const SESSION_PATH = '/tmp/whatsapp-session';
-
-let globalSocket = null;
+let globalClient = null;
 let connectionState = 'disconnected';
 let qrCodeData = null;
 
@@ -26,90 +24,95 @@ Deno.serve(async (req) => {
 
     if (action === 'connect') {
         try {
-            if (globalSocket && connectionState === 'connected') {
+            if (globalClient && connectionState === 'connected') {
                 return Response.json({ 
                     status: 'already_connected',
                     message: 'WhatsApp já está conectado'
                 });
             }
 
-            console.log('Iniciando conexão WhatsApp...');
+            console.log('Iniciando conexão WhatsApp com whatsapp-web.js...');
             
-            const { state, saveCreds } = await useMultiFileAuthState(SESSION_PATH);
-            console.log('Auth state carregado');
-
-            const socket = makeWASocket({
-                auth: state,
-                printQRInTerminal: false
-            });
-            console.log('Socket criado');
-
-            globalSocket = socket;
-            connectionState = 'connecting';
-
-            socket.ev.on('connection.update', async (update) => {
-                try {
-                    const { connection, lastDisconnect, qr } = update;
-                    console.log('Connection update:', { connection, hasQr: !!qr });
-
-                    if (qr) {
-                        connectionState = 'qr_code';
-                        qrCodeData = await QRCode.toDataURL(qr);
-                        console.log('QR Code gerado');
-                        
-                        const existing = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
-                        if (existing.length > 0) {
-                            await base44.asServiceRole.entities.WhatsAppSession.update(existing[0].id, {
-                                status: 'qr_code',
-                                qr_code: qrCodeData
-                            });
-                        } else {
-                            await base44.asServiceRole.entities.WhatsAppSession.create({
-                                session_id: 'main',
-                                status: 'qr_code',
-                                qr_code: qrCodeData
-                            });
-                        }
-                    }
-
-                    if (connection === 'close') {
-                        connectionState = 'disconnected';
-                        globalSocket = null;
-                        console.log('Conexão fechada');
-                        
-                        const existing = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
-                        if (existing.length > 0) {
-                            await base44.asServiceRole.entities.WhatsAppSession.update(existing[0].id, {
-                                status: 'disconnected'
-                            });
-                        }
-                    } else if (connection === 'open') {
-                        connectionState = 'connected';
-                        const phoneNumber = socket.user?.id?.split(':')[0] || 'Unknown';
-                        console.log('Conectado com sucesso:', phoneNumber);
-                        
-                        const existing = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
-                        if (existing.length > 0) {
-                            await base44.asServiceRole.entities.WhatsAppSession.update(existing[0].id, {
-                                status: 'connected',
-                                phone_number: phoneNumber,
-                                last_connection: new Date().toISOString()
-                            });
-                        } else {
-                            await base44.asServiceRole.entities.WhatsAppSession.create({
-                                session_id: 'main',
-                                status: 'connected',
-                                phone_number: phoneNumber,
-                                last_connection: new Date().toISOString()
-                            });
-                        }
-                    }
-                } catch (err) {
-                    console.error('Erro no connection.update:', err);
+            const client = new Client({
+                authStrategy: new LocalAuth({ dataPath: '/tmp/whatsapp-session' }),
+                puppeteer: {
+                    headless: true,
+                    args: ['--no-sandbox', '--disable-setuid-sandbox']
                 }
             });
 
-            socket.ev.on('creds.update', saveCreds);
+            globalClient = client;
+            connectionState = 'connecting';
+
+            client.on('qr', async (qr) => {
+                console.log('QR Code recebido');
+                connectionState = 'qr_code';
+                qrCodeData = qr;
+                
+                try {
+                    const existing = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
+                    if (existing.length > 0) {
+                        await base44.asServiceRole.entities.WhatsAppSession.update(existing[0].id, {
+                            status: 'qr_code',
+                            qr_code: qr
+                        });
+                    } else {
+                        await base44.asServiceRole.entities.WhatsAppSession.create({
+                            session_id: 'main',
+                            status: 'qr_code',
+                            qr_code: qr
+                        });
+                    }
+                } catch (err) {
+                    console.error('Erro ao salvar QR:', err);
+                }
+            });
+
+            client.on('ready', async () => {
+                console.log('WhatsApp conectado com sucesso!');
+                connectionState = 'connected';
+                
+                try {
+                    const info = client.info;
+                    const existing = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
+                    if (existing.length > 0) {
+                        await base44.asServiceRole.entities.WhatsAppSession.update(existing[0].id, {
+                            status: 'connected',
+                            phone_number: info.wid.user,
+                            last_connection: new Date().toISOString()
+                        });
+                    } else {
+                        await base44.asServiceRole.entities.WhatsAppSession.create({
+                            session_id: 'main',
+                            status: 'connected',
+                            phone_number: info.wid.user,
+                            last_connection: new Date().toISOString()
+                        });
+                    }
+                } catch (err) {
+                    console.error('Erro ao atualizar conexão:', err);
+                }
+            });
+
+            client.on('disconnected', async () => {
+                console.log('WhatsApp desconectado');
+                connectionState = 'disconnected';
+                globalClient = null;
+                
+                try {
+                    const existing = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
+                    if (existing.length > 0) {
+                        await base44.asServiceRole.entities.WhatsAppSession.update(existing[0].id, {
+                            status: 'disconnected'
+                        });
+                    }
+                } catch (err) {
+                    console.error('Erro ao atualizar desconexão:', err);
+                }
+            });
+
+            await client.initialize();
+            console.log('Cliente inicializado');
 
             return Response.json({ 
                 status: 'connecting',
@@ -136,9 +139,9 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'disconnect') {
-        if (globalSocket) {
-            await globalSocket.logout();
-            globalSocket = null;
+        if (globalClient) {
+            await globalClient.destroy();
+            globalClient = null;
             connectionState = 'disconnected';
             qrCodeData = null;
 
