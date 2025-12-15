@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,10 +6,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Leaf, Zap, Shield, Smartphone, ArrowRight, Sun } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from "@/utils";
+import { base44 } from '@/api/base44Client';
 
 export default function Hero() {
   const [billValue, setBillValue] = useState('');
   const [customerType, setCustomerType] = useState('residential');
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => setUser(null));
+  }, []);
   
   const calculateSavings = () => {
     const value = parseFloat(billValue) || 0;
@@ -24,6 +30,24 @@ export default function Hero() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950">
+      {/* Floating Admin Button */}
+      {user?.role === 'admin' && (
+        <motion.div
+          initial={{ x: -100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          className="fixed left-6 top-1/2 -translate-y-1/2 z-50"
+        >
+          <Link to={createPageUrl('AdminDashboard')}>
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-slate-900 to-amber-600 hover:from-slate-800 hover:to-amber-500 text-white shadow-2xl rounded-xl h-14 px-6"
+            >
+              <span className="text-xl mr-2">🔐</span>
+              Admin
+            </Button>
+          </Link>
+        </motion.div>
+      )}
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-20 left-10 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl"></div>
@@ -93,11 +117,6 @@ export default function Hero() {
                   Calcular economia
                 </Button>
               </a>
-              <Link to={createPageUrl('AdminDashboard')}>
-                <Button size="lg" variant="outline" className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10 px-8 h-14 text-lg rounded-xl">
-                  🔐 Admin
-                </Button>
-              </Link>
             </div>
           </motion.div>
 
