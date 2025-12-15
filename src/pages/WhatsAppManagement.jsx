@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from "@/utils";
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function WhatsAppManagement() {
   const queryClient = useQueryClient();
@@ -19,6 +20,9 @@ export default function WhatsAppManagement() {
     phone_number: '',
     message: ''
   });
+  const [logs, setLogs] = useState([]);
+  const [showLogs, setShowLogs] = useState(false);
+  const [retrying, setRetrying] = useState(false);
 
   const { data: connectionStatus, refetch: refetchStatus } = useQuery({
     queryKey: ['whatsapp-status'],
@@ -69,6 +73,33 @@ export default function WhatsAppManagement() {
       toast.error(error.message || 'Erro ao enviar mensagem');
     }
   });
+
+  const handleManualRetry = async () => {
+    setRetrying(true);
+    try {
+      const res = await base44.functions.invoke('whatsappMonitor', { action: 'manual_retry' });
+      if (res.data.success) {
+        toast.success('Tentativa de reconexão iniciada');
+        setTimeout(() => refetchStatus(), 2000);
+      } else {
+        toast.error('Falha ao reconectar: ' + res.data.error);
+      }
+    } catch (error) {
+      toast.error('Erro ao tentar reconectar');
+    } finally {
+      setRetrying(false);
+    }
+  };
+
+  const loadLogs = async () => {
+    try {
+      const res = await base44.functions.invoke('whatsappMonitor', { action: 'get_logs' });
+      setLogs(res.data.logs || []);
+      setShowLogs(true);
+    } catch (error) {
+      toast.error('Erro ao carregar logs');
+    }
+  };
 
   const handleConnect = () => {
     connectMutation.mutate('connect');
@@ -206,27 +237,80 @@ export default function WhatsAppManagement() {
                     <div className="p-4 bg-slate-50 rounded-xl text-center">
                       <XCircle className="w-12 h-12 text-slate-400 mx-auto mb-2" />
                       <p className="font-semibold text-slate-900">Desconectado</p>
-                      <p className="text-sm text-slate-500 mt-1">
-                        Conecte sua conta do WhatsApp
-                      </p>
-                    </div>
-                    <Button 
-                      className="w-full bg-green-600 hover:bg-green-700" 
-                      onClick={handleConnect}
-                      disabled={connectMutation.isPending}
-                    >
-                      {connectMutation.isPending ? 'Conectando...' : 'Conectar WhatsApp'}
-                    </Button>
-                  </>
-                )}
+                          <p className="text-sm text-slate-500 mt-1">
+                            Conecte sua conta do WhatsApp
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <Button 
+                            className="w-full bg-green-600 hover:bg-green-700" 
+                            onClick={handleConnect}
+                            disabled={connectMutation.isPending || retrying}
+                          >
+                            {connectMutation.isPending ? 'Conectando...' : 'Conectar WhatsApp'}
+                          </Button>
+                          <Button 
+                            variant="outline"
+                            className="w-full" 
+                            onClick={handleManualRetry}
+                            disabled={retrying || connectMutation.isPending}
+                          >
+                            {retrying ? 'Tentando reconectar...' : 'Tentar Reconexão Manual'}
+                          </Button>
+                        </div>
+                      </>
+                      )}
 
                 {connectionStatus?.session?.last_connection && (
                   <p className="text-xs text-slate-500 text-center">
                     Última conexão: {format(new Date(connectionStatus.session.last_connection), 'dd/MM/yyyy HH:mm')}
                   </p>
                 )}
-              </CardContent>
-            </Card>
+
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="w-full text-xs" 
+                  onClick={loadLogs}
+                >
+                  Ver Logs de Conexão
+                </Button>
+                </CardContent>
+                </Card>
+
+                {showLogs && (
+                <Card className="border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="text-sm">Logs de Conexão</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {logs.length > 0 ? (
+                      logs.map((log, idx) => (
+                        <div key={idx} className="p-2 bg-slate-50 rounded text-xs">
+                          <div className="flex justify-between items-center mb-1">
+                            <Badge className={
+                              log.status === 'success' || log.status === 'manual_success' ? 'bg-green-100 text-green-800' :
+                              log.status === 'failed' || log.status === 'manual_failed' ? 'bg-red-100 text-red-800' :
+                              'bg-blue-100 text-blue-800'
+                            }>
+                              {log.status}
+                            </Badge>
+                            <span className="text-slate-500">
+                              {format(new Date(log.timestamp), 'dd/MM HH:mm:ss')}
+                            </span>
+                          </div>
+                          {log.attempt && <p className="text-slate-600">Tentativa: {log.attempt}</p>}
+                          {log.error && <p className="text-red-600 mt-1">Erro: {log.error}</p>}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-slate-500 text-center py-4">Nenhum log disponível</p>
+                    )}
+                  </div>
+                </CardContent>
+                </Card>
+                )}
 
             {/* Send Message Panel */}
             {connectionStatus?.status === 'connected' && (

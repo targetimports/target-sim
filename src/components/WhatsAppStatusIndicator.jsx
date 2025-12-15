@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Wifi, WifiOff, AlertCircle } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { MessageCircle, Wifi, WifiOff, AlertCircle, RefreshCw } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
 import {
   Popover,
   PopoverContent,
@@ -11,6 +13,7 @@ import {
 export default function WhatsAppStatusIndicator() {
   const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [retrying, setRetrying] = useState(false);
 
   useEffect(() => {
     checkHealth();
@@ -29,6 +32,23 @@ export default function WhatsAppStatusIndicator() {
     } catch (error) {
       console.error('Error checking WhatsApp health:', error);
       setLoading(false);
+    }
+  };
+
+  const handleManualRetry = async () => {
+    setRetrying(true);
+    try {
+      const res = await base44.functions.invoke('whatsappMonitor', { action: 'manual_retry' });
+      if (res.data.success) {
+        toast.success('Tentativa de reconexão iniciada');
+        setTimeout(checkHealth, 2000);
+      } else {
+        toast.error('Falha ao tentar reconectar: ' + res.data.error);
+      }
+    } catch (error) {
+      toast.error('Erro ao tentar reconectar');
+    } finally {
+      setRetrying(false);
     }
   };
 
@@ -103,6 +123,27 @@ export default function WhatsAppStatusIndicator() {
             <div className="text-xs text-slate-500">
               <p>Última conexão: {new Date(health.last_connection).toLocaleString('pt-BR')}</p>
             </div>
+          )}
+          
+          {!health.connected && (
+            <Button 
+              size="sm" 
+              className="w-full mt-2"
+              onClick={handleManualRetry}
+              disabled={retrying}
+            >
+              {retrying ? (
+                <>
+                  <RefreshCw className="w-3 h-3 mr-2 animate-spin" />
+                  Reconectando...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-3 h-3 mr-2" />
+                  Tentar Reconectar
+                </>
+              )}
+            </Button>
           )}
         </div>
       </PopoverContent>
