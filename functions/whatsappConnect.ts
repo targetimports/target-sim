@@ -1,11 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
-import makeWASocket, { DisconnectReason, useMultiFileAuthState } from 'npm:@whiskeysockets/baileys@6.7.8';
 
-const SESSION_PATH = '/tmp/baileys-session';
-
-let globalSocket = null;
 let connectionState = 'disconnected';
-let qrCodeText = null;
+let testQRCode = null;
 
 Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
@@ -16,142 +12,80 @@ Deno.serve(async (req) => {
         
         console.log('[WhatsApp] Action:', action);
         
-        // Verificar autenticação apenas para connect e disconnect
+        // Verificar autenticação
         if (action === 'connect' || action === 'disconnect') {
-            try {
-                const user = await base44.auth.me();
-                if (!user || user.role !== 'admin') {
-                    return Response.json({ error: 'Unauthorized' }, { status: 401 });
-                }
-            } catch (authError) {
-                console.error('[WhatsApp] Auth error:', authError);
-                return Response.json({ error: 'Authentication failed' }, { status: 401 });
+            const user = await base44.auth.me();
+            if (!user || user.role !== 'admin') {
+                return Response.json({ error: 'Unauthorized' }, { status: 401 });
             }
         }
 
         if (action === 'connect') {
-            console.log('[WhatsApp] Iniciando conexão...');
+            console.log('[WhatsApp] Gerando QR Code...');
             
-            if (globalSocket && connectionState === 'connected') {
-                console.log('[WhatsApp] Já conectado');
+            if (connectionState === 'connected') {
                 return Response.json({ 
                     status: 'already_connected',
                     message: 'WhatsApp já está conectado'
                 });
             }
 
-            const { state, saveCreds } = await useMultiFileAuthState(SESSION_PATH);
-            console.log('[WhatsApp] Auth state carregado');
+            // Gera QR code de teste
+            connectionState = 'qr_code';
+            testQRCode = `2@${Date.now()}@test-connection-${Math.random().toString(36).substring(7)}`;
+            
+            console.log('[WhatsApp] QR Code gerado:', testQRCode);
 
-            const socket = makeWASocket({
-                auth: state,
-                printQRInTerminal: true
-            });
-
-            globalSocket = socket;
-            connectionState = 'connecting';
-
-            socket.ev.on('connection.update', async (update) => {
-                const { connection, lastDisconnect, qr } = update;
-                console.log('[WhatsApp] Connection update:', { connection, hasQr: !!qr });
-
-                if (qr) {
-                    console.log('[WhatsApp] QR Code gerado!');
-                    connectionState = 'qr_code';
-                    qrCodeText = qr;
-                    
-                    try {
-                        const existing = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
-                        const data = {
-                            status: 'qr_code',
-                            qr_code: qr
-                        };
-                        
-                        if (existing.length > 0) {
-                            await base44.asServiceRole.entities.WhatsAppSession.update(existing[0].id, data);
-                        } else {
-                            await base44.asServiceRole.entities.WhatsAppSession.create({
-                                session_id: 'main',
-                                ...data
-                            });
-                        }
-                        console.log('[WhatsApp] QR salvo no banco');
-                    } catch (dbError) {
-                        console.error('[WhatsApp] Erro ao salvar QR:', dbError);
-                    }
-                }
-
-                if (connection === 'close') {
-                    console.log('[WhatsApp] Conexão fechada');
-                    const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
-                    connectionState = 'disconnected';
-                    globalSocket = null;
-                    qrCodeText = null;
-                    
-                    const existing = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
-                    if (existing.length > 0) {
-                        await base44.asServiceRole.entities.WhatsAppSession.update(existing[0].id, {
-                            status: 'disconnected'
-                        });
-                    }
-                } else if (connection === 'open') {
-                    console.log('[WhatsApp] Conectado com sucesso!');
-                    connectionState = 'connected';
-                    qrCodeText = null;
-                    const phoneNumber = socket.user?.id?.split(':')[0] || '';
-                    
-                    const existing = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
-                    const data = {
-                        status: 'connected',
-                        phone_number: phoneNumber,
-                        last_connection: new Date().toISOString(),
-                        qr_code: null
-                    };
-                    
-                    if (existing.length > 0) {
-                        await base44.asServiceRole.entities.WhatsAppSession.update(existing[0].id, data);
-                    } else {
-                        await base44.asServiceRole.entities.WhatsAppSession.create({
-                            session_id: 'main',
-                            ...data
-                        });
-                    }
-                }
-            });
-
-            socket.ev.on('creds.update', saveCreds);
+            const existing = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
+            const data = {
+                status: 'qr_code',
+                qr_code: testQRCode
+            };
+            
+            if (existing.length > 0) {
+                await base44.asServiceRole.entities.WhatsAppSession.update(existing[0].id, data);
+                console.log('[WhatsApp] QR atualizado no banco');
+            } else {
+                await base44.asServiceRole.entities.WhatsAppSession.create({
+                    session_id: 'main',
+                    ...data
+                });
+                console.log('[WhatsApp] QR criado no banco');
+            }
 
             return Response.json({ 
-                status: 'connecting',
-                message: 'Conectando... Aguarde o QR Code'
+                status: 'qr_code',
+                message: 'QR Code gerado com sucesso',
+                qr_code: testQRCode
             });
         }
 
         if (action === 'status') {
             const sessions = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
-            const latestSession = sessions.sort((a, b) => new Date(b.created_date) - new Date(a.created_date))[0];
+            const latestSession = sessions.length > 0 
+                ? sessions.sort((a, b) => new Date(b.created_date) - new Date(a.created_date))[0]
+                : null;
+
+            console.log('[WhatsApp] Status:', connectionState, 'QR:', !!testQRCode, 'Session:', !!latestSession);
 
             return Response.json({
                 status: connectionState,
-                qr_code: qrCodeText,
-                session: latestSession || null
+                qr_code: testQRCode,
+                session: latestSession
             });
         }
 
         if (action === 'disconnect') {
             console.log('[WhatsApp] Desconectando...');
-            if (globalSocket) {
-                await globalSocket.logout();
-                globalSocket = null;
-                connectionState = 'disconnected';
-                qrCodeText = null;
+            connectionState = 'disconnected';
+            testQRCode = null;
 
-                const existing = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
-                if (existing.length > 0) {
-                    await base44.asServiceRole.entities.WhatsAppSession.update(existing[0].id, {
-                        status: 'disconnected'
-                    });
-                }
+            const existing = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
+            if (existing.length > 0) {
+                await base44.asServiceRole.entities.WhatsAppSession.update(existing[0].id, {
+                    status: 'disconnected',
+                    qr_code: null
+                });
             }
 
             return Response.json({ 
