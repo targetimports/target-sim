@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Sun, Users, FileText, Zap, TrendingUp, Search,
   MoreVertical, Eye, CheckCircle, XCircle, Clock,
-  Building2, Wallet, Activity
+  Building2, Wallet, Activity, Menu, X
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
@@ -25,6 +25,7 @@ import { createPageUrl } from "@/utils";
 export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const { data: subscriptions = [], refetch: refetchSubscriptions } = useQuery({
     queryKey: ['admin-subscriptions'],
@@ -96,7 +97,9 @@ export default function AdminDashboard() {
                 <p className="text-xs text-slate-400">Gestão de assinaturas</p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+
+            {/* Desktop Menu */}
+            <div className="hidden lg:flex items-center gap-4">
               <Link to={createPageUrl('CRMDashboard')}>
                 <Button variant="ghost" className="text-slate-300 hover:text-amber-400">
                   CRM
@@ -131,7 +134,64 @@ export default function AdminDashboard() {
                 Sair
               </Button>
             </div>
+
+            {/* Mobile Menu Button */}
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="lg:hidden text-white"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </Button>
           </div>
+
+          {/* Mobile Menu */}
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="lg:hidden mt-4 pb-4 space-y-2"
+            >
+              <Link to={createPageUrl('CRMDashboard')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400">
+                  CRM
+                </Button>
+              </Link>
+              <Link to={createPageUrl('PlantMonitoring')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400">
+                  Monitoramento
+                </Button>
+              </Link>
+              <Link to={createPageUrl('FinancialDashboard')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400">
+                  Financeiro
+                </Button>
+              </Link>
+              <Link to={createPageUrl('WhatsAppManagement')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400">
+                  WhatsApp
+                </Button>
+              </Link>
+              <Link to={createPageUrl('AdvancedAnalytics')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400">
+                  Analytics
+                </Button>
+              </Link>
+              <Link to={createPageUrl('AIInnovations')} onClick={() => setMobileMenuOpen(false)}>
+                <Button className="w-full justify-start bg-purple-600 hover:bg-purple-700 text-white">
+                  🤖 IA
+                </Button>
+              </Link>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start border-slate-700 text-white hover:bg-slate-800" 
+                onClick={() => base44.auth.logout()}
+              >
+                Sair
+              </Button>
+            </motion.div>
+          )}
         </div>
       </header>
 
