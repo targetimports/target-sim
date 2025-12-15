@@ -15,6 +15,8 @@ import ProsumerDashboard from './pages/ProsumerDashboard';
 import ConsumerGroups from './pages/ConsumerGroups';
 import CreditMarketplace from './pages/CreditMarketplace';
 import AdminPowerPlantContracts from './pages/AdminPowerPlantContracts';
+import FinancialDashboard from './pages/FinancialDashboard';
+import EnergyPurchaseManagement from './pages/EnergyPurchaseManagement';
 import __Layout from './Layout.jsx';
 
 
@@ -36,6 +38,8 @@ export const PAGES = {
     "ConsumerGroups": ConsumerGroups,
     "CreditMarketplace": CreditMarketplace,
     "AdminPowerPlantContracts": AdminPowerPlantContracts,
+    "FinancialDashboard": FinancialDashboard,
+    "EnergyPurchaseManagement": EnergyPurchaseManagement,
 }
 
 export const pagesConfig = {
