@@ -224,13 +224,20 @@ Deno.serve(async (req) => {
 
         return Response.json({ error: 'Ação inválida' }, { status: 400 });
 
-    } catch (error) {
-        console.error('[Evolution API] Error:', error);
+        } catch (error) {
+        console.error('[Evolution API] Inner Error:', error);
         return Response.json({ 
             success: false,
             error: error.message,
-            details: error.stack,
-            action: action
+            details: error.stack
         }, { status: 200 });
-    }
-});
+        }
+        } catch (error) {
+        console.error('[Evolution API] Outer Error:', error);
+        return Response.json({ 
+        success: false,
+        error: error.message,
+        stack: error.stack
+        }, { status: 200 });
+        }
+        });
