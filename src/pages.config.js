@@ -19,6 +19,10 @@ import FinancialDashboard from './pages/FinancialDashboard';
 import EnergyPurchaseManagement from './pages/EnergyPurchaseManagement';
 import AccountsManagement from './pages/AccountsManagement';
 import OwnerContracts from './pages/OwnerContracts';
+import NotificationCenter from './pages/NotificationCenter';
+import Gamification from './pages/Gamification';
+import Certificates from './pages/Certificates';
+import WeatherForecast from './pages/WeatherForecast';
 import __Layout from './Layout.jsx';
 
 
@@ -44,6 +48,10 @@ export const PAGES = {
     "EnergyPurchaseManagement": EnergyPurchaseManagement,
     "AccountsManagement": AccountsManagement,
     "OwnerContracts": OwnerContracts,
+    "NotificationCenter": NotificationCenter,
+    "Gamification": Gamification,
+    "Certificates": Certificates,
+    "WeatherForecast": WeatherForecast,
 }
 
 export const pagesConfig = {
