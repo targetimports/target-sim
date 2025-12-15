@@ -184,12 +184,30 @@ export default function WhatsAppEvolution() {
             <CardContent className="space-y-4">
               <Alert>
                 <AlertDescription>
-                  <strong>Como configurar:</strong>
-                  <ol className="list-decimal ml-4 mt-2 space-y-1">
-                    <li>Instale Evolution API: <code className="bg-slate-100 px-1 rounded">docker run -d -p 8080:8080 atendai/evolution-api</code></li>
-                    <li>URL da API: http://seu-servidor:8080</li>
-                    <li>API Key: Configure no Evolution API ou deixe vazio</li>
-                  </ol>
+                  <div className="space-y-3">
+                    <div>
+                      <strong>🚀 Instale Evolution API no seu servidor:</strong>
+                      <div className="mt-2 p-3 bg-slate-900 text-white rounded-lg text-sm font-mono">
+                        docker run -d --name evolution-api \<br/>
+                        &nbsp;&nbsp;-p 8080:8080 \<br/>
+                        &nbsp;&nbsp;atendai/evolution-api:latest
+                      </div>
+                    </div>
+                    <div>
+                      <strong>📖 Documentação completa:</strong>
+                      <a href="https://doc.evolution-api.com" target="_blank" rel="noopener" className="text-blue-600 hover:underline ml-2">
+                        doc.evolution-api.com
+                      </a>
+                    </div>
+                    <div>
+                      <strong>💡 Depois de instalar:</strong>
+                      <ul className="list-disc ml-4 mt-1 space-y-1">
+                        <li>URL será: <code className="bg-slate-100 px-1 rounded">http://IP-DO-SEU-SERVIDOR:8080</code></li>
+                        <li>API Key é opcional (deixe vazio para começar)</li>
+                        <li>Nome da instância: escolha qualquer nome (ex: "targetsim")</li>
+                      </ul>
+                    </div>
+                  </div>
                 </AlertDescription>
               </Alert>
 
