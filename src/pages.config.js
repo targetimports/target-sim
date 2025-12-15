@@ -32,6 +32,7 @@ import PlantMonitoring from './pages/PlantMonitoring';
 import WhatsAppManagement from './pages/WhatsAppManagement';
 import SuperApp from './pages/SuperApp';
 import AIInnovations from './pages/AIInnovations';
+import WhatsAppCampaigns from './pages/WhatsAppCampaigns';
 import __Layout from './Layout.jsx';
 
 
@@ -70,6 +71,7 @@ export const PAGES = {
     "WhatsAppManagement": WhatsAppManagement,
     "SuperApp": SuperApp,
     "AIInnovations": AIInnovations,
+    "WhatsAppCampaigns": WhatsAppCampaigns,
 }
 
 export const pagesConfig = {

@@ -115,9 +115,9 @@ export default function AdminDashboard() {
                   Financeiro
                 </Button>
               </Link>
-              <Link to={createPageUrl('WhatsAppManagement')}>
+              <Link to={createPageUrl('WhatsAppCampaigns')}>
                 <Button variant="ghost" className="text-slate-300 hover:text-amber-400">
-                  WhatsApp
+                  Campanhas
                 </Button>
               </Link>
               <Link to={createPageUrl('AdvancedAnalytics')}>
@@ -168,9 +168,9 @@ export default function AdminDashboard() {
                   Financeiro
                 </Button>
               </Link>
-              <Link to={createPageUrl('WhatsAppManagement')} onClick={() => setMobileMenuOpen(false)}>
+              <Link to={createPageUrl('WhatsAppCampaigns')} onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400">
-                  WhatsApp
+                  Campanhas
                 </Button>
               </Link>
               <Link to={createPageUrl('AdvancedAnalytics')} onClick={() => setMobileMenuOpen(false)}>
