@@ -1,123 +1,153 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 import makeWASocket, { 
     DisconnectReason, 
-    useMultiFileAuthState
-} from 'npm:@whiskeysockets/baileys@6.3.0';
-import pino from 'npm:pino@8.16.2';
+    useMultiFileAuthState,
+    Browsers
+} from 'npm:@whiskeysockets/baileys@6.7.8';
+import { Boom } from 'npm:@hapi/boom@10.0.1';
+import pino from 'npm:pino@9.0.0';
+import NodeCache from 'npm:node-cache@5.1.2';
 
+const msgRetryCounterCache = new NodeCache();
 const logger = pino({ level: 'silent' });
 
-const state = {
-    sock: null,
-    qr: null,
-    status: 'disconnected'
-};
+let sock = null;
+let qrCode = null;
+let connectionStatus = 'disconnected';
 
-async function connect(base44) {
-    console.log('[WA] Starting connection...');
-    
-    const authPath = '/tmp/baileys_session';
-    await Deno.mkdir(authPath, { recursive: true }).catch(() => {});
+async function startWhatsApp(base44) {
+    try {
+        const authPath = '/tmp/auth_info_baileys';
+        
+        await Deno.mkdir(authPath, { recursive: true }).catch(() => {});
 
-    const { state: authState, saveCreds } = await useMultiFileAuthState(authPath);
+        const { state, saveCreds } = await useMultiFileAuthState(authPath);
 
-    state.sock = makeWASocket({
-        auth: authState,
-        logger,
-        printQRInTerminal: true
-    });
+        sock = makeWASocket({
+            version: [2, 3000, 1015901307],
+            logger,
+            printQRInTerminal: false,
+            auth: state,
+            msgRetryCounterCache,
+            browser: Browsers.macOS('Desktop'),
+            syncFullHistory: false,
+            markOnlineOnConnect: false,
+            generateHighQualityLinkPreview: false,
+            getMessage: async () => undefined
+        });
 
-    state.sock.ev.on('creds.update', saveCreds);
+        sock.ev.on('creds.update', saveCreds);
 
-    state.sock.ev.on('connection.update', async (update) => {
-        const { connection, lastDisconnect, qr } = update;
+        sock.ev.on('connection.update', async (update) => {
+            const { connection, lastDisconnect, qr } = update;
 
-        if (qr) {
-            state.qr = qr;
-            state.status = 'qr_code';
-            console.log('[WA] QR Code generated');
-            console.log('[WA] QR length:', qr?.length);
+            if (qr) {
+                qrCode = qr;
+                connectionStatus = 'qr_code';
+                console.log('[WhatsApp] QR Code ready');
 
-            const sessions = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
-            if (sessions.length > 0) {
-                await base44.asServiceRole.entities.WhatsAppSession.update(sessions[0].id, {
-                    status: 'qr_code',
-                    qr_code: qr
-                });
-            } else {
-                await base44.asServiceRole.entities.WhatsAppSession.create({
-                    session_id: 'main',
-                    status: 'qr_code',
-                    qr_code: qr
-                });
+                try {
+                    const sessions = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
+                    
+                    if (sessions.length > 0) {
+                        await base44.asServiceRole.entities.WhatsAppSession.update(sessions[0].id, {
+                            status: 'qr_code',
+                            qr_code: qr
+                        });
+                    } else {
+                        await base44.asServiceRole.entities.WhatsAppSession.create({
+                            session_id: 'main',
+                            status: 'qr_code',
+                            qr_code: qr
+                        });
+                    }
+                } catch (e) {
+                    console.error('[WhatsApp] Error saving QR:', e);
+                }
             }
-        }
 
-        if (connection === 'close') {
-            const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
-            console.log('[WA] Connection closed, reconnect:', shouldReconnect);
+            if (connection === 'close') {
+                const shouldReconnect = (lastDisconnect?.error instanceof Boom) 
+                    ? lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut
+                    : true;
 
-            if (shouldReconnect) {
-                setTimeout(() => connect(base44), 5000);
-            } else {
-                state.sock = null;
-                state.status = 'disconnected';
-                state.qr = null;
+                console.log('[WhatsApp] Connection closed. Reconnect:', shouldReconnect);
+
+                if (shouldReconnect) {
+                    setTimeout(() => startWhatsApp(base44), 5000);
+                } else {
+                    sock = null;
+                    connectionStatus = 'disconnected';
+                    qrCode = null;
+                }
             }
-        }
 
-        if (connection === 'open') {
-            state.status = 'connected';
-            state.qr = null;
-            
-            const phone = state.sock.user?.id?.split(':')[0];
-            console.log('[WA] ✅ CONNECTED! Phone:', phone);
+            if (connection === 'open') {
+                connectionStatus = 'connected';
+                qrCode = null;
+                
+                const phoneNumber = sock.user?.id?.split(':')[0];
+                console.log('[WhatsApp] ✅ Connected:', phoneNumber);
 
-            const sessions = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
-            const data = {
-                status: 'connected',
-                qr_code: null,
-                phone_number: phone,
-                last_connection: new Date().toISOString()
-            };
+                try {
+                    const sessions = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
+                    const data = {
+                        status: 'connected',
+                        qr_code: null,
+                        phone_number: phoneNumber,
+                        last_connection: new Date().toISOString()
+                    };
 
-            if (sessions.length > 0) {
-                await base44.asServiceRole.entities.WhatsAppSession.update(sessions[0].id, data);
-            } else {
-                await base44.asServiceRole.entities.WhatsAppSession.create({
-                    session_id: 'main',
-                    ...data
-                });
+                    if (sessions.length > 0) {
+                        await base44.asServiceRole.entities.WhatsAppSession.update(sessions[0].id, data);
+                    } else {
+                        await base44.asServiceRole.entities.WhatsAppSession.create({
+                            session_id: 'main',
+                            ...data
+                        });
+                    }
+                } catch (e) {
+                    console.error('[WhatsApp] Error saving session:', e);
+                }
             }
-        }
-    });
+        });
 
-    state.sock.ev.on('messages.upsert', async ({ messages, type }) => {
-        if (type !== 'notify') return;
+        sock.ev.on('messages.upsert', async ({ messages }) => {
+            for (const msg of messages) {
+                if (msg.key.fromMe || !msg.message) continue;
 
-        for (const msg of messages) {
-            if (!msg.message || msg.key.fromMe) continue;
+                const from = msg.key.remoteJid.replace('@s.whatsapp.net', '');
+                const text = msg.message.conversation || 
+                            msg.message.extendedTextMessage?.text || '';
 
-            const phone = msg.key.remoteJid?.replace('@s.whatsapp.net', '');
-            const text = msg.message.conversation || msg.message.extendedTextMessage?.text || '';
-
-            if (phone && text) {
-                await base44.asServiceRole.entities.WhatsAppMessage.create({
-                    phone_number: phone,
-                    message: text,
-                    status: 'delivered',
-                    direction: 'inbound'
-                }).catch(() => {});
+                if (text) {
+                    try {
+                        await base44.asServiceRole.entities.WhatsAppMessage.create({
+                            phone_number: from,
+                            message: text,
+                            status: 'delivered',
+                            direction: 'inbound'
+                        });
+                        console.log('[WhatsApp] Message saved from:', from);
+                    } catch (e) {
+                        console.error('[WhatsApp] Error saving message:', e);
+                    }
+                }
             }
-        }
-    });
+        });
+
+    } catch (error) {
+        console.error('[WhatsApp] Error starting:', error);
+        throw error;
+    }
 }
 
 Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
-    
+
     try {
-        const { action, phone, message } = await req.json();
+        const body = await req.json();
+        const { action, phone, message } = body;
 
         if (['connect', 'disconnect'].includes(action)) {
             const user = await base44.auth.me();
@@ -127,33 +157,50 @@ Deno.serve(async (req) => {
         }
 
         if (action === 'connect') {
-            if (state.status === 'connected') {
-                return Response.json({ status: 'connected' });
+            if (connectionStatus === 'connected') {
+                return Response.json({ 
+                    success: true,
+                    message: 'Already connected',
+                    status: connectionStatus 
+                });
             }
-            connect(base44);
-            return Response.json({ status: 'connecting' });
+
+            startWhatsApp(base44);
+            
+            return Response.json({ 
+                success: true,
+                message: 'Connecting...',
+                status: 'connecting' 
+            });
         }
 
         if (action === 'status') {
-            const sessions = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
+            const sessions = await base44.asServiceRole.entities.WhatsAppSession.filter({ 
+                session_id: 'main' 
+            });
+
             return Response.json({
-                status: state.status,
-                qr_code: state.qr,
+                status: connectionStatus,
+                qr_code: qrCode,
                 session: sessions[0] || null
             });
         }
 
         if (action === 'disconnect') {
-            if (state.sock) {
-                await state.sock.logout().catch(() => {});
+            if (sock) {
+                await sock.logout();
             }
-            state.sock = null;
-            state.status = 'disconnected';
-            state.qr = null;
+            
+            sock = null;
+            connectionStatus = 'disconnected';
+            qrCode = null;
 
-            await Deno.remove('/tmp/baileys_session', { recursive: true }).catch(() => {});
+            await Deno.remove('/tmp/auth_info_baileys', { recursive: true }).catch(() => {});
 
-            const sessions = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
+            const sessions = await base44.asServiceRole.entities.WhatsAppSession.filter({ 
+                session_id: 'main' 
+            });
+            
             if (sessions.length > 0) {
                 await base44.asServiceRole.entities.WhatsAppSession.update(sessions[0].id, {
                     status: 'disconnected',
@@ -161,29 +208,38 @@ Deno.serve(async (req) => {
                 });
             }
 
-            return Response.json({ status: 'disconnected' });
+            return Response.json({ 
+                success: true,
+                message: 'Disconnected',
+                status: 'disconnected' 
+            });
         }
 
         if (action === 'send') {
-            if (!state.sock || state.status !== 'connected') {
-                return Response.json({ error: 'Not connected' }, { status: 400 });
+            if (!sock || connectionStatus !== 'connected') {
+                return Response.json({ 
+                    success: false,
+                    error: 'Not connected to WhatsApp' 
+                }, { status: 400 });
             }
 
-            let jid = phone.replace(/\D/g, '');
-            if (!jid.endsWith('@s.whatsapp.net')) {
-                jid += '@s.whatsapp.net';
-            }
+            const jid = phone.includes('@') ? phone : `${phone.replace(/\D/g, '')}@s.whatsapp.net`;
 
-            await state.sock.sendMessage(jid, { text: message });
-            return Response.json({ success: true });
+            await sock.sendMessage(jid, { text: message });
+            
+            return Response.json({ 
+                success: true,
+                message: 'Message sent' 
+            });
         }
 
         return Response.json({ error: 'Invalid action' }, { status: 400 });
 
     } catch (error) {
-        console.error('[WA] Error:', error);
-        return Response.json({ error: error.message }, { status: 500 });
+        console.error('[WhatsApp] Request error:', error);
+        return Response.json({ 
+            success: false,
+            error: error.message 
+        }, { status: 500 });
     }
 });
-
-export { state };
