@@ -14,6 +14,7 @@ import EnergyCreditsMarket from './pages/EnergyCreditsMarket';
 import ProsumerDashboard from './pages/ProsumerDashboard';
 import ConsumerGroups from './pages/ConsumerGroups';
 import CreditMarketplace from './pages/CreditMarketplace';
+import ContractManagement from './pages/ContractManagement';
 import __Layout from './Layout.jsx';
 
 
@@ -34,6 +35,7 @@ export const PAGES = {
     "ProsumerDashboard": ProsumerDashboard,
     "ConsumerGroups": ConsumerGroups,
     "CreditMarketplace": CreditMarketplace,
+    "ContractManagement": ContractManagement,
 }
 
 export const pagesConfig = {
