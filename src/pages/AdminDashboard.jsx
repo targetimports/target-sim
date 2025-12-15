@@ -92,7 +92,7 @@ export default function AdminDashboard() {
                 <Sun className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold">Painel Administrativo</h1>
+                <h1 className="text-lg font-bold">Target Sim - Admin</h1>
                 <p className="text-xs text-slate-400">Gestão de assinaturas</p>
               </div>
             </div>

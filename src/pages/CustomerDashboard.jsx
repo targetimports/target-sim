@@ -98,7 +98,7 @@ export default function CustomerDashboard() {
                 <Sun className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-slate-900">Minha Energia</h1>
+                <h1 className="text-xl font-bold text-slate-900">Target Sim</h1>
                 <p className="text-sm text-slate-500">Olá, {user?.full_name || 'Cliente'}</p>
               </div>
             </div>
