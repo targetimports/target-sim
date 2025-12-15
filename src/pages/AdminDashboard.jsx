@@ -68,7 +68,7 @@ export default function AdminDashboard() {
   const statusColors = {
     pending: 'bg-yellow-100 text-yellow-800',
     analyzing: 'bg-blue-100 text-blue-800',
-    active: 'bg-emerald-100 text-emerald-800',
+    active: 'bg-amber-100 text-amber-900',
     suspended: 'bg-red-100 text-red-800',
     cancelled: 'bg-slate-100 text-slate-800'
   };
@@ -88,9 +88,9 @@ export default function AdminDashboard() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-black to-amber-600 rounded-xl flex items-center justify-center">
-              <Sun className="w-6 h-6 text-amber-400" />
-            </div>
+              <div className="w-10 h-10 bg-gradient-to-br from-slate-900 to-amber-600 rounded-xl flex items-center justify-center">
+                <Sun className="w-6 h-6 text-white" />
+              </div>
               <div>
                 <h1 className="text-lg font-bold">Painel Administrativo</h1>
                 <p className="text-xs text-slate-400">Gestão de assinaturas</p>
@@ -170,8 +170,8 @@ export default function AdminDashboard() {
             <Card className="border-0 shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center">
-                    <Wallet className="w-7 h-7 text-amber-600" />
+                  <div className="w-14 h-14 bg-slate-800 rounded-2xl flex items-center justify-center">
+                    <Wallet className="w-7 h-7 text-amber-500" />
                   </div>
                   <div>
                     <p className="text-sm text-slate-500">Receita estimada/mês</p>
@@ -330,7 +330,7 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-4 px-4">
                             <Badge className={
-                              ref.status === 'converted' ? 'bg-emerald-100 text-emerald-800' :
+                              ref.status === 'converted' ? 'bg-amber-100 text-amber-900' :
                               ref.status === 'contacted' ? 'bg-blue-100 text-blue-800' :
                               'bg-yellow-100 text-yellow-800'
                             }>
@@ -380,7 +380,7 @@ export default function AdminDashboard() {
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-slate-500">{plant.capacity_kw} kW</span>
                           <Badge className={
-                            plant.status === 'operational' ? 'bg-emerald-100 text-emerald-800' :
+                            plant.status === 'operational' ? 'bg-amber-100 text-amber-900' :
                             plant.status === 'maintenance' ? 'bg-yellow-100 text-yellow-800' :
                             'bg-slate-100 text-slate-800'
                           }>

@@ -135,16 +135,16 @@ export default function AdminPlans() {
                 </Button>
               </Link>
               <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-black to-amber-600 rounded-xl flex items-center justify-center">
-                <Sun className="w-6 h-6 text-amber-400" />
-              </div>
+                <div className="w-10 h-10 bg-gradient-to-br from-slate-900 to-amber-600 rounded-xl flex items-center justify-center">
+                  <Sun className="w-6 h-6 text-white" />
+                </div>
                 <div>
                   <h1 className="text-lg font-bold">Gerenciar Planos</h1>
                   <p className="text-xs text-slate-400">Configure os planos de assinatura</p>
                 </div>
               </div>
             </div>
-            <Button onClick={() => { resetForm(); setIsDialogOpen(true); }} className="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-semibold">
+            <Button onClick={() => { resetForm(); setIsDialogOpen(true); }} className="bg-amber-500 hover:bg-amber-600">
               <Plus className="w-4 h-4 mr-2" />
               Novo plano
             </Button>
@@ -165,7 +165,7 @@ export default function AdminPlans() {
                   <div className="flex items-start justify-between">
                     <div>
                       <CardTitle className="text-xl">{plan.name}</CardTitle>
-                      <Badge className={plan.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'}>
+                      <Badge className={plan.is_active ? 'bg-amber-100 text-amber-900' : 'bg-slate-100 text-slate-800'}>
                         {plan.is_active ? 'Ativo' : 'Inativo'}
                       </Badge>
                     </div>
@@ -234,7 +234,7 @@ export default function AdminPlans() {
               <Sun className="w-12 h-12 text-slate-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-slate-900 mb-2">Nenhum plano cadastrado</h3>
               <p className="text-slate-500 mb-6">Crie seu primeiro plano de assinatura</p>
-              <Button onClick={() => setIsDialogOpen(true)} className="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-semibold">
+              <Button onClick={() => setIsDialogOpen(true)} className="bg-amber-500 hover:bg-amber-600">
                 <Plus className="w-4 h-4 mr-2" />
                 Criar plano
               </Button>
@@ -358,7 +358,7 @@ export default function AdminPlans() {
               <Button type="button" variant="outline" className="flex-1" onClick={() => setIsDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" className="flex-1 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-semibold">
+              <Button type="submit" className="flex-1 bg-amber-500 hover:bg-amber-600">
                 {editingPlan ? 'Salvar alterações' : 'Criar plano'}
               </Button>
             </div>
