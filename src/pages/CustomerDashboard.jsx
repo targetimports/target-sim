@@ -103,6 +103,11 @@ export default function CustomerDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-4">
+              <Link to={createPageUrl('SuperApp')}>
+                <Button className="bg-amber-500 hover:bg-amber-600 text-white">
+                  🌟 Super App
+                </Button>
+              </Link>
               <Link to={createPageUrl('NotificationCenter')}>
                 <Button variant="ghost" className="text-slate-600 hover:text-amber-600">
                   Notificações
@@ -111,21 +116,6 @@ export default function CustomerDashboard() {
               <Link to={createPageUrl('Gamification')}>
                 <Button variant="ghost" className="text-slate-600 hover:text-amber-600">
                   Conquistas
-                </Button>
-              </Link>
-              <Link to={createPageUrl('Certificates')}>
-                <Button variant="ghost" className="text-slate-600 hover:text-amber-600">
-                  Certificados
-                </Button>
-              </Link>
-              <Link to={createPageUrl('Chatbot')}>
-                <Button variant="ghost" className="text-slate-600 hover:text-amber-600">
-                  Chat
-                </Button>
-              </Link>
-              <Link to={createPageUrl('PaymentGateway')}>
-                <Button variant="ghost" className="text-slate-600 hover:text-amber-600">
-                  Pagamentos
                 </Button>
               </Link>
               <Button variant="outline" onClick={() => base44.auth.logout()}>

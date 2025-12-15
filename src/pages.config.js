@@ -30,6 +30,8 @@ import Chatbot from './pages/Chatbot';
 import CRMDashboard from './pages/CRMDashboard';
 import PlantMonitoring from './pages/PlantMonitoring';
 import WhatsAppManagement from './pages/WhatsAppManagement';
+import SuperApp from './pages/SuperApp';
+import AIInnovations from './pages/AIInnovations';
 import __Layout from './Layout.jsx';
 
 
@@ -66,6 +68,8 @@ export const PAGES = {
     "CRMDashboard": CRMDashboard,
     "PlantMonitoring": PlantMonitoring,
     "WhatsAppManagement": WhatsAppManagement,
+    "SuperApp": SuperApp,
+    "AIInnovations": AIInnovations,
 }
 
 export const pagesConfig = {

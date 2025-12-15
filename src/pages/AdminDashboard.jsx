@@ -122,6 +122,11 @@ export default function AdminDashboard() {
                   Analytics
                 </Button>
               </Link>
+              <Link to={createPageUrl('AIInnovations')}>
+                <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                  🤖 IA
+                </Button>
+              </Link>
               <Button variant="outline" className="border-slate-700 text-white hover:bg-slate-800" onClick={() => base44.auth.logout()}>
                 Sair
               </Button>
