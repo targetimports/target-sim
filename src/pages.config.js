@@ -18,7 +18,7 @@ import AdminPowerPlantContracts from './pages/AdminPowerPlantContracts';
 import FinancialDashboard from './pages/FinancialDashboard';
 import EnergyPurchaseManagement from './pages/EnergyPurchaseManagement';
 import AccountsManagement from './pages/AccountsManagement';
-import PlantOwnerContracts from './pages/PlantOwnerContracts';
+import OwnerContracts from './pages/OwnerContracts';
 import __Layout from './Layout.jsx';
 
 
@@ -43,7 +43,7 @@ export const PAGES = {
     "FinancialDashboard": FinancialDashboard,
     "EnergyPurchaseManagement": EnergyPurchaseManagement,
     "AccountsManagement": AccountsManagement,
-    "PlantOwnerContracts": PlantOwnerContracts,
+    "OwnerContracts": OwnerContracts,
 }
 
 export const pagesConfig = {
