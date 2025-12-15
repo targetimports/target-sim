@@ -208,14 +208,6 @@ Deno.serve(async (req) => {
 
             const result = await sendRes.json();
 
-            // Salvar no banco
-            await base44.asServiceRole.entities.WhatsAppMessage.create({
-                phone_number: formattedPhone,
-                message: message,
-                status: 'sent',
-                direction: 'outbound'
-            });
-
             return Response.json({
                 success: true,
                 message: 'Mensagem enviada',
