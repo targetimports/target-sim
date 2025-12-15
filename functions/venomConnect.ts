@@ -1,91 +1,73 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
-import venom from 'npm:venom-bot@5.0.9';
+import venom from 'npm:venom-bot@5.0.29';
 
-let venomClient = null;
-let qrCodeData = null;
+let client = null;
+let qrCode = null;
 let connectionStatus = 'disconnected';
+let phoneNumber = null;
 
-async function startVenom(base44, sessionName) {
+async function startVenom(base44) {
     try {
-        venomClient = await venom.create(
-            sessionName,
+        console.log('[Venom] Starting...');
+
+        client = await venom.create(
+            'targetsim-session',
             (base64Qr, asciiQR) => {
-                qrCodeData = base64Qr;
-                connectionStatus = 'qr_code';
-                console.log('[Venom] QR Code gerado');
-                
-                // Salvar QR no banco
-                base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: sessionName })
-                    .then(sessions => {
-                        const data = {
-                            status: 'qr_code',
-                            qr_code: base64Qr
-                        };
-                        if (sessions.length > 0) {
-                            base44.asServiceRole.entities.WhatsAppSession.update(sessions[0].id, data);
-                        } else {
-                            base44.asServiceRole.entities.WhatsAppSession.create({
-                                session_id: sessionName,
-                                ...data
-                            });
-                        }
-                    });
+                console.log('[Venom] QR Code generated');
+                qrCode = base64Qr;
+                connectionStatus = 'qrReadSuccess';
             },
-            (statusSession, session) => {
+            (statusSession) => {
                 console.log('[Venom] Status:', statusSession);
-                connectionStatus = statusSession === 'inChat' ? 'connected' : 'connecting';
+                connectionStatus = statusSession;
                 
-                if (statusSession === 'inChat') {
-                    qrCodeData = null;
-                    
-                    // Atualizar sessão como conectada
-                    venomClient.getSessionTokenBrowser().then(token => {
-                        base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: sessionName })
-                            .then(sessions => {
-                                const data = {
-                                    status: 'connected',
-                                    qr_code: null,
-                                    phone_number: token?.me?.user || 'Conectado',
-                                    last_connection: new Date().toISOString()
-                                };
-                                if (sessions.length > 0) {
-                                    base44.asServiceRole.entities.WhatsAppSession.update(sessions[0].id, data);
-                                }
-                            });
-                    });
+                if (statusSession === 'isLogged' || statusSession === 'qrReadSuccess') {
+                    connectionStatus = 'connected';
                 }
             },
             {
                 headless: true,
-                devtools: false,
                 useChrome: false,
-                debug: false,
                 logQR: false,
-                browserArgs: ['--no-sandbox', '--disable-setuid-sandbox']
+                disableWelcome: true,
+                updatesLog: false
             }
         );
 
-        // Escutar mensagens recebidas
-        venomClient.onMessage(async (message) => {
-            if (message.isGroupMsg === false && !message.fromMe) {
+        if (client) {
+            console.log('[Venom] Connected successfully');
+            connectionStatus = 'connected';
+            qrCode = null;
+
+            const me = await client.getHostDevice();
+            phoneNumber = me?.id?.user || null;
+
+            // Listen to incoming messages
+            client.onMessage(async (message) => {
                 try {
-                    await base44.asServiceRole.entities.WhatsAppMessage.create({
-                        phone_number: message.from.replace('@c.us', ''),
-                        message: message.body,
-                        status: 'delivered',
-                        direction: 'inbound'
-                    });
+                    if (message.isGroupMsg) return;
+                    
+                    const from = message.from.replace('@c.us', '');
+                    const text = message.body || '';
+
+                    if (text) {
+                        await base44.asServiceRole.entities.WhatsAppMessage.create({
+                            phone_number: from,
+                            message: text,
+                            status: 'delivered',
+                            direction: 'inbound'
+                        });
+                        console.log('[Venom] Message saved from:', from);
+                    }
                 } catch (e) {
-                    console.error('[Venom] Erro salvar mensagem:', e);
+                    console.error('[Venom] Error saving message:', e);
                 }
-            }
-        });
+            });
+        }
 
-        console.log('[Venom] ✅ Cliente iniciado');
-        return venomClient;
-
+        return client;
     } catch (error) {
-        console.error('[Venom] Erro ao iniciar:', error);
+        console.error('[Venom] Error starting:', error);
         connectionStatus = 'disconnected';
         throw error;
     }
@@ -96,9 +78,9 @@ Deno.serve(async (req) => {
 
     try {
         const body = await req.json();
-        const { action, sessionName, phone, message } = body;
+        const { action, phone, message } = body;
 
-        // Verificar autenticação admin
+        // Only admin can connect/disconnect
         if (['connect', 'disconnect'].includes(action)) {
             const user = await base44.auth.me();
             if (!user || user.role !== 'admin') {
@@ -106,98 +88,90 @@ Deno.serve(async (req) => {
             }
         }
 
-        const session = sessionName || 'venom-session';
-
         if (action === 'connect') {
-            if (connectionStatus === 'connected' && venomClient) {
-                return Response.json({
+            if (connectionStatus === 'connected' && client) {
+                return Response.json({ 
                     success: true,
-                    message: 'Já conectado',
-                    status: connectionStatus
+                    message: 'Already connected',
+                    status: connectionStatus,
+                    phoneNumber
                 });
             }
 
-            // Iniciar Venom em background
-            startVenom(base44, session).catch(console.error);
+            connectionStatus = 'connecting';
+            startVenom(base44).catch(err => {
+                console.error('[Venom] Connection error:', err);
+                connectionStatus = 'disconnected';
+            });
 
-            return Response.json({
+            return Response.json({ 
                 success: true,
-                message: 'Iniciando conexão...',
-                status: 'connecting'
+                message: 'Connecting...',
+                status: 'connecting' 
             });
         }
 
         if (action === 'status') {
-            const sessions = await base44.asServiceRole.entities.WhatsAppSession.filter({
-                session_id: session
-            });
-
             return Response.json({
                 status: connectionStatus,
-                qr_code: qrCodeData,
-                session: sessions[0] || null,
-                client_active: venomClient !== null
+                qrCode: qrCode,
+                phoneNumber: phoneNumber
             });
         }
 
         if (action === 'disconnect') {
-            if (venomClient) {
-                await venomClient.close();
-                venomClient = null;
+            if (client) {
+                try {
+                    await client.close();
+                } catch (e) {
+                    console.error('[Venom] Error closing:', e);
+                }
             }
-
+            
+            client = null;
             connectionStatus = 'disconnected';
-            qrCodeData = null;
+            qrCode = null;
+            phoneNumber = null;
 
-            const sessions = await base44.asServiceRole.entities.WhatsAppSession.filter({
-                session_id: session
-            });
-
-            if (sessions.length > 0) {
-                await base44.asServiceRole.entities.WhatsAppSession.update(sessions[0].id, {
-                    status: 'disconnected',
-                    qr_code: null
-                });
-            }
-
-            return Response.json({
+            return Response.json({ 
                 success: true,
-                message: 'Desconectado'
+                message: 'Disconnected',
+                status: 'disconnected' 
             });
         }
 
         if (action === 'send') {
-            if (!venomClient || connectionStatus !== 'connected') {
-                return Response.json({
+            if (!client || connectionStatus !== 'connected') {
+                return Response.json({ 
                     success: false,
-                    error: 'WhatsApp não conectado'
+                    error: 'Not connected' 
                 }, { status: 400 });
             }
 
-            const phoneFormatted = phone.includes('@c.us') ? phone : `${phone.replace(/\D/g, '')}@c.us`;
+            const chatId = phone.includes('@c.us') ? phone : `${phone.replace(/\D/g, '')}@c.us`;
 
-            await venomClient.sendText(phoneFormatted, message);
-
+            await client.sendText(chatId, message);
+            
             await base44.asServiceRole.entities.WhatsAppMessage.create({
-                phone_number: phone.replace(/\D/g, ''),
+                phone_number: phone,
                 message: message,
                 status: 'sent',
                 direction: 'outbound'
             });
 
-            return Response.json({
+            return Response.json({ 
                 success: true,
-                message: 'Mensagem enviada'
+                message: 'Message sent' 
             });
         }
 
-        return Response.json({ error: 'Ação inválida' }, { status: 400 });
+        return Response.json({ error: 'Invalid action' }, { status: 400 });
 
     } catch (error) {
-        console.error('[Venom] Erro na requisição:', error);
-        return Response.json({
+        console.error('[Venom] Request error:', error);
+        return Response.json({ 
             success: false,
-            error: error.message
+            error: error.message 
         }, { status: 500 });
     }
 });
