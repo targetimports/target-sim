@@ -23,6 +23,10 @@ import NotificationCenter from './pages/NotificationCenter';
 import Gamification from './pages/Gamification';
 import Certificates from './pages/Certificates';
 import WeatherForecast from './pages/WeatherForecast';
+import PaymentGateway from './pages/PaymentGateway';
+import MaintenanceManagement from './pages/MaintenanceManagement';
+import AdvancedAnalytics from './pages/AdvancedAnalytics';
+import Chatbot from './pages/Chatbot';
 import __Layout from './Layout.jsx';
 
 
@@ -52,6 +56,10 @@ export const PAGES = {
     "Gamification": Gamification,
     "Certificates": Certificates,
     "WeatherForecast": WeatherForecast,
+    "PaymentGateway": PaymentGateway,
+    "MaintenanceManagement": MaintenanceManagement,
+    "AdvancedAnalytics": AdvancedAnalytics,
+    "Chatbot": Chatbot,
 }
 
 export const pagesConfig = {
