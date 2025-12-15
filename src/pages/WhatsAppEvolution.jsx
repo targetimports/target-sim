@@ -48,7 +48,7 @@ export default function WhatsAppEvolution() {
     refetchStatus();
   };
 
-  const { data: status, refetch: refetchStatus } = useQuery({
+  const { data: status, refetch: refetchStatus, error: statusError } = useQuery({
     queryKey: ['evolution-status'],
     queryFn: async () => {
       const res = await base44.functions.invoke('evolutionAPI', {
@@ -59,8 +59,15 @@ export default function WhatsAppEvolution() {
       });
       return res.data;
     },
-    enabled: !!apiUrl && !!apiKey,
-    refetchInterval: 5000
+    enabled: !!apiUrl,
+    refetchInterval: (data) => {
+      // Só faz polling se conectado ou com QR code
+      if (data?.state === 'open' || data?.qrcode) {
+        return 5000;
+      }
+      return false; // Não faz polling automático
+    },
+    retry: false
   });
 
   const { data: messages = [] } = useQuery({
@@ -210,15 +217,21 @@ export default function WhatsAppEvolution() {
                   value={apiUrl}
                   onChange={(e) => setApiUrl(e.target.value)}
                 />
+                <p className="text-xs text-slate-500 mt-1">
+                  Ex: http://localhost:8080 ou http://192.168.1.100:8080
+                </p>
               </div>
 
               <div>
-                <Label>API Key (opcional)</Label>
+                <Label>API Key</Label>
                 <Input
-                  placeholder="sua-api-key"
+                  placeholder="B6D711FCDE4D4FD5936544120E713976"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                 />
+                <p className="text-xs text-slate-500 mt-1">
+                  Deixe vazio se não configurou autenticação na Evolution API
+                </p>
               </div>
 
               <div>
@@ -241,6 +254,20 @@ export default function WhatsAppEvolution() {
           <Alert className="mb-6">
             <AlertDescription>
               Configure a Evolution API primeiro clicando no ícone ⚙️
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {statusError && (
+          <Alert className="mb-6 border-red-200 bg-red-50">
+            <AlertDescription className="text-red-800">
+              <strong>❌ Erro ao conectar com Evolution API</strong>
+              <p className="mt-2 text-sm">Verifique se:</p>
+              <ul className="list-disc ml-4 mt-1 text-sm">
+                <li>A Evolution API está rodando no servidor</li>
+                <li>A URL está correta (ex: http://localhost:8080)</li>
+                <li>Não há firewall bloqueando a porta 8080</li>
+              </ul>
             </AlertDescription>
           </Alert>
         )}
