@@ -13,6 +13,7 @@ import PowerPlantManager from './pages/PowerPlantManager';
 import EnergyCreditsMarket from './pages/EnergyCreditsMarket';
 import ProsumerDashboard from './pages/ProsumerDashboard';
 import ConsumerGroups from './pages/ConsumerGroups';
+import CreditMarketplace from './pages/CreditMarketplace';
 import __Layout from './Layout.jsx';
 
 
@@ -32,6 +33,7 @@ export const PAGES = {
     "EnergyCreditsMarket": EnergyCreditsMarket,
     "ProsumerDashboard": ProsumerDashboard,
     "ConsumerGroups": ConsumerGroups,
+    "CreditMarketplace": CreditMarketplace,
 }
 
 export const pagesConfig = {
