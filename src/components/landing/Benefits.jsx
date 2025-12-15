@@ -86,8 +86,8 @@ export default function Benefits() {
               className="group"
             >
               <div className="h-full p-6 rounded-2xl bg-slate-50 hover:bg-gradient-to-br hover:from-amber-50 hover:to-yellow-50 border border-transparent hover:border-amber-100 transition-all duration-300">
-                <div className="w-12 h-12 bg-gradient-to-br from-slate-900 to-amber-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <benefit.icon className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 bg-gradient-to-br from-black to-amber-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <benefit.icon className="w-6 h-6 text-amber-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-slate-900 mb-2">{benefit.title}</h3>
                 <p className="text-slate-600 text-sm">{benefit.description}</p>

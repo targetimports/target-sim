@@ -23,7 +23,7 @@ export default function Hero() {
   const savings = calculateSavings();
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-black via-slate-950 to-amber-950/30">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-20 left-10 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl"></div>
@@ -83,7 +83,7 @@ export default function Hero() {
 
             <div className="flex flex-wrap gap-4">
               <Link to={createPageUrl('Subscribe')}>
-                <Button size="lg" className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-8 h-14 text-lg rounded-xl shadow-lg shadow-amber-500/25">
+                <Button size="lg" className="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-semibold px-8 h-14 text-lg rounded-xl shadow-lg shadow-amber-500/25">
                   Assinar agora
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
@@ -165,7 +165,7 @@ export default function Hero() {
                 )}
 
                 <Link to={createPageUrl('Subscribe')} className="block">
-                  <Button className="w-full h-14 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-lg rounded-xl shadow-lg shadow-amber-500/25">
+                  <Button className="w-full h-14 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-semibold text-lg rounded-xl shadow-lg shadow-amber-500/25">
                     Começar a economizar
                     <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>

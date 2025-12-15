@@ -75,13 +75,13 @@ export default function Subscribe() {
   const savings = parseFloat(formData.average_bill_value || 0) * discountRate;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950">
+    <div className="min-h-screen bg-gradient-to-br from-black via-slate-950 to-amber-950/30">
       {/* Header */}
       <header className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
           <Link to={createPageUrl('Home')} className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-violet-500 rounded-xl flex items-center justify-center">
-              <Sun className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 bg-gradient-to-br from-black to-amber-600 rounded-xl flex items-center justify-center">
+              <Sun className="w-6 h-6 text-amber-400" />
             </div>
             <span className="text-xl font-bold text-white">EnergiaSolar</span>
           </Link>
@@ -103,14 +103,14 @@ export default function Subscribe() {
                 <React.Fragment key={s}>
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${
                     step >= s 
-                      ? 'bg-emerald-500 text-white' 
+                      ? 'bg-gradient-to-br from-amber-500 to-yellow-600 text-black' 
                       : 'bg-slate-800 text-slate-500'
                   }`}>
                     {step > s ? <Check className="w-5 h-5" /> : s}
                   </div>
                   {s < 3 && (
                     <div className={`w-24 h-1 mx-2 rounded transition-all ${
-                      step > s ? 'bg-emerald-500' : 'bg-slate-800'
+                      step > s ? 'bg-amber-500' : 'bg-slate-800'
                     }`} />
                   )}
                 </React.Fragment>
@@ -300,12 +300,12 @@ export default function Subscribe() {
                   </div>
 
                   {parseFloat(formData.average_bill_value) >= 200 && (
-                    <div className="p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                    <div className="p-6 bg-amber-500/10 border border-amber-500/20 rounded-xl">
                       <p className="text-slate-400 text-sm mb-2">Sua economia estimada:</p>
                       <p className="text-3xl font-bold text-white">
-                        R$ {savings.toFixed(2)}<span className="text-lg text-emerald-400">/mês</span>
+                        R$ {savings.toFixed(2)}<span className="text-lg text-amber-400">/mês</span>
                       </p>
-                      <p className="text-emerald-400 text-sm mt-1">
+                      <p className="text-amber-400 text-sm mt-1">
                         Desconto de {(discountRate * 100).toFixed(0)}% garantido
                       </p>
                     </div>
@@ -348,14 +348,14 @@ export default function Subscribe() {
                     </div>
                   </div>
 
-                  <div className="p-6 bg-gradient-to-br from-emerald-500/20 to-violet-500/20 border border-emerald-500/30 rounded-xl">
+                  <div className="p-6 bg-gradient-to-br from-amber-500/20 to-yellow-500/20 border border-amber-500/30 rounded-xl">
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-slate-300">Desconto mensal estimado:</span>
                       <span className="text-2xl font-bold text-white">R$ {savings.toFixed(2)}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-slate-300">Economia anual estimada:</span>
-                      <span className="text-2xl font-bold text-emerald-400">R$ {(savings * 12).toFixed(2)}</span>
+                      <span className="text-2xl font-bold text-amber-400">R$ {(savings * 12).toFixed(2)}</span>
                     </div>
                   </div>
 
@@ -364,10 +364,10 @@ export default function Subscribe() {
                       id="terms" 
                       checked={acceptTerms} 
                       onCheckedChange={setAcceptTerms}
-                      className="mt-1 border-white/20 data-[state=checked]:bg-emerald-500"
+                      className="mt-1 border-white/20 data-[state=checked]:bg-amber-500"
                     />
                     <label htmlFor="terms" className="text-sm text-slate-400 cursor-pointer">
-                      Li e aceito os <a href="#" className="text-emerald-400 hover:underline">Termos de Uso</a> e a <a href="#" className="text-emerald-400 hover:underline">Política de Privacidade</a>. Autorizo o processamento dos meus dados para fins de contratação do serviço.
+                      Li e aceito os <a href="#" className="text-amber-400 hover:underline">Termos de Uso</a> e a <a href="#" className="text-amber-400 hover:underline">Política de Privacidade</a>. Autorizo o processamento dos meus dados para fins de contratação do serviço.
                     </label>
                   </div>
                 </CardContent>
@@ -382,8 +382,8 @@ export default function Subscribe() {
               animate={{ opacity: 1, scale: 1 }}
               className="text-center"
             >
-              <div className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-8">
-                <Check className="w-12 h-12 text-white" />
+              <div className="w-24 h-24 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-8">
+                <Check className="w-12 h-12 text-black" />
               </div>
               <h2 className="text-3xl font-bold text-white mb-4">Cadastro realizado com sucesso!</h2>
               <p className="text-lg text-slate-400 mb-8 max-w-lg mx-auto">
@@ -397,14 +397,14 @@ export default function Subscribe() {
                   { icon: Zap, text: 'Economia garantida' }
                 ].map((item, idx) => (
                   <div key={idx} className="p-4 bg-white/5 rounded-xl border border-white/10">
-                    <item.icon className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
+                    <item.icon className="w-8 h-8 text-amber-400 mx-auto mb-2" />
                     <p className="text-sm text-slate-300">{item.text}</p>
                   </div>
                 ))}
               </div>
 
               <Link to={createPageUrl('Home')}>
-                <Button size="lg" className="bg-emerald-500 hover:bg-emerald-600">
+                <Button size="lg" className="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-semibold">
                   Voltar para o início
                 </Button>
               </Link>
@@ -426,7 +426,7 @@ export default function Subscribe() {
               <Button
                 onClick={nextStep}
                 disabled={(step === 3 && !acceptTerms) || createSubscription.isPending}
-                className="bg-emerald-500 hover:bg-emerald-600"
+                className="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-semibold"
               >
                 {createSubscription.isPending ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />

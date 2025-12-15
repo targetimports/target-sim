@@ -4,6 +4,7 @@ import CustomerDashboard from './pages/CustomerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminPlans from './pages/AdminPlans';
 import AdminPowerPlants from './pages/AdminPowerPlants';
+import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
@@ -18,4 +19,5 @@ export const PAGES = {
 export const pagesConfig = {
     mainPage: "Home",
     Pages: PAGES,
+    Layout: __Layout,
 };

@@ -37,16 +37,16 @@ const colorClasses = {
     gradient: 'from-amber-500'
   },
   violet: {
-    bg: 'bg-amber-600/10',
-    icon: 'text-amber-600',
-    border: 'border-amber-600/20',
-    gradient: 'from-amber-600'
-  },
-  yellow: {
     bg: 'bg-yellow-500/10',
-    icon: 'text-yellow-500',
+    icon: 'text-yellow-600',
     border: 'border-yellow-500/20',
     gradient: 'from-yellow-500'
+  },
+  yellow: {
+    bg: 'bg-amber-400/10',
+    icon: 'text-amber-400',
+    border: 'border-amber-400/20',
+    gradient: 'from-amber-400'
   }
 };
 

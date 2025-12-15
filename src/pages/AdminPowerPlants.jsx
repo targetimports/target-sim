@@ -161,16 +161,16 @@ export default function AdminPowerPlants() {
                 </Button>
               </Link>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-violet-500 rounded-xl flex items-center justify-center">
-                  <Sun className="w-6 h-6 text-white" />
-                </div>
+              <div className="w-10 h-10 bg-gradient-to-br from-black to-amber-600 rounded-xl flex items-center justify-center">
+                <Sun className="w-6 h-6 text-amber-400" />
+              </div>
                 <div>
                   <h1 className="text-lg font-bold">Gerenciar Usinas</h1>
                   <p className="text-xs text-slate-400">Cadastre e gerencie suas usinas</p>
                 </div>
               </div>
             </div>
-            <Button onClick={() => { resetForm(); setIsDialogOpen(true); }} className="bg-emerald-500 hover:bg-emerald-600">
+            <Button onClick={() => { resetForm(); setIsDialogOpen(true); }} className="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-semibold">
               <Plus className="w-4 h-4 mr-2" />
               Nova usina
             </Button>
@@ -184,8 +184,8 @@ export default function AdminPowerPlants() {
           <Card className="border-0 shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-                  <Sun className="w-6 h-6 text-emerald-600" />
+                <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                  <Sun className="w-6 h-6 text-amber-600" />
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Total de usinas</p>
@@ -290,7 +290,7 @@ export default function AdminPowerPlants() {
               <Sun className="w-12 h-12 text-slate-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-slate-900 mb-2">Nenhuma usina cadastrada</h3>
               <p className="text-slate-500 mb-6">Cadastre sua primeira usina de energia</p>
-              <Button onClick={() => setIsDialogOpen(true)} className="bg-emerald-500 hover:bg-emerald-600">
+              <Button onClick={() => setIsDialogOpen(true)} className="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-semibold">
                 <Plus className="w-4 h-4 mr-2" />
                 Cadastrar usina
               </Button>
@@ -414,7 +414,7 @@ export default function AdminPowerPlants() {
               <Button type="button" variant="outline" className="flex-1" onClick={() => setIsDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" className="flex-1 bg-emerald-500 hover:bg-emerald-600">
+              <Button type="submit" className="flex-1 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-semibold">
                 {editingPlant ? 'Salvar alterações' : 'Cadastrar usina'}
               </Button>
             </div>

@@ -135,16 +135,16 @@ export default function AdminPlans() {
                 </Button>
               </Link>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-violet-500 rounded-xl flex items-center justify-center">
-                  <Sun className="w-6 h-6 text-white" />
-                </div>
+              <div className="w-10 h-10 bg-gradient-to-br from-black to-amber-600 rounded-xl flex items-center justify-center">
+                <Sun className="w-6 h-6 text-amber-400" />
+              </div>
                 <div>
                   <h1 className="text-lg font-bold">Gerenciar Planos</h1>
                   <p className="text-xs text-slate-400">Configure os planos de assinatura</p>
                 </div>
               </div>
             </div>
-            <Button onClick={() => { resetForm(); setIsDialogOpen(true); }} className="bg-emerald-500 hover:bg-emerald-600">
+            <Button onClick={() => { resetForm(); setIsDialogOpen(true); }} className="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-semibold">
               <Plus className="w-4 h-4 mr-2" />
               Novo plano
             </Button>
@@ -182,7 +182,7 @@ export default function AdminPlans() {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-bold text-emerald-600">{plan.discount_percentage}%</span>
+                      <span className="text-4xl font-bold text-amber-600">{plan.discount_percentage}%</span>
                       <span className="text-slate-500">de desconto</span>
                     </div>
                     
@@ -214,7 +214,7 @@ export default function AdminPlans() {
                         <ul className="space-y-1">
                           {plan.features.map((feature, idx) => (
                             <li key={idx} className="flex items-center gap-2 text-sm text-slate-600">
-                              <Check className="w-4 h-4 text-emerald-500" />
+                              <Check className="w-4 h-4 text-amber-500" />
                               {feature}
                             </li>
                           ))}
@@ -234,7 +234,7 @@ export default function AdminPlans() {
               <Sun className="w-12 h-12 text-slate-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-slate-900 mb-2">Nenhum plano cadastrado</h3>
               <p className="text-slate-500 mb-6">Crie seu primeiro plano de assinatura</p>
-              <Button onClick={() => setIsDialogOpen(true)} className="bg-emerald-500 hover:bg-emerald-600">
+              <Button onClick={() => setIsDialogOpen(true)} className="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-semibold">
                 <Plus className="w-4 h-4 mr-2" />
                 Criar plano
               </Button>
@@ -358,7 +358,7 @@ export default function AdminPlans() {
               <Button type="button" variant="outline" className="flex-1" onClick={() => setIsDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" className="flex-1 bg-emerald-500 hover:bg-emerald-600">
+              <Button type="submit" className="flex-1 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-semibold">
                 {editingPlan ? 'Salvar alterações' : 'Criar plano'}
               </Button>
             </div>

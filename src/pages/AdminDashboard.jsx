@@ -88,9 +88,9 @@ export default function AdminDashboard() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-violet-500 rounded-xl flex items-center justify-center">
-                <Sun className="w-6 h-6 text-white" />
-              </div>
+            <div className="w-10 h-10 bg-gradient-to-br from-black to-amber-600 rounded-xl flex items-center justify-center">
+              <Sun className="w-6 h-6 text-amber-400" />
+            </div>
               <div>
                 <h1 className="text-lg font-bold">Painel Administrativo</h1>
                 <p className="text-xs text-slate-400">Gestão de assinaturas</p>
@@ -122,8 +122,8 @@ export default function AdminDashboard() {
             <Card className="border-0 shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center">
-                    <Users className="w-7 h-7 text-emerald-600" />
+                  <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center">
+                    <Users className="w-7 h-7 text-amber-600" />
                   </div>
                   <div>
                     <p className="text-sm text-slate-500">Total de assinaturas</p>
@@ -170,8 +170,8 @@ export default function AdminDashboard() {
             <Card className="border-0 shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-violet-100 rounded-2xl flex items-center justify-center">
-                    <Wallet className="w-7 h-7 text-violet-600" />
+                  <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center">
+                    <Wallet className="w-7 h-7 text-amber-600" />
                   </div>
                   <div>
                     <p className="text-sm text-slate-500">Receita estimada/mês</p>
