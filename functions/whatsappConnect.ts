@@ -1,15 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 import makeWASocket, { 
     DisconnectReason, 
-    useMultiFileAuthState,
-    Browsers
+    useMultiFileAuthState
 } from 'npm:@whiskeysockets/baileys@6.7.8';
 import { Boom } from 'npm:@hapi/boom@10.0.1';
-import pino from 'npm:pino@9.0.0';
-import NodeCache from 'npm:node-cache@5.1.2';
-
-const msgRetryCounterCache = new NodeCache();
-const logger = pino({ level: 'silent' });
 
 let sock = null;
 let qrCode = null;
@@ -17,23 +11,15 @@ let connectionStatus = 'disconnected';
 
 async function startWhatsApp(base44) {
     try {
-        const authPath = '/tmp/auth_info_baileys';
+        const authPath = '/tmp/baileys_auth';
         
         await Deno.mkdir(authPath, { recursive: true }).catch(() => {});
 
         const { state, saveCreds } = await useMultiFileAuthState(authPath);
 
         sock = makeWASocket({
-            version: [2, 3000, 1015901307],
-            logger,
-            printQRInTerminal: false,
             auth: state,
-            msgRetryCounterCache,
-            browser: Browsers.macOS('Desktop'),
-            syncFullHistory: false,
-            markOnlineOnConnect: false,
-            generateHighQualityLinkPreview: false,
-            getMessage: async () => undefined
+            printQRInTerminal: true
         });
 
         sock.ev.on('creds.update', saveCreds);
@@ -195,7 +181,7 @@ Deno.serve(async (req) => {
             connectionStatus = 'disconnected';
             qrCode = null;
 
-            await Deno.remove('/tmp/auth_info_baileys', { recursive: true }).catch(() => {});
+            await Deno.remove('/tmp/baileys_auth', { recursive: true }).catch(() => {});
 
             const sessions = await base44.asServiceRole.entities.WhatsAppSession.filter({ 
                 session_id: 'main' 
