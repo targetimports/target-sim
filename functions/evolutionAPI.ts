@@ -226,7 +226,9 @@ Deno.serve(async (req) => {
         console.error('[Evolution API] Error:', error);
         return Response.json({ 
             success: false,
-            error: error.message 
-        }, { status: 500 });
+            error: error.message,
+            details: error.stack,
+            action: action
+        }, { status: 200 });
     }
 });
