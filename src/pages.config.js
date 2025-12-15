@@ -6,6 +6,9 @@ import AdminPlans from './pages/AdminPlans';
 import AdminPowerPlants from './pages/AdminPowerPlants';
 import ConsumptionMonitor from './pages/ConsumptionMonitor';
 import SupportCenter from './pages/SupportCenter';
+import ServiceOrders from './pages/ServiceOrders';
+import AdminServiceOrders from './pages/AdminServiceOrders';
+import AdminAnalytics from './pages/AdminAnalytics';
 import __Layout from './Layout.jsx';
 
 
@@ -18,6 +21,9 @@ export const PAGES = {
     "AdminPowerPlants": AdminPowerPlants,
     "ConsumptionMonitor": ConsumptionMonitor,
     "SupportCenter": SupportCenter,
+    "ServiceOrders": ServiceOrders,
+    "AdminServiceOrders": AdminServiceOrders,
+    "AdminAnalytics": AdminAnalytics,
 }
 
 export const pagesConfig = {
