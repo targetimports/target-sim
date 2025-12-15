@@ -17,6 +17,7 @@ import CreditMarketplace from './pages/CreditMarketplace';
 import AdminPowerPlantContracts from './pages/AdminPowerPlantContracts';
 import FinancialDashboard from './pages/FinancialDashboard';
 import EnergyPurchaseManagement from './pages/EnergyPurchaseManagement';
+import AccountsManagement from './pages/AccountsManagement';
 import __Layout from './Layout.jsx';
 
 
@@ -40,6 +41,7 @@ export const PAGES = {
     "AdminPowerPlantContracts": AdminPowerPlantContracts,
     "FinancialDashboard": FinancialDashboard,
     "EnergyPurchaseManagement": EnergyPurchaseManagement,
+    "AccountsManagement": AccountsManagement,
 }
 
 export const pagesConfig = {
