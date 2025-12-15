@@ -99,37 +99,89 @@ export default function AdminDashboard() {
             </div>
 
             {/* Desktop Menu */}
-            <div className="hidden lg:flex items-center gap-4">
-              <Link to={createPageUrl('CRMDashboard')}>
-                <Button variant="ghost" className="text-slate-300 hover:text-amber-400">
-                  CRM
-                </Button>
-              </Link>
-              <Link to={createPageUrl('PlantMonitoring')}>
-                <Button variant="ghost" className="text-slate-300 hover:text-amber-400">
-                  Monitoramento
-                </Button>
-              </Link>
-              <Link to={createPageUrl('FinancialDashboard')}>
-                <Button variant="ghost" className="text-slate-300 hover:text-amber-400">
-                  Financeiro
-                </Button>
-              </Link>
-              <Link to={createPageUrl('WhatsAppCampaigns')}>
-                <Button variant="ghost" className="text-slate-300 hover:text-amber-400">
-                  Campanhas
-                </Button>
-              </Link>
-              <Link to={createPageUrl('AdvancedAnalytics')}>
-                <Button variant="ghost" className="text-slate-300 hover:text-amber-400">
-                  Analytics
-                </Button>
-              </Link>
-              <Link to={createPageUrl('AIInnovations')}>
-                <Button className="bg-purple-600 hover:bg-purple-700 text-white">
-                  🤖 IA
-                </Button>
-              </Link>
+            <div className="hidden lg:flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="text-slate-300 hover:text-amber-400">
+                    <Menu className="w-4 h-4 mr-2" />
+                    Menu
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('CRMDashboard')} className="w-full">CRM Dashboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('PlantMonitoring')} className="w-full">Monitoramento Usinas</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('AdminPowerPlants')} className="w-full">Gerenciar Usinas</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('FinancialDashboard')} className="w-full">Dashboard Financeiro</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('AccountsManagement')} className="w-full">Contas a Pagar/Receber</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('WhatsAppCampaigns')} className="w-full">Campanhas WhatsApp</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('WhatsAppManagement')} className="w-full">WhatsApp Conectar</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('AdminPlans')} className="w-full">Gerenciar Planos</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('ConsumptionMonitor')} className="w-full">Monitor Consumo</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('ServiceOrders')} className="w-full">Ordens Serviço</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('AdminServiceOrders')} className="w-full">Admin Ordens Serviço</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('SupportCenter')} className="w-full">Central Suporte</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('MaintenanceManagement')} className="w-full">Manutenções</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('OwnerContracts')} className="w-full">Contratos Proprietários</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('EnergyPurchaseManagement')} className="w-full">Compra Energia</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('EnergyCreditsMarket')} className="w-full">Mercado Créditos</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('CreditMarketplace')} className="w-full">Marketplace Créditos</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('AdvancedAnalytics')} className="w-full">Analytics Avançado</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('AdminAnalytics')} className="w-full">Admin Analytics</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('AIInnovations')} className="w-full">🤖 IA Inovações</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('Certificates')} className="w-full">Certificados</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('WeatherForecast')} className="w-full">Previsão Tempo</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('PaymentGateway')} className="w-full">Gateway Pagamento</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('Chatbot')} className="w-full">Chatbot</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button variant="outline" className="border-slate-700 text-white hover:bg-slate-800" onClick={() => base44.auth.logout()}>
                 Sair
               </Button>
@@ -151,41 +203,83 @@ export default function AdminDashboard() {
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="lg:hidden mt-4 pb-4 space-y-2"
+              className="lg:hidden mt-4 pb-4 space-y-1 max-h-96 overflow-y-auto"
             >
               <Link to={createPageUrl('CRMDashboard')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400">
-                  CRM
-                </Button>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">CRM Dashboard</Button>
               </Link>
               <Link to={createPageUrl('PlantMonitoring')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400">
-                  Monitoramento
-                </Button>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Monitoramento Usinas</Button>
+              </Link>
+              <Link to={createPageUrl('AdminPowerPlants')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Gerenciar Usinas</Button>
               </Link>
               <Link to={createPageUrl('FinancialDashboard')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400">
-                  Financeiro
-                </Button>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Dashboard Financeiro</Button>
+              </Link>
+              <Link to={createPageUrl('AccountsManagement')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Contas a Pagar/Receber</Button>
               </Link>
               <Link to={createPageUrl('WhatsAppCampaigns')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400">
-                  Campanhas
-                </Button>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Campanhas WhatsApp</Button>
+              </Link>
+              <Link to={createPageUrl('WhatsAppManagement')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">WhatsApp Conectar</Button>
+              </Link>
+              <Link to={createPageUrl('AdminPlans')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Gerenciar Planos</Button>
+              </Link>
+              <Link to={createPageUrl('ConsumptionMonitor')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Monitor Consumo</Button>
+              </Link>
+              <Link to={createPageUrl('ServiceOrders')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Ordens Serviço</Button>
+              </Link>
+              <Link to={createPageUrl('AdminServiceOrders')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Admin Ordens</Button>
+              </Link>
+              <Link to={createPageUrl('SupportCenter')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Suporte</Button>
+              </Link>
+              <Link to={createPageUrl('MaintenanceManagement')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Manutenções</Button>
+              </Link>
+              <Link to={createPageUrl('OwnerContracts')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Contratos Prop.</Button>
+              </Link>
+              <Link to={createPageUrl('EnergyPurchaseManagement')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Compra Energia</Button>
+              </Link>
+              <Link to={createPageUrl('EnergyCreditsMarket')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Mercado Créditos</Button>
+              </Link>
+              <Link to={createPageUrl('CreditMarketplace')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Marketplace</Button>
               </Link>
               <Link to={createPageUrl('AdvancedAnalytics')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400">
-                  Analytics
-                </Button>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Analytics Avanç.</Button>
+              </Link>
+              <Link to={createPageUrl('AdminAnalytics')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Admin Analytics</Button>
               </Link>
               <Link to={createPageUrl('AIInnovations')} onClick={() => setMobileMenuOpen(false)}>
-                <Button className="w-full justify-start bg-purple-600 hover:bg-purple-700 text-white">
-                  🤖 IA
-                </Button>
+                <Button className="w-full justify-start bg-purple-600 hover:bg-purple-700 text-white text-sm">🤖 IA</Button>
+              </Link>
+              <Link to={createPageUrl('Certificates')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Certificados</Button>
+              </Link>
+              <Link to={createPageUrl('WeatherForecast')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Previsão Tempo</Button>
+              </Link>
+              <Link to={createPageUrl('PaymentGateway')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Pagamentos</Button>
+              </Link>
+              <Link to={createPageUrl('Chatbot')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Chatbot</Button>
               </Link>
               <Button 
                 variant="outline" 
-                className="w-full justify-start border-slate-700 text-white hover:bg-slate-800" 
+                className="w-full justify-start border-slate-700 text-white hover:bg-slate-800 text-sm mt-2" 
                 onClick={() => base44.auth.logout()}
               >
                 Sair
