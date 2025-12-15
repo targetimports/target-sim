@@ -4,6 +4,8 @@ import CustomerDashboard from './pages/CustomerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminPlans from './pages/AdminPlans';
 import AdminPowerPlants from './pages/AdminPowerPlants';
+import ConsumptionMonitor from './pages/ConsumptionMonitor';
+import SupportCenter from './pages/SupportCenter';
 import __Layout from './Layout.jsx';
 
 
@@ -14,6 +16,8 @@ export const PAGES = {
     "AdminDashboard": AdminDashboard,
     "AdminPlans": AdminPlans,
     "AdminPowerPlants": AdminPowerPlants,
+    "ConsumptionMonitor": ConsumptionMonitor,
+    "SupportCenter": SupportCenter,
 }
 
 export const pagesConfig = {
