@@ -98,13 +98,23 @@ export default function AdminDashboard() {
             </div>
             <div className="flex items-center gap-4">
               <Link to={createPageUrl('AdminPlans')}>
-                <Button variant="ghost" className="text-slate-300 hover:text-white">
+                <Button variant="ghost" className="text-slate-300 hover:text-amber-400">
                   Planos
                 </Button>
               </Link>
               <Link to={createPageUrl('AdminPowerPlants')}>
-                <Button variant="ghost" className="text-slate-300 hover:text-white">
+                <Button variant="ghost" className="text-slate-300 hover:text-amber-400">
                   Usinas
+                </Button>
+              </Link>
+              <Link to={createPageUrl('AdminServiceOrders')}>
+                <Button variant="ghost" className="text-slate-300 hover:text-amber-400">
+                  Ordens de Serviço
+                </Button>
+              </Link>
+              <Link to={createPageUrl('AdminAnalytics')}>
+                <Button variant="ghost" className="text-slate-300 hover:text-amber-400">
+                  Analytics
                 </Button>
               </Link>
               <Button variant="outline" className="border-slate-700 text-white hover:bg-slate-800" onClick={() => base44.auth.logout()}>
