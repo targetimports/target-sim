@@ -103,19 +103,29 @@ export default function CustomerDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Link to={createPageUrl('ConsumptionMonitor')}>
+              <Link to={createPageUrl('NotificationCenter')}>
                 <Button variant="ghost" className="text-slate-600 hover:text-amber-600">
-                  Consumo
+                  Notificações
                 </Button>
               </Link>
-              <Link to={createPageUrl('ServiceOrders')}>
+              <Link to={createPageUrl('Gamification')}>
                 <Button variant="ghost" className="text-slate-600 hover:text-amber-600">
-                  Serviços
+                  Conquistas
                 </Button>
               </Link>
-              <Link to={createPageUrl('SupportCenter')}>
+              <Link to={createPageUrl('Certificates')}>
                 <Button variant="ghost" className="text-slate-600 hover:text-amber-600">
-                  Suporte
+                  Certificados
+                </Button>
+              </Link>
+              <Link to={createPageUrl('Chatbot')}>
+                <Button variant="ghost" className="text-slate-600 hover:text-amber-600">
+                  Chat
+                </Button>
+              </Link>
+              <Link to={createPageUrl('PaymentGateway')}>
+                <Button variant="ghost" className="text-slate-600 hover:text-amber-600">
+                  Pagamentos
                 </Button>
               </Link>
               <Button variant="outline" onClick={() => base44.auth.logout()}>

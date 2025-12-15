@@ -27,6 +27,8 @@ import PaymentGateway from './pages/PaymentGateway';
 import MaintenanceManagement from './pages/MaintenanceManagement';
 import AdvancedAnalytics from './pages/AdvancedAnalytics';
 import Chatbot from './pages/Chatbot';
+import CRMDashboard from './pages/CRMDashboard';
+import PlantMonitoring from './pages/PlantMonitoring';
 import __Layout from './Layout.jsx';
 
 
@@ -60,6 +62,8 @@ export const PAGES = {
     "MaintenanceManagement": MaintenanceManagement,
     "AdvancedAnalytics": AdvancedAnalytics,
     "Chatbot": Chatbot,
+    "CRMDashboard": CRMDashboard,
+    "PlantMonitoring": PlantMonitoring,
 }
 
 export const pagesConfig = {
