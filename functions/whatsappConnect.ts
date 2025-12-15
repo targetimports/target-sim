@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
 
         if (action === 'connect') {
             console.log('[WhatsApp] Gerando QR Code...');
-            
+
             if (connectionState === 'connected') {
                 return Response.json({ 
                     status: 'already_connected',
@@ -30,11 +30,17 @@ Deno.serve(async (req) => {
                 });
             }
 
-            // Gera QR code de teste
+            // Gera QR code simulado (formato mais próximo do real)
+            // NOTA: Para produção, substituir por integração real com @whiskeysockets/baileys
             connectionState = 'qr_code';
-            testQRCode = `2@${Date.now()}@test-connection-${Math.random().toString(36).substring(7)}`;
-            
-            console.log('[WhatsApp] QR Code gerado:', testQRCode);
+            const timestamp = Date.now();
+            const randomId = Math.random().toString(36).substring(2, 15);
+            const serverToken = Math.random().toString(36).substring(2, 15);
+
+            // Formato simulado mais próximo do QR real do WhatsApp
+            testQRCode = `1@${randomId},${serverToken},${timestamp}`;
+
+            console.log('[WhatsApp] QR Code gerado. IMPORTANTE: Este é um QR de teste.');
 
             const existing = await base44.asServiceRole.entities.WhatsAppSession.filter({ session_id: 'main' });
             const data = {

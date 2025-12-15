@@ -232,15 +232,18 @@ export default function WhatsAppManagement() {
                       </p>
                       {connectionStatus?.qr_code || connectionStatus?.session?.qr_code ? (
                         <>
-                          <div className="mx-auto max-w-[280px]">
-                            <div 
-                              dangerouslySetInnerHTML={{ 
-                                __html: `<img src="https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(connectionStatus?.qr_code || connectionStatus?.session?.qr_code)}" alt="QR Code" class="w-full border-4 border-white shadow-lg rounded-lg" />` 
-                              }}
+                          <div className="mx-auto max-w-[280px] bg-white p-4 rounded-lg">
+                            <img 
+                              src={`https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(connectionStatus?.qr_code || connectionStatus?.session?.qr_code)}`}
+                              alt="QR Code WhatsApp"
+                              className="w-full"
                             />
                           </div>
-                          <p className="text-xs text-slate-500 mt-3">
-                            Abra o WhatsApp no celular e escaneie este código
+                          <p className="text-xs text-yellow-700 font-medium mt-3 text-center">
+                            Abra o WhatsApp no celular {'>'} Menu {'>'} Aparelhos Conectados {'>'} Conectar um aparelho
+                          </p>
+                          <p className="text-xs text-slate-500 mt-1 text-center">
+                            Código válido por 60 segundos
                           </p>
                         </>
                       ) : (
