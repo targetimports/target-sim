@@ -83,7 +83,7 @@ export default function Subscribe() {
             <div className="w-10 h-10 bg-gradient-to-br from-slate-900 to-amber-600 rounded-xl flex items-center justify-center">
               <Sun className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-white">EnergiaSolar</span>
+            <span className="text-xl font-bold text-white">Target Sim</span>
           </Link>
           <Link to={createPageUrl('Home')}>
             <Button variant="ghost" className="text-slate-400 hover:text-white">
