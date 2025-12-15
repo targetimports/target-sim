@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, QrCode, Phone, Send, CheckCircle, XCircle, Clock, ArrowLeft } from 'lucide-react';
+import { MessageCircle, QrCode, Phone, Send, CheckCircle, XCircle, Clock, ArrowLeft, Lightbulb } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -13,6 +13,9 @@ import { createPageUrl } from "@/utils";
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import AIMessageDrafter from '../components/whatsapp/AIMessageDrafter';
+import MessageScheduler from '../components/whatsapp/MessageScheduler';
+import AIReplySuggestions from '../components/whatsapp/AIReplySuggestions';
 
 export default function WhatsAppManagement() {
   const queryClient = useQueryClient();
@@ -23,6 +26,9 @@ export default function WhatsAppManagement() {
   const [logs, setLogs] = useState([]);
   const [showLogs, setShowLogs] = useState(false);
   const [retrying, setRetrying] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState(null);
+  const [showScheduled, setShowScheduled] = useState(false);
+  const [scheduledMessages, setScheduledMessages] = useState([]);
 
   const { data: connectionStatus, refetch: refetchStatus } = useQuery({
     queryKey: ['whatsapp-status'],
@@ -98,6 +104,26 @@ export default function WhatsAppManagement() {
       setShowLogs(true);
     } catch (error) {
       toast.error('Erro ao carregar logs');
+    }
+  };
+
+  const loadScheduledMessages = async () => {
+    try {
+      const res = await base44.functions.invoke('whatsappScheduler', { action: 'list_scheduled' });
+      setScheduledMessages(res.data.messages || []);
+      setShowScheduled(true);
+    } catch (error) {
+      toast.error('Erro ao carregar mensagens agendadas');
+    }
+  };
+
+  const handleCancelScheduled = async (messageId) => {
+    try {
+      await base44.functions.invoke('whatsappScheduler', { action: 'cancel', message_id: messageId });
+      toast.success('Mensagem cancelada');
+      loadScheduledMessages();
+    } catch (error) {
+      toast.error('Erro ao cancelar mensagem');
     }
   };
 
@@ -312,54 +338,85 @@ export default function WhatsAppManagement() {
                 </Card>
                 )}
 
-            {/* Send Message Panel */}
+            {/* AI & Scheduling Tools */}
             {connectionStatus?.status === 'connected' && (
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Send className="w-5 h-5" />
-                    Enviar Mensagem
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label>Número (com DDI)</Label>
-                    <Input
-                      placeholder="5511999999999"
-                      value={messageData.phone_number}
-                      onChange={(e) => setMessageData(prev => ({ ...prev, phone_number: e.target.value }))}
-                    />
-                    <p className="text-xs text-slate-500 mt-1">Ex: 5511999999999</p>
-                  </div>
+              <>
+                <AIMessageDrafter 
+                  onMessageGenerated={(msg) => setMessageData(prev => ({ ...prev, message: msg }))}
+                />
 
-                  <div>
-                    <Label>Mensagem</Label>
-                    <Textarea
-                      placeholder="Digite sua mensagem..."
-                      value={messageData.message}
-                      onChange={(e) => setMessageData(prev => ({ ...prev, message: e.target.value }))}
-                      rows={4}
-                    />
-                  </div>
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Send className="w-5 h-5" />
+                      Enviar Mensagem
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label>Número (com DDI)</Label>
+                      <Input
+                        placeholder="5511999999999"
+                        value={messageData.phone_number}
+                        onChange={(e) => setMessageData(prev => ({ ...prev, phone_number: e.target.value }))}
+                      />
+                      <p className="text-xs text-slate-500 mt-1">Ex: 5511999999999</p>
+                    </div>
 
-                  <Button 
-                    className="w-full bg-green-600 hover:bg-green-700" 
-                    onClick={handleSendMessage}
-                    disabled={sendMessageMutation.isPending}
-                  >
-                    <Send className="w-4 h-4 mr-2" />
-                    {sendMessageMutation.isPending ? 'Enviando...' : 'Enviar'}
-                  </Button>
-                </CardContent>
-              </Card>
+                    <div>
+                      <Label>Mensagem</Label>
+                      <Textarea
+                        placeholder="Digite sua mensagem..."
+                        value={messageData.message}
+                        onChange={(e) => setMessageData(prev => ({ ...prev, message: e.target.value }))}
+                        rows={4}
+                      />
+                    </div>
+
+                    <Button 
+                      className="w-full bg-green-600 hover:bg-green-700" 
+                      onClick={handleSendMessage}
+                      disabled={sendMessageMutation.isPending}
+                    >
+                      <Send className="w-4 h-4 mr-2" />
+                      {sendMessageMutation.isPending ? 'Enviando...' : 'Enviar Agora'}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <MessageScheduler 
+                  phoneNumber={messageData.phone_number}
+                  message={messageData.message}
+                  onScheduled={() => {
+                    setMessageData({ phone_number: '', message: '' });
+                    loadScheduledMessages();
+                  }}
+                />
+              </>
             )}
-          </div>
+            </div>
 
-          {/* Messages History */}
-          <div className="lg:col-span-2">
+          {/* Messages History & AI Tools */}
+          <div className="lg:col-span-2 space-y-6">
+            {selectedMessage && (
+              <AIReplySuggestions 
+                incomingMessage={selectedMessage}
+                onSelectSuggestion={(suggestion) => {
+                  setMessageData(prev => ({ ...prev, message: suggestion }));
+                  setSelectedMessage(null);
+                }}
+              />
+            )}
+
             <Card className="border-0 shadow-sm">
               <CardHeader>
-                <CardTitle>Histórico de Mensagens</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Histórico de Mensagens</CardTitle>
+                  <Button variant="outline" size="sm" onClick={loadScheduledMessages}>
+                    <Clock className="w-4 h-4 mr-2" />
+                    Agendadas
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -381,9 +438,23 @@ export default function WhatsAppManagement() {
                             {format(new Date(msg.created_date), 'dd/MM/yyyy HH:mm')}
                           </p>
                         </div>
-                        <Badge className={messageStatusColors[msg.status]}>
-                          {msg.status}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge className={messageStatusColors[msg.status]}>
+                            {msg.status}
+                          </Badge>
+                          {msg.direction === 'inbound' && (
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => {
+                                setSelectedMessage(msg.message);
+                                setMessageData(prev => ({ ...prev, phone_number: msg.phone_number }));
+                              }}
+                            >
+                              <Lightbulb className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       <p className="text-sm text-slate-700">{msg.message}</p>
                       {msg.error_message && (
@@ -401,6 +472,38 @@ export default function WhatsAppManagement() {
                 </div>
               </CardContent>
             </Card>
+
+            {showScheduled && scheduledMessages.length > 0 && (
+              <Card className="border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle>Mensagens Agendadas</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {scheduledMessages.map((msg) => (
+                      <div key={msg.id} className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <p className="font-medium text-sm">Para: {msg.phone_number}</p>
+                            <p className="text-xs text-slate-500">
+                              Agendado para: {format(new Date(msg.sent_at), 'dd/MM/yyyy HH:mm')}
+                            </p>
+                          </div>
+                          <Button 
+                            size="sm" 
+                            variant="destructive"
+                            onClick={() => handleCancelScheduled(msg.id)}
+                          >
+                            <XCircle className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <p className="text-sm text-slate-700">{msg.message}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </main>
