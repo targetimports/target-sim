@@ -8,6 +8,8 @@ import {
   Sun, Zap, Wallet, TrendingDown, FileText, Users, 
   Calendar, Download, Copy, Check, Leaf, ArrowUpRight 
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from "@/utils";
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -100,9 +102,26 @@ export default function CustomerDashboard() {
                 <p className="text-sm text-slate-500">Olá, {user?.full_name || 'Cliente'}</p>
               </div>
             </div>
-            <Button variant="outline" onClick={() => base44.auth.logout()}>
-              Sair
-            </Button>
+            <div className="flex items-center gap-4">
+              <Link to={createPageUrl('ConsumptionMonitor')}>
+                <Button variant="ghost" className="text-slate-600 hover:text-amber-600">
+                  Consumo
+                </Button>
+              </Link>
+              <Link to={createPageUrl('ServiceOrders')}>
+                <Button variant="ghost" className="text-slate-600 hover:text-amber-600">
+                  Serviços
+                </Button>
+              </Link>
+              <Link to={createPageUrl('SupportCenter')}>
+                <Button variant="ghost" className="text-slate-600 hover:text-amber-600">
+                  Suporte
+                </Button>
+              </Link>
+              <Button variant="outline" onClick={() => base44.auth.logout()}>
+                Sair
+              </Button>
+            </div>
           </div>
         </div>
       </header>
