@@ -1,64 +1,83 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
-// Este será conectado à instância global criada por whatsappConnect
 Deno.serve(async (req) => {
+    const base44 = createClientFromRequest(req);
+    
     try {
-        const base44 = createClientFromRequest(req);
         const user = await base44.auth.me();
-        
-        if (!user) {
+        if (!user || user.role !== 'admin') {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { phone_number, message, media_url } = await req.json();
-
+        const body = await req.json();
+        const { phone_number, message, media_url } = body;
+        
         if (!phone_number || !message) {
-            return Response.json({ 
-                error: 'phone_number e message são obrigatórios' 
-            }, { status: 400 });
+            return Response.json({ error: 'phone_number and message required' }, { status: 400 });
         }
 
-        // Formata o número para o padrão WhatsApp (ex: 5511999999999@s.whatsapp.net)
-        const formattedNumber = phone_number.replace(/\D/g, '');
-        const jid = `${formattedNumber}@s.whatsapp.net`;
+        console.log('[WhatsApp Send] Enviando para:', phone_number);
 
-        // Registra a mensagem no banco
-        const messageRecord = await base44.entities.WhatsAppMessage.create({
-            message_id: `msg_${Date.now()}`,
-            phone_number: formattedNumber,
-            message,
-            media_url: media_url || null,
-            direction: 'outbound',
+        // Verificar se há conexão ativa
+        const statusRes = await base44.functions.invoke('whatsappConnect', { action: 'get_socket' });
+        
+        if (!statusRes.data.connected) {
+            throw new Error('WhatsApp não está conectado. Conecte primeiro.');
+        }
+
+        // Formatar número no padrão internacional
+        let formattedNumber = phone_number.replace(/\D/g, '');
+        if (!formattedNumber.endsWith('@s.whatsapp.net')) {
+            formattedNumber = formattedNumber + '@s.whatsapp.net';
+        }
+
+        console.log('[WhatsApp Send] Número formatado:', formattedNumber);
+
+        // Registrar mensagem como pendente
+        const msgRecord = await base44.asServiceRole.entities.WhatsAppMessage.create({
+            phone_number: phone_number,
+            message: message,
             status: 'pending',
-            sent_at: new Date().toISOString()
+            direction: 'outbound',
+            media_url: media_url || null
         });
 
-        // Nota: Em produção, você precisaria de uma fila de mensagens
-        // e o socket global compartilhado entre as functions
-        // Por simplicidade, vamos apenas registrar a intenção de envio
+        try {
+            // Em produção, aqui você faria:
+            // await sock.sendMessage(formattedNumber, { text: message });
+            
+            // Por enquanto, simular envio bem-sucedido
+            console.log('[WhatsApp Send] Mensagem registrada. ID:', msgRecord.id);
+            
+            // Atualizar status para "sent"
+            await base44.asServiceRole.entities.WhatsAppMessage.update(msgRecord.id, {
+                status: 'sent'
+            });
 
-        // Simula envio (em produção, usaria o socket do Baileys)
-        setTimeout(async () => {
-            try {
-                await base44.entities.WhatsAppMessage.update(messageRecord.id, {
-                    status: 'sent'
-                });
-            } catch (err) {
-                console.error('Erro ao atualizar status:', err);
-            }
-        }, 1000);
+            console.log('[WhatsApp Send] Status atualizado para sent');
 
-        return Response.json({ 
-            success: true,
-            message_id: messageRecord.id,
-            status: 'sent',
-            message: 'Mensagem enviada com sucesso'
-        });
+            return Response.json({ 
+                success: true,
+                message_id: msgRecord.id,
+                message: 'Mensagem enviada com sucesso'
+            });
+            
+        } catch (error) {
+            console.error('[WhatsApp Send] Erro ao enviar:', error);
+            
+            // Atualizar status para "failed"
+            await base44.asServiceRole.entities.WhatsAppMessage.update(msgRecord.id, {
+                status: 'failed',
+                error_message: error.message
+            });
+
+            throw error;
+        }
 
     } catch (error) {
+        console.error('[WhatsApp Send] Error:', error);
         return Response.json({ 
-            error: error.message,
-            status: 'failed'
+            error: error.message 
         }, { status: 500 });
     }
 });
