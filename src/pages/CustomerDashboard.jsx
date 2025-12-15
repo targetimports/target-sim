@@ -58,7 +58,7 @@ export default function CustomerDashboard() {
   const statusColors = {
     pending: 'bg-yellow-100 text-yellow-800',
     analyzing: 'bg-blue-100 text-blue-800',
-    active: 'bg-emerald-100 text-emerald-800',
+    active: 'bg-amber-100 text-amber-900',
     suspended: 'bg-red-100 text-red-800',
     cancelled: 'bg-slate-100 text-slate-800'
   };
@@ -73,7 +73,7 @@ export default function CustomerDashboard() {
 
   const invoiceStatusColors = {
     pending: 'bg-yellow-100 text-yellow-800',
-    paid: 'bg-emerald-100 text-emerald-800',
+    paid: 'bg-amber-100 text-amber-900',
     overdue: 'bg-red-100 text-red-800',
     cancelled: 'bg-slate-100 text-slate-800'
   };
@@ -92,8 +92,8 @@ export default function CustomerDashboard() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-black to-amber-600 rounded-xl flex items-center justify-center">
-                <Sun className="w-6 h-6 text-amber-400" />
+              <div className="w-10 h-10 bg-gradient-to-br from-slate-900 to-amber-600 rounded-xl flex items-center justify-center">
+                <Sun className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-slate-900">Minha Energia</h1>
@@ -129,8 +129,8 @@ export default function CustomerDashboard() {
             <Card className="border-0 shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center">
-                    <TrendingDown className="w-6 h-6 text-violet-600" />
+                  <div className="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center">
+                    <TrendingDown className="w-6 h-6 text-amber-500" />
                   </div>
                 </div>
                 <p className="text-sm text-slate-500 mb-1">Desconto mensal</p>
@@ -172,15 +172,15 @@ export default function CustomerDashboard() {
 
         <Tabs defaultValue="subscription" className="space-y-6">
           <TabsList className="bg-white border border-slate-200 p-1">
-            <TabsTrigger value="subscription" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-black data-[state=active]:to-amber-600 data-[state=active]:text-white">
+            <TabsTrigger value="subscription" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white">
               <Zap className="w-4 h-4 mr-2" />
               Assinatura
             </TabsTrigger>
-            <TabsTrigger value="invoices" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-black data-[state=active]:to-amber-600 data-[state=active]:text-white">
+            <TabsTrigger value="invoices" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white">
               <FileText className="w-4 h-4 mr-2" />
               Faturas
             </TabsTrigger>
-            <TabsTrigger value="referrals" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-black data-[state=active]:to-amber-600 data-[state=active]:text-white">
+            <TabsTrigger value="referrals" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white">
               <Users className="w-4 h-4 mr-2" />
               Indicações
             </TabsTrigger>
@@ -245,7 +245,7 @@ export default function CustomerDashboard() {
                   <Zap className="w-12 h-12 text-slate-300 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-slate-900 mb-2">Nenhuma assinatura encontrada</h3>
                   <p className="text-slate-500 mb-6">Faça sua adesão e comece a economizar</p>
-                  <Button className="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-semibold">
+                  <Button className="bg-amber-500 hover:bg-amber-600">
                     Assinar agora
                   </Button>
                 </CardContent>
@@ -310,7 +310,7 @@ export default function CustomerDashboard() {
                               <p className="text-sm text-slate-500">{referral.referred_email}</p>
                             </div>
                             <Badge className={
-                              referral.status === 'converted' ? 'bg-emerald-100 text-emerald-800' :
+                              referral.status === 'converted' ? 'bg-amber-100 text-amber-900' :
                               referral.status === 'contacted' ? 'bg-blue-100 text-blue-800' :
                               'bg-yellow-100 text-yellow-800'
                             }>
@@ -330,14 +330,14 @@ export default function CustomerDashboard() {
                 </Card>
               </div>
 
-              <Card className="border-0 shadow-sm bg-gradient-to-br from-black to-amber-600 text-white">
+              <Card className="border-0 shadow-sm bg-gradient-to-br from-slate-900 to-amber-600 text-white">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-bold mb-2">Indique e ganhe!</h3>
-                  <p className="text-amber-100 text-sm mb-6">
+                  <p className="text-amber-50 text-sm mb-6">
                     Ganhe R$ 100 por cada amigo que assinar nossa energia.
                   </p>
                   <div className="bg-white/10 rounded-xl p-4 mb-4">
-                    <p className="text-xs text-amber-100 mb-2">Seu link de indicação:</p>
+                    <p className="text-xs text-amber-50 mb-2">Seu link de indicação:</p>
                     <div className="flex items-center gap-2">
                       <code className="text-xs bg-white/10 px-2 py-1 rounded flex-1 truncate">
                         {window.location.origin}?ref={user?.email}
@@ -349,7 +349,7 @@ export default function CustomerDashboard() {
                   </div>
                   <div className="text-center">
                     <p className="text-3xl font-bold">R$ {convertedReferrals * 100}</p>
-                    <p className="text-sm text-amber-100">Total em bônus</p>
+                    <p className="text-sm text-amber-50">Total em bônus</p>
                   </div>
                 </CardContent>
               </Card>

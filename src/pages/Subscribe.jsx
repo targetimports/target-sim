@@ -75,13 +75,13 @@ export default function Subscribe() {
   const savings = parseFloat(formData.average_bill_value || 0) * discountRate;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-slate-950 to-amber-950/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950">
       {/* Header */}
       <header className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
           <Link to={createPageUrl('Home')} className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-black to-amber-600 rounded-xl flex items-center justify-center">
-              <Sun className="w-6 h-6 text-amber-400" />
+            <div className="w-10 h-10 bg-gradient-to-br from-slate-900 to-amber-600 rounded-xl flex items-center justify-center">
+              <Sun className="w-6 h-6 text-white" />
             </div>
             <span className="text-xl font-bold text-white">EnergiaSolar</span>
           </Link>
@@ -103,7 +103,7 @@ export default function Subscribe() {
                 <React.Fragment key={s}>
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${
                     step >= s 
-                      ? 'bg-gradient-to-br from-amber-500 to-yellow-600 text-black' 
+                      ? 'bg-amber-500 text-white' 
                       : 'bg-slate-800 text-slate-500'
                   }`}>
                     {step > s ? <Check className="w-5 h-5" /> : s}
@@ -382,8 +382,8 @@ export default function Subscribe() {
               animate={{ opacity: 1, scale: 1 }}
               className="text-center"
             >
-              <div className="w-24 h-24 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-8">
-                <Check className="w-12 h-12 text-black" />
+              <div className="w-24 h-24 bg-amber-500 rounded-full flex items-center justify-center mx-auto mb-8">
+                <Check className="w-12 h-12 text-white" />
               </div>
               <h2 className="text-3xl font-bold text-white mb-4">Cadastro realizado com sucesso!</h2>
               <p className="text-lg text-slate-400 mb-8 max-w-lg mx-auto">
@@ -404,7 +404,7 @@ export default function Subscribe() {
               </div>
 
               <Link to={createPageUrl('Home')}>
-                <Button size="lg" className="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-semibold">
+                <Button size="lg" className="bg-amber-500 hover:bg-amber-600">
                   Voltar para o início
                 </Button>
               </Link>
@@ -426,7 +426,7 @@ export default function Subscribe() {
               <Button
                 onClick={nextStep}
                 disabled={(step === 3 && !acceptTerms) || createSubscription.isPending}
-                className="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-semibold"
+                className="bg-amber-500 hover:bg-amber-600"
               >
                 {createSubscription.isPending ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
