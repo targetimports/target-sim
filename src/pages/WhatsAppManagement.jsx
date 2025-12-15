@@ -159,19 +159,40 @@ export default function WhatsAppManagement() {
                       Desconectar
                     </Button>
                   </>
-                ) : connectionStatus?.status === 'qr_code' && connectionStatus?.qr_code ? (
+                ) : connectionStatus?.status === 'qr_code' || connectionStatus?.status === 'connecting' ? (
                   <>
                     <div className="p-4 bg-yellow-50 rounded-xl text-center">
                       <QrCode className="w-12 h-12 text-yellow-600 mx-auto mb-2" />
-                      <p className="font-semibold text-yellow-900 mb-3">Escaneie o QR Code</p>
-                      <img 
-                        src={connectionStatus.qr_code} 
-                        alt="QR Code" 
-                        className="mx-auto border-4 border-white shadow-lg rounded-lg"
-                      />
-                      <p className="text-xs text-slate-500 mt-3">
-                        Abra o WhatsApp no celular e escaneie este código
+                      <p className="font-semibold text-yellow-900 mb-3">
+                        {connectionStatus?.qr_code ? 'Escaneie o QR Code' : 'Gerando QR Code...'}
                       </p>
+                      {connectionStatus?.qr_code ? (
+                        <>
+                          <img 
+                            src={connectionStatus.qr_code} 
+                            alt="QR Code" 
+                            className="mx-auto border-4 border-white shadow-lg rounded-lg max-w-[280px]"
+                          />
+                          <p className="text-xs text-slate-500 mt-3">
+                            Abra o WhatsApp no celular e escaneie este código
+                          </p>
+                        </>
+                      ) : connectionStatus?.session?.qr_code ? (
+                        <>
+                          <img 
+                            src={connectionStatus.session.qr_code} 
+                            alt="QR Code" 
+                            className="mx-auto border-4 border-white shadow-lg rounded-lg max-w-[280px]"
+                          />
+                          <p className="text-xs text-slate-500 mt-3">
+                            Abra o WhatsApp no celular e escaneie este código
+                          </p>
+                        </>
+                      ) : (
+                        <div className="flex items-center justify-center py-8">
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600"></div>
+                        </div>
+                      )}
                     </div>
                     <Button 
                       variant="outline" 
