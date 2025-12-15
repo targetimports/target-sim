@@ -11,10 +11,10 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-black to-amber-600 rounded-xl flex items-center justify-center">
-                <Sun className="w-6 h-6 text-amber-400" />
+              <div className="w-10 h-10 bg-gradient-to-br from-slate-900 to-amber-600 rounded-xl flex items-center justify-center">
+                <Sun className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-white">EnergiaSolar</span>
+              <span className="text-xl font-bold text-white">Target Sim</span>
             </div>
             <p className="text-sm mb-6">
               Energia solar por assinatura. Economize na conta de luz com energia 100% limpa e renovável.
@@ -69,8 +69,8 @@ export default function Footer() {
               </li>
               <li className="flex items-start gap-3">
                 <Mail className="w-5 h-5 text-amber-500 flex-shrink-0" />
-                <a href="mailto:contato@energiasolar.com" className="hover:text-amber-400 transition-colors">
-                  contato@energiasolar.com
+                <a href="mailto:contato@targetsim.com.br" className="hover:text-amber-400 transition-colors">
+                  contato@targetsim.com.br
                 </a>
               </li>
               <li className="flex items-start gap-3">
@@ -83,7 +83,7 @@ export default function Footer() {
 
         <div className="border-t border-slate-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-center md:text-left">
-            © 2024 EnergiaSolar. Todos os direitos reservados.
+            © 2024 Target Sim. Todos os direitos reservados.
           </p>
           <div className="flex gap-6 text-sm">
             <a href="#" className="hover:text-amber-400 transition-colors">Privacidade</a>
