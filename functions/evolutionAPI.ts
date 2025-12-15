@@ -25,63 +25,142 @@ Deno.serve(async (req) => {
         }
 
         if (action === 'connect') {
-            // Criar instância
-            const createRes = await fetch(`${apiUrl}/instance/create`, {
-                method: 'POST',
-                headers,
-                body: JSON.stringify({
-                    instanceName: instanceName,
-                    qrcode: true
-                })
-            });
+            try {
+                // Tentar obter informações da instância
+                const fetchRes = await fetch(`${apiUrl}/instance/fetchInstances?instanceName=${instanceName}`, {
+                    method: 'GET',
+                    headers
+                });
 
-            if (!createRes.ok) {
-                const error = await createRes.text();
-                throw new Error(`Erro ao criar instância: ${error}`);
+                let instanceExists = false;
+                if (fetchRes.ok) {
+                    const instances = await fetchRes.json();
+                    instanceExists = instances && instances.length > 0;
+                }
+
+                // Se não existir, criar
+                if (!instanceExists) {
+                    const createRes = await fetch(`${apiUrl}/instance/create`, {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify({
+                            instanceName: instanceName,
+                            qrcode: true,
+                            integration: 'WHATSAPP-BAILEYS'
+                        })
+                    });
+
+                    if (!createRes.ok) {
+                        const error = await createRes.text();
+                        console.error('Erro criar instância:', error);
+                        throw new Error(`Erro ao criar: ${error}`);
+                    }
+                }
+
+                // Conectar (gera QR)
+                const connectRes = await fetch(`${apiUrl}/instance/connect/${instanceName}`, {
+                    method: 'GET',
+                    headers
+                });
+
+                if (!connectRes.ok) {
+                    throw new Error('Erro ao conectar');
+                }
+
+                const qrData = await connectRes.json();
+                
+                return Response.json({
+                    success: true,
+                    message: 'QR Code gerado',
+                    qrcode: qrData
+                });
+
+            } catch (error) {
+                console.error('Erro no connect:', error);
+                throw error;
             }
-
-            const result = await createRes.json();
-            
-            return Response.json({
-                success: true,
-                message: 'Instância criada. Aguarde o QR Code.',
-                data: result
-            });
         }
 
         if (action === 'status') {
-            // Obter status da conexão
-            const statusRes = await fetch(`${apiUrl}/instance/connectionState/${instanceName}`, {
-                method: 'GET',
-                headers
-            });
-
-            if (!statusRes.ok) {
-                return Response.json({
-                    state: 'close',
-                    instance: null
-                });
-            }
-
-            const status = await statusRes.json();
-
-            // Se desconectado, tentar obter QR Code
-            if (status.state === 'close') {
-                const qrRes = await fetch(`${apiUrl}/instance/connect/${instanceName}`, {
+            try {
+                // Verificar se instância existe
+                const fetchRes = await fetch(`${apiUrl}/instance/fetchInstances?instanceName=${instanceName}`, {
                     method: 'GET',
                     headers
-                }).catch(() => null);
+                });
 
-                if (qrRes && qrRes.ok) {
-                    const qrData = await qrRes.json();
+                if (!fetchRes.ok) {
                     return Response.json({
-                        ...status,
-                        qrcode: qrData
+                        state: 'close',
+                        instance: null,
+                        exists: false
                     });
                 }
-            }
 
-            return Response.json(status);
+                const instances = await fetchRes.json();
+                if (!instances || instances.length === 0) {
+                    return Response.json({
+                        state: 'close',
+                        instance: null,
+                        exists: false
+                    });
+                }
+
+                const instance = instances[0];
+
+                // Obter status da conexão
+                const statusRes = await fetch(`${apiUrl}/instance/connectionState/${instanceName}`, {
+                    method: 'GET',
+                    headers
+                });
+
+                if (!statusRes.ok) {
+                    return Response.json({
+                        state: 'close',
+                        instance: instance,
+                        exists: true
+                    });
+                }
+
+                const status = await statusRes.json();
+
+                // Se desconectado, obter QR Code
+                if (status.state === 'close') {
+                    try {
+                        const qrRes = await fetch(`${apiUrl}/instance/connect/${instanceName}`, {
+                            method: 'GET',
+                            headers
+                        });
+
+                        if (qrRes.ok) {
+                            const qrData = await qrRes.json();
+                            return Response.json({
+                                ...status,
+                                instance: instance,
+                                exists: true,
+                                qrcode: qrData
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Erro ao obter QR:', e);
+                    }
+                }
+
+                return Response.json({
+                    ...status,
+                    instance: instance,
+                    exists: true
+                });
+
+            } catch (error) {
+                console.error('Erro no status:', error);
+                return Response.json({
+                    state: 'close',
+                    instance: null,
+                    exists: false,
+                    error: error.message
+                });
+            }
         }
 
         if (action === 'disconnect') {

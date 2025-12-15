@@ -186,26 +186,18 @@ export default function WhatsAppEvolution() {
                 <AlertDescription>
                   <div className="space-y-3">
                     <div>
-                      <strong>🚀 Instale Evolution API no seu servidor:</strong>
-                      <div className="mt-2 p-3 bg-slate-900 text-white rounded-lg text-sm font-mono">
-                        docker run -d --name evolution-api \<br/>
-                        &nbsp;&nbsp;-p 8080:8080 \<br/>
-                        &nbsp;&nbsp;atendai/evolution-api:latest
+                      <strong>🚀 Opção 1 - Servidor próprio (recomendado):</strong>
+                      <div className="mt-2 p-3 bg-slate-900 text-white rounded-lg text-sm font-mono overflow-x-auto">
+                        docker run -d --name evolution-api -p 8080:8080 atendai/evolution-api:latest
                       </div>
+                      <p className="text-xs text-slate-600 mt-1">URL: http://SEU-IP:8080</p>
                     </div>
                     <div>
-                      <strong>📖 Documentação completa:</strong>
-                      <a href="https://doc.evolution-api.com" target="_blank" rel="noopener" className="text-blue-600 hover:underline ml-2">
-                        doc.evolution-api.com
-                      </a>
-                    </div>
-                    <div>
-                      <strong>💡 Depois de instalar:</strong>
-                      <ul className="list-disc ml-4 mt-1 space-y-1">
-                        <li>URL será: <code className="bg-slate-100 px-1 rounded">http://IP-DO-SEU-SERVIDOR:8080</code></li>
-                        <li>API Key é opcional (deixe vazio para começar)</li>
-                        <li>Nome da instância: escolha qualquer nome (ex: "targetsim")</li>
-                      </ul>
+                      <strong>💡 Opção 2 - Testar com API demo:</strong>
+                      <div className="mt-2 p-3 bg-blue-50 rounded-lg">
+                        <p className="text-sm">URL: <code className="bg-white px-2 py-1 rounded">https://evo-api-demo.com</code></p>
+                        <p className="text-xs text-slate-600 mt-1">⚠️ Apenas para testes, não use em produção</p>
+                      </div>
                     </div>
                   </div>
                 </AlertDescription>
