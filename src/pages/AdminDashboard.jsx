@@ -137,9 +137,6 @@ export default function AdminDashboard() {
                     <Link to={createPageUrl('WhatsAppEvolution')} className="w-full">WhatsApp Evolution API</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('WhatsAppVenom')} className="w-full">WhatsApp Venom</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
                     <Link to={createPageUrl('AdminPlans')} className="w-full">Gerenciar Planos</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -238,9 +235,6 @@ export default function AdminDashboard() {
               </Link>
               <Link to={createPageUrl('WhatsAppEvolution')} onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">WhatsApp Evolution API</Button>
-              </Link>
-              <Link to={createPageUrl('WhatsAppVenom')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">WhatsApp Venom</Button>
               </Link>
               <Link to={createPageUrl('AdminPlans')} onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Gerenciar Planos</Button>

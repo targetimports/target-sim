@@ -34,7 +34,6 @@ import SuperApp from './pages/SuperApp';
 import AIInnovations from './pages/AIInnovations';
 import WhatsAppCampaigns from './pages/WhatsAppCampaigns';
 import WhatsAppEvolution from './pages/WhatsAppEvolution';
-import WhatsAppVenom from './pages/WhatsAppVenom';
 import __Layout from './Layout.jsx';
 
 
@@ -75,7 +74,6 @@ export const PAGES = {
     "AIInnovations": AIInnovations,
     "WhatsAppCampaigns": WhatsAppCampaigns,
     "WhatsAppEvolution": WhatsAppEvolution,
-    "WhatsAppVenom": WhatsAppVenom,
 }
 
 export const pagesConfig = {
