@@ -1,5 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
+// Referência ao socket global
+let cachedSock = null;
+
 Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     
@@ -43,18 +46,22 @@ Deno.serve(async (req) => {
         });
 
         try {
-            // Em produção, aqui você faria:
-            // await sock.sendMessage(formattedNumber, { text: message });
+            // Importar o socket da função whatsappConnect
+            const { sock } = await import('./whatsappConnect.js');
             
-            // Por enquanto, simular envio bem-sucedido
-            console.log('[WhatsApp Send] Mensagem registrada. ID:', msgRecord.id);
+            if (!sock) {
+                throw new Error('Socket não disponível');
+            }
+
+            // Enviar mensagem real via Baileys
+            await sock.sendMessage(formattedNumber, { text: message });
+            
+            console.log('[WhatsApp Send] Mensagem enviada com sucesso');
             
             // Atualizar status para "sent"
             await base44.asServiceRole.entities.WhatsAppMessage.update(msgRecord.id, {
                 status: 'sent'
             });
-
-            console.log('[WhatsApp Send] Status atualizado para sent');
 
             return Response.json({ 
                 success: true,
