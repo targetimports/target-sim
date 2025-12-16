@@ -201,7 +201,7 @@ export default function WhatsAppEvolution() {
               <Button 
                 variant="outline" 
                 size="icon"
-                className="text-white border-white/30 hover:bg-white/10"
+                className="text-white border-white/30 hover:bg-white/20"
                 onClick={() => setShowConfig(!showConfig)}
               >
                 <Settings className="w-5 h-5" />
