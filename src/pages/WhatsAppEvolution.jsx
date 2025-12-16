@@ -364,15 +364,15 @@ export default function WhatsAppEvolution() {
                             <QrCode className="w-12 h-12 text-yellow-600 mx-auto mb-3" />
                             <p className="font-semibold text-yellow-900 mb-3">Escaneie o QR Code</p>
                             <div className="bg-white p-4 rounded-lg">
-                              {status.qrcode.base64 ? (
+                              {qrCode?.base64 ? (
                                 <img 
-                                  src={status.qrcode.base64}
+                                  src={qrCode.base64}
                                   alt="QR Code"
                                   className="w-full max-w-[280px] mx-auto"
                                 />
                               ) : (
                                 <img 
-                                  src={`https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(status.qrcode.code || status.qrcode)}`}
+                                  src={`https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(qrCode?.code || qrCode)}`}
                                   alt="QR Code"
                                   className="w-full max-w-[280px] mx-auto"
                                 />
