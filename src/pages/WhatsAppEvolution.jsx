@@ -193,9 +193,9 @@ export default function WhatsAppEvolution() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {status?.state && (
-                <Badge className={statusColors[status.state] || 'bg-slate-100 text-slate-800'}>
-                  {statusLabels[status.state] || status.state}
+              {connectionStatus && (
+                <Badge className={statusColors[connectionStatus] || 'bg-slate-100 text-slate-800'}>
+                  {statusLabels[connectionStatus] || connectionStatus}
                 </Badge>
               )}
               <Button 
