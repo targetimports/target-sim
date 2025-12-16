@@ -88,10 +88,10 @@ Deno.serve(async (req) => {
 
         if (action === 'status') {
             try {
-                console.log('[Status] Checking instance:', instanceName, 'at', apiUrl);
-                
+                console.log('[Status] Checking instance:', instanceName, 'at', baseUrl);
+
                 // Verificar se instância existe
-                const fetchRes = await fetch(`${apiUrl}/instance/fetchInstances?instanceName=${instanceName}`, {
+                const fetchRes = await fetch(`${baseUrl}/instance/fetchInstances?instanceName=${instanceName}`, {
                     method: 'GET',
                     headers
                 });
