@@ -416,7 +416,13 @@ export default function WhatsAppEvolution() {
                         </>
                         )}
                         </>
-                        ) : (
+                        ) : connectionStatus === 'connecting' ? (
+                    <div className="p-4 bg-yellow-50 rounded-xl text-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600 mx-auto mb-2"></div>
+                      <p className="font-semibold text-yellow-900">Gerando QR Code...</p>
+                      <p className="text-xs text-yellow-700 mt-2">Aguarde alguns segundos</p>
+                    </div>
+                  ) : (
                     <div className="p-4 bg-blue-50 rounded-xl text-center">
                       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-2"></div>
                       <p className="font-semibold text-blue-900">Verificando status...</p>
@@ -425,7 +431,7 @@ export default function WhatsAppEvolution() {
                 </CardContent>
               </Card>
 
-              {status?.state === 'open' && (
+              {connectionStatus === 'open' && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
