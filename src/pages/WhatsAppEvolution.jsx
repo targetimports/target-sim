@@ -325,17 +325,25 @@ export default function WhatsAppEvolution() {
                     </>
                   ) : status?.state === 'close' ? (
                     <>
-                      {status.qrcode?.base64 ? (
+                      {status?.qrcode?.base64 || status?.qrcode?.code ? (
                         <>
                           <div className="p-4 bg-yellow-50 rounded-xl text-center">
                             <QrCode className="w-12 h-12 text-yellow-600 mx-auto mb-3" />
                             <p className="font-semibold text-yellow-900 mb-3">Escaneie o QR Code</p>
                             <div className="bg-white p-4 rounded-lg">
-                              <img 
-                                src={status.qrcode.base64}
-                                alt="QR Code"
-                                className="w-full max-w-[280px] mx-auto"
-                              />
+                              {status.qrcode.base64 ? (
+                                <img 
+                                  src={status.qrcode.base64}
+                                  alt="QR Code"
+                                  className="w-full max-w-[280px] mx-auto"
+                                />
+                              ) : (
+                                <img 
+                                  src={`https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(status.qrcode.code || status.qrcode)}`}
+                                  alt="QR Code"
+                                  className="w-full max-w-[280px] mx-auto"
+                                />
+                              )}
                             </div>
                             <p className="text-xs text-yellow-700 mt-3">
                               WhatsApp → Menu → Aparelhos Conectados
