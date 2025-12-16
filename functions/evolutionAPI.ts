@@ -202,7 +202,7 @@ Deno.serve(async (req) => {
             }
 
             // Enviar mensagem
-            const sendRes = await fetch(`${apiUrl}/message/sendText/${instanceName}`, {
+            const sendRes = await fetch(`${baseUrl}/message/sendText/${instanceName}`, {
                 method: 'POST',
                 headers,
                 body: JSON.stringify({
