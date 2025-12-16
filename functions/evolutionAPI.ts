@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
         if (action === 'connect') {
             try {
                 // Tentar obter informações da instância
-                const fetchRes = await fetch(`${apiUrl}/instance/fetchInstances?instanceName=${instanceName}`, {
+                const fetchRes = await fetch(`${baseUrl}/instance/fetchInstances?instanceName=${instanceName}`, {
                     method: 'GET',
                     headers
                 });
