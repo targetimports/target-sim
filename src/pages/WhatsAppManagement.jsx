@@ -172,7 +172,7 @@ export default function WhatsAppManagement() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link to={createPageUrl('AdminDashboard')}>
-                <Button variant="ghost" size="icon" className="text-white/80 hover:text-white">
+                <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
                   <ArrowLeft className="w-5 h-5" />
                 </Button>
               </Link>
