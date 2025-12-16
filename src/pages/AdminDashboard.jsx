@@ -191,6 +191,33 @@ export default function AdminDashboard() {
                     <Link to={createPageUrl('RegulatoryReports')} className="w-full">📑 Relatórios Regulatórios</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('AutomaticBilling')} className="w-full">💳 Faturamento Automático</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('CreditAdjustments')} className="w-full">⚖️ Ajustes de Crédito</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('ExpiringCredits')} className="w-full">⏰ Créditos Expirando</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('DeficitCompensation')} className="w-full">⚖️ Compensação Déficit</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('AllocationSimulator')} className="w-full">🧮 Simulador Alocação</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('PerformanceDashboard')} className="w-full">📊 Dashboard Performance</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('AllocationPriorities')} className="w-full">⭐ Prioridades Alocação</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('TransactionHistory')} className="w-full">📜 Histórico Transações</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('DistributorIntegrations')} className="w-full">🔌 Integração Distribuidoras</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
                     <Link to={createPageUrl('AIInnovations')} className="w-full">🤖 IA Inovações</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -307,6 +334,33 @@ export default function AdminDashboard() {
               </Link>
               <Link to={createPageUrl('RegulatoryReports')} onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">📑 Relatórios</Button>
+              </Link>
+              <Link to={createPageUrl('AutomaticBilling')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">💳 Faturamento</Button>
+              </Link>
+              <Link to={createPageUrl('CreditAdjustments')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">⚖️ Ajustes</Button>
+              </Link>
+              <Link to={createPageUrl('ExpiringCredits')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">⏰ Expirações</Button>
+              </Link>
+              <Link to={createPageUrl('DeficitCompensation')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">⚖️ Compensação</Button>
+              </Link>
+              <Link to={createPageUrl('AllocationSimulator')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">🧮 Simulador</Button>
+              </Link>
+              <Link to={createPageUrl('PerformanceDashboard')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">📊 Performance</Button>
+              </Link>
+              <Link to={createPageUrl('AllocationPriorities')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">⭐ Prioridades</Button>
+              </Link>
+              <Link to={createPageUrl('TransactionHistory')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">📜 Histórico</Button>
+              </Link>
+              <Link to={createPageUrl('DistributorIntegrations')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">🔌 Integrações</Button>
               </Link>
               <Link to={createPageUrl('AIInnovations')} onClick={() => setMobileMenuOpen(false)}>
                 <Button className="w-full justify-start bg-purple-600 hover:bg-purple-700 text-white text-sm">🤖 IA</Button>

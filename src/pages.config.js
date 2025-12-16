@@ -41,6 +41,14 @@ import PlantCapacityManager from './pages/PlantCapacityManager';
 import OnboardingManager from './pages/OnboardingManager';
 import UtilityBillManager from './pages/UtilityBillManager';
 import RegulatoryReports from './pages/RegulatoryReports';
+import AutomaticBilling from './pages/AutomaticBilling';
+import CreditAdjustments from './pages/CreditAdjustments';
+import ExpiringCredits from './pages/ExpiringCredits';
+import DeficitCompensation from './pages/DeficitCompensation';
+import AllocationSimulator from './pages/AllocationSimulator';
+import PerformanceDashboard from './pages/PerformanceDashboard';
+import TransactionHistory from './pages/TransactionHistory';
+import DistributorIntegrations from './pages/DistributorIntegrations';
 import __Layout from './Layout.jsx';
 
 
@@ -88,6 +96,14 @@ export const PAGES = {
     "OnboardingManager": OnboardingManager,
     "UtilityBillManager": UtilityBillManager,
     "RegulatoryReports": RegulatoryReports,
+    "AutomaticBilling": AutomaticBilling,
+    "CreditAdjustments": CreditAdjustments,
+    "ExpiringCredits": ExpiringCredits,
+    "DeficitCompensation": DeficitCompensation,
+    "AllocationSimulator": AllocationSimulator,
+    "PerformanceDashboard": PerformanceDashboard,
+    "TransactionHistory": TransactionHistory,
+    "DistributorIntegrations": DistributorIntegrations,
 }
 
 export const pagesConfig = {
