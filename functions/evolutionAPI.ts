@@ -119,7 +119,7 @@ Deno.serve(async (req) => {
                 const instance = instances[0];
 
                 // Obter status da conexão
-                const statusRes = await fetch(`${apiUrl}/instance/connectionState/${instanceName}`, {
+                const statusRes = await fetch(`${baseUrl}/instance/connectionState/${instanceName}`, {
                     method: 'GET',
                     headers
                 });
