@@ -392,17 +392,27 @@ export default function WhatsAppEvolution() {
                             <XCircle className="w-12 h-12 text-slate-400 mx-auto mb-2" />
                             <p className="font-semibold text-slate-900">Desconectado</p>
                           </div>
-                          <Button 
-                            className="w-full bg-green-600 hover:bg-green-700"
-                            onClick={() => connectMutation.mutate()}
-                            disabled={connectMutation.isPending}
-                          >
-                            {connectMutation.isPending ? 'Conectando...' : 'Conectar WhatsApp'}
-                          </Button>
+                          <div className="space-y-2">
+                            <Button 
+                              className="w-full bg-green-600 hover:bg-green-700"
+                              onClick={() => connectMutation.mutate()}
+                              disabled={connectMutation.isPending || resetConnectionMutation.isPending}
+                            >
+                              {connectMutation.isPending ? 'Conectando...' : 'Conectar WhatsApp'}
+                            </Button>
+                            <Button 
+                              variant="outline"
+                              className="w-full"
+                              onClick={() => resetConnectionMutation.mutate()}
+                              disabled={connectMutation.isPending || resetConnectionMutation.isPending}
+                            >
+                              {resetConnectionMutation.isPending ? 'Resetando...' : '🔄 Resetar Conexão'}
+                            </Button>
+                          </div>
                         </>
-                      )}
-                    </>
-                  ) : (
+                        )}
+                        </>
+                        ) : (
                     <div className="p-4 bg-blue-50 rounded-xl text-center">
                       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-2"></div>
                       <p className="font-semibold text-blue-900">Verificando status...</p>
