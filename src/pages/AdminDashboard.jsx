@@ -170,6 +170,27 @@ export default function AdminDashboard() {
                     <Link to={createPageUrl('AdminAnalytics')} className="w-full">Admin Analytics</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('EnergyAllocationManager')} className="w-full">⚡ Rateio de Energia</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('CreditBalanceManager')} className="w-full">💰 Saldo de Créditos</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('MonthlyReconciliation')} className="w-full">🔄 Reconciliação Mensal</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('PlantCapacityManager')} className="w-full">📊 Capacidade Usinas</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('OnboardingManager')} className="w-full">📋 Onboarding/Migração</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('UtilityBillManager')} className="w-full">📄 Contas de Luz</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('RegulatoryReports')} className="w-full">📑 Relatórios Regulatórios</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
                     <Link to={createPageUrl('AIInnovations')} className="w-full">🤖 IA Inovações</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -265,6 +286,27 @@ export default function AdminDashboard() {
               </Link>
               <Link to={createPageUrl('AdminAnalytics')} onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Admin Analytics</Button>
+              </Link>
+              <Link to={createPageUrl('EnergyAllocationManager')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">⚡ Rateio Energia</Button>
+              </Link>
+              <Link to={createPageUrl('CreditBalanceManager')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">💰 Saldo Créditos</Button>
+              </Link>
+              <Link to={createPageUrl('MonthlyReconciliation')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">🔄 Reconciliação</Button>
+              </Link>
+              <Link to={createPageUrl('PlantCapacityManager')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">📊 Capacidade</Button>
+              </Link>
+              <Link to={createPageUrl('OnboardingManager')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">📋 Onboarding</Button>
+              </Link>
+              <Link to={createPageUrl('UtilityBillManager')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">📄 Contas Luz</Button>
+              </Link>
+              <Link to={createPageUrl('RegulatoryReports')} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">📑 Relatórios</Button>
               </Link>
               <Link to={createPageUrl('AIInnovations')} onClick={() => setMobileMenuOpen(false)}>
                 <Button className="w-full justify-start bg-purple-600 hover:bg-purple-700 text-white text-sm">🤖 IA</Button>
