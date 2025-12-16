@@ -3,7 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Camera, X, Zap, CheckCircle, AlertCircle } from 'lucide-react';
-import jsQR from 'jsqr';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 
@@ -54,24 +53,21 @@ export default function ScanQRCode() {
     setScanning(false);
   };
 
-  const scanQRCode = () => {
-    if (!videoRef.current || !canvasRef.current || !scanning) return;
+  const scanQRCode = async () => {
+    if (!videoRef.current || !scanning) return;
 
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-      canvas.height = video.videoHeight;
-      canvas.width = video.videoWidth;
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-      const code = jsQR(imageData.data, imageData.width, imageData.height);
-
-      if (code) {
-        handleQRCodeDetected(code.data);
-        return;
+    // Usar BarcodeDetector API se disponível
+    if ('BarcodeDetector' in window) {
+      try {
+        const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
+        const barcodes = await barcodeDetector.detect(videoRef.current);
+        
+        if (barcodes.length > 0) {
+          handleQRCodeDetected(barcodes[0].rawValue);
+          return;
+        }
+      } catch (err) {
+        console.error('BarcodeDetector error:', err);
       }
     }
 
