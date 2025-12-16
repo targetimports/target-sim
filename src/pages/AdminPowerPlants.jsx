@@ -41,6 +41,7 @@ export default function AdminPowerPlants() {
     city: '',
     state: '',
     status: 'operational',
+    operation_mode: 'monthly_generation',
     start_date: '',
     image_url: ''
   });
@@ -94,6 +95,7 @@ export default function AdminPowerPlants() {
       city: '',
       state: '',
       status: 'operational',
+      operation_mode: 'monthly_generation',
       start_date: '',
       image_url: ''
     });
@@ -112,6 +114,7 @@ export default function AdminPowerPlants() {
       city: plant.city || '',
       state: plant.state || '',
       status: plant.status || 'operational',
+      operation_mode: plant.operation_mode || 'monthly_generation',
       start_date: plant.start_date || '',
       image_url: plant.image_url || ''
     });
@@ -212,7 +215,7 @@ export default function AdminPowerPlants() {
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Capacidade total</p>
-                  <p className="text-2xl font-bold">{(totalCapacity / 1000).toFixed(1)} MW</p>
+                  <p className="text-2xl font-bold">{(totalCapacity / 1000).toFixed(1)} MWp</p>
                 </div>
               </div>
             </CardContent>
@@ -276,7 +279,7 @@ export default function AdminPowerPlants() {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-slate-600">
                       <Zap className="w-4 h-4" />
-                      <span>{plant.capacity_kw?.toLocaleString()} kW</span>
+                      <span>{plant.capacity_kw?.toLocaleString()} kWp</span>
                     </div>
                     {plant.monthly_generation_kwh && (
                       <div className="flex items-center gap-2 text-sm font-semibold text-amber-700">
@@ -290,9 +293,14 @@ export default function AdminPowerPlants() {
                         <span>Desde {format(new Date(plant.start_date), 'MM/yyyy')}</span>
                       </div>
                     )}
-                    <Badge className={statusColors[plant.status]}>
-                      {statusLabels[plant.status]}
-                    </Badge>
+                    <div className="flex gap-2">
+                      <Badge className={statusColors[plant.status]}>
+                        {statusLabels[plant.status]}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {plant.operation_mode === 'accumulated_balance' ? 'Saldo Acumulado' : 'Geração Mensal'}
+                      </Badge>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -348,7 +356,7 @@ export default function AdminPowerPlants() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Capacidade Instalada (kW) *</Label>
+                <Label>Capacidade Instalada (kWp) *</Label>
                 <Input
                   type="number"
                   value={formData.capacity_kw}
@@ -357,6 +365,22 @@ export default function AdminPowerPlants() {
                   required
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Modo de Operação *</Label>
+              <Select value={formData.operation_mode} onValueChange={(v) => setFormData(prev => ({ ...prev, operation_mode: v }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monthly_generation">Geração Mensal</SelectItem>
+                  <SelectItem value="accumulated_balance">Saldo Acumulado</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-slate-500">
+                Geração Mensal: energia gerada é distribuída mensalmente. Saldo Acumulado: créditos acumulam ao longo do tempo.
+              </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
