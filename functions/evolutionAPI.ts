@@ -18,6 +18,9 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'API URL e Instance Name são obrigatórios' }, { status: 400 });
         }
 
+        // Remove trailing slash from apiUrl
+        const baseUrl = apiUrl.replace(/\/$/, '');
+
         const headers = {
             'Content-Type': 'application/json'
         };
