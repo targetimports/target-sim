@@ -175,7 +175,7 @@ Deno.serve(async (req) => {
 
         if (action === 'disconnect') {
             // Logout da instância
-            const logoutRes = await fetch(`${apiUrl}/instance/logout/${instanceName}`, {
+            const logoutRes = await fetch(`${baseUrl}/instance/logout/${instanceName}`, {
                 method: 'DELETE',
                 headers
             });
