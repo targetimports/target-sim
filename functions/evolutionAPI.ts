@@ -137,7 +137,7 @@ Deno.serve(async (req) => {
                 // Se desconectado, obter QR Code
                 if (status.state === 'close') {
                     try {
-                        const qrRes = await fetch(`${apiUrl}/instance/connect/${instanceName}`, {
+                        const qrRes = await fetch(`${baseUrl}/instance/connect/${instanceName}`, {
                             method: 'GET',
                             headers
                         });
