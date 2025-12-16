@@ -131,9 +131,6 @@ export default function AdminDashboard() {
                     <Link to={createPageUrl('WhatsAppCampaigns')} className="w-full">Campanhas WhatsApp</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('WhatsAppManagement')} className="w-full">WhatsApp Conectar</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
                     <Link to={createPageUrl('WhatsAppEvolution')} className="w-full">WhatsApp Evolution API</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -189,7 +186,7 @@ export default function AdminDashboard() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button variant="outline" className="border-slate-700 text-white hover:bg-slate-800" onClick={() => base44.auth.logout()}>
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => base44.auth.logout()}>
                 Sair
               </Button>
             </div>
@@ -229,9 +226,6 @@ export default function AdminDashboard() {
               </Link>
               <Link to={createPageUrl('WhatsAppCampaigns')} onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Campanhas WhatsApp</Button>
-              </Link>
-              <Link to={createPageUrl('WhatsAppManagement')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">WhatsApp Conectar</Button>
               </Link>
               <Link to={createPageUrl('WhatsAppEvolution')} onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">WhatsApp Evolution API</Button>
@@ -289,7 +283,7 @@ export default function AdminDashboard() {
               </Link>
               <Button 
                 variant="outline" 
-                className="w-full justify-start border-slate-700 text-white hover:bg-slate-800 text-sm mt-2" 
+                className="w-full justify-start border-white/30 text-white hover:bg-white/20 text-sm mt-2" 
                 onClick={() => base44.auth.logout()}
               >
                 Sair
