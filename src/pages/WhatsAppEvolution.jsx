@@ -169,6 +169,10 @@ export default function WhatsAppEvolution() {
     connecting: 'Conectando...'
   };
 
+  // Extrair status da resposta
+  const connectionStatus = status?.state || status?.instance?.connectionStatus;
+  const qrCode = status?.qrcode || status?.qr;
+
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
