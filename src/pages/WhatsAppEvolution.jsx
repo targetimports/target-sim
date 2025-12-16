@@ -338,13 +338,13 @@ export default function WhatsAppEvolution() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {status?.state === 'open' ? (
+                  {connectionStatus === 'open' ? (
                     <>
                       <div className="p-4 bg-green-50 rounded-xl text-center">
                         <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-2" />
                         <p className="font-semibold text-green-900">Conectado</p>
-                        {status.instance?.owner && (
-                          <p className="text-sm text-green-700 mt-1">{status.instance.owner}</p>
+                        {status?.instance?.profileName && (
+                          <p className="text-sm text-green-700 mt-1">{status.instance.profileName}</p>
                         )}
                       </div>
                       <Button 
@@ -356,9 +356,9 @@ export default function WhatsAppEvolution() {
                         Desconectar
                       </Button>
                     </>
-                  ) : status?.state === 'close' ? (
+                  ) : connectionStatus === 'close' ? (
                     <>
-                      {status?.qrcode?.base64 || status?.qrcode?.code ? (
+                      {qrCode?.base64 || qrCode?.code ? (
                         <>
                           <div className="p-4 bg-yellow-50 rounded-xl text-center">
                             <QrCode className="w-12 h-12 text-yellow-600 mx-auto mb-3" />
