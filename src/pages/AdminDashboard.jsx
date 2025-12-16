@@ -8,25 +8,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Sun, Users, FileText, Zap, TrendingUp, Search,
   MoreVertical, Eye, CheckCircle, XCircle, Clock,
-  Building2, Wallet, Activity, Menu, X
+  Building2, Wallet, Activity, Menu, X, LayoutGrid
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from "@/utils";
 import WhatsAppStatusIndicator from '../components/WhatsAppStatusIndicator';
+import NavigationMenu from '../components/admin/NavigationMenu';
+import QuickAccessCards from '../components/admin/QuickAccessCards';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const { data: subscriptions = [], refetch: refetchSubscriptions } = useQuery({
     queryKey: ['admin-subscriptions'],
@@ -104,293 +108,69 @@ export default function AdminDashboard() {
 
             {/* Desktop Menu */}
             <div className="hidden lg:flex items-center gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+              <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+                <SheetTrigger asChild>
                   <Button variant="ghost" className="text-slate-300 hover:text-amber-400">
-                    <Menu className="w-4 h-4 mr-2" />
-                    Menu
+                    <LayoutGrid className="w-4 h-4 mr-2" />
+                    Todas Funções
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('CRMDashboard')} className="w-full">CRM Dashboard</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('PlantMonitoring')} className="w-full">Monitoramento Usinas</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('AdminPowerPlants')} className="w-full">Gerenciar Usinas</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('FinancialDashboard')} className="w-full">Dashboard Financeiro</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('AccountsManagement')} className="w-full">Contas a Pagar/Receber</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('WhatsAppCampaigns')} className="w-full">Campanhas WhatsApp</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('WhatsAppEvolution')} className="w-full">WhatsApp Evolution API</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('AdminPlans')} className="w-full">Gerenciar Planos</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('ConsumptionMonitor')} className="w-full">Monitor Consumo</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('ServiceOrders')} className="w-full">Ordens Serviço</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('AdminServiceOrders')} className="w-full">Admin Ordens Serviço</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('SupportCenter')} className="w-full">Central Suporte</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('MaintenanceManagement')} className="w-full">Manutenções</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('OwnerContracts')} className="w-full">Contratos Proprietários</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('EnergyPurchaseManagement')} className="w-full">Compra Energia</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('EnergyCreditsMarket')} className="w-full">Mercado Créditos</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('CreditMarketplace')} className="w-full">Marketplace Créditos</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('AdvancedAnalytics')} className="w-full">Analytics Avançado</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('AdminAnalytics')} className="w-full">Admin Analytics</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('EnergyAllocationManager')} className="w-full">⚡ Rateio de Energia</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('CreditBalanceManager')} className="w-full">💰 Saldo de Créditos</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('MonthlyReconciliation')} className="w-full">🔄 Reconciliação Mensal</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('PlantCapacityManager')} className="w-full">📊 Capacidade Usinas</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('OnboardingManager')} className="w-full">📋 Onboarding/Migração</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('UtilityBillManager')} className="w-full">📄 Contas de Luz</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('RegulatoryReports')} className="w-full">📑 Relatórios Regulatórios</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('AutomaticBilling')} className="w-full">💳 Faturamento Automático</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('CreditAdjustments')} className="w-full">⚖️ Ajustes de Crédito</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('ExpiringCredits')} className="w-full">⏰ Créditos Expirando</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('DeficitCompensation')} className="w-full">⚖️ Compensação Déficit</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('AllocationSimulator')} className="w-full">🧮 Simulador Alocação</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('PerformanceDashboard')} className="w-full">📊 Dashboard Performance</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('AllocationPriorities')} className="w-full">⭐ Prioridades Alocação</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('TransactionHistory')} className="w-full">📜 Histórico Transações</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('DistributorIntegrations')} className="w-full">🔌 Integração Distribuidoras</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('AIInnovations')} className="w-full">🤖 IA Inovações</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('Certificates')} className="w-full">Certificados</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('WeatherForecast')} className="w-full">Previsão Tempo</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('PaymentGateway')} className="w-full">Gateway Pagamento</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('Chatbot')} className="w-full">Chatbot</Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[400px] sm:w-[500px] overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Menu de Navegação</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <NavigationMenu onNavigate={() => setSidebarOpen(false)} />
+                  </div>
+                </SheetContent>
+              </Sheet>
               <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => base44.auth.logout()}>
                 Sair
               </Button>
             </div>
 
             {/* Mobile Menu Button */}
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="lg:hidden text-white"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </Button>
-          </div>
-
-          {/* Mobile Menu */}
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="lg:hidden mt-4 pb-4 space-y-1 max-h-96 overflow-y-auto"
-            >
-              <Link to={createPageUrl('CRMDashboard')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">CRM Dashboard</Button>
-              </Link>
-              <Link to={createPageUrl('PlantMonitoring')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Monitoramento Usinas</Button>
-              </Link>
-              <Link to={createPageUrl('AdminPowerPlants')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Gerenciar Usinas</Button>
-              </Link>
-              <Link to={createPageUrl('FinancialDashboard')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Dashboard Financeiro</Button>
-              </Link>
-              <Link to={createPageUrl('AccountsManagement')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Contas a Pagar/Receber</Button>
-              </Link>
-              <Link to={createPageUrl('WhatsAppCampaigns')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Campanhas WhatsApp</Button>
-              </Link>
-              <Link to={createPageUrl('WhatsAppEvolution')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">WhatsApp Evolution API</Button>
-              </Link>
-              <Link to={createPageUrl('AdminPlans')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Gerenciar Planos</Button>
-              </Link>
-              <Link to={createPageUrl('ConsumptionMonitor')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Monitor Consumo</Button>
-              </Link>
-              <Link to={createPageUrl('ServiceOrders')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Ordens Serviço</Button>
-              </Link>
-              <Link to={createPageUrl('AdminServiceOrders')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Admin Ordens</Button>
-              </Link>
-              <Link to={createPageUrl('SupportCenter')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Suporte</Button>
-              </Link>
-              <Link to={createPageUrl('MaintenanceManagement')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Manutenções</Button>
-              </Link>
-              <Link to={createPageUrl('OwnerContracts')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Contratos Prop.</Button>
-              </Link>
-              <Link to={createPageUrl('EnergyPurchaseManagement')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Compra Energia</Button>
-              </Link>
-              <Link to={createPageUrl('EnergyCreditsMarket')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Mercado Créditos</Button>
-              </Link>
-              <Link to={createPageUrl('CreditMarketplace')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Marketplace</Button>
-              </Link>
-              <Link to={createPageUrl('AdvancedAnalytics')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Analytics Avanç.</Button>
-              </Link>
-              <Link to={createPageUrl('AdminAnalytics')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Admin Analytics</Button>
-              </Link>
-              <Link to={createPageUrl('EnergyAllocationManager')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">⚡ Rateio Energia</Button>
-              </Link>
-              <Link to={createPageUrl('CreditBalanceManager')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">💰 Saldo Créditos</Button>
-              </Link>
-              <Link to={createPageUrl('MonthlyReconciliation')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">🔄 Reconciliação</Button>
-              </Link>
-              <Link to={createPageUrl('PlantCapacityManager')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">📊 Capacidade</Button>
-              </Link>
-              <Link to={createPageUrl('OnboardingManager')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">📋 Onboarding</Button>
-              </Link>
-              <Link to={createPageUrl('UtilityBillManager')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">📄 Contas Luz</Button>
-              </Link>
-              <Link to={createPageUrl('RegulatoryReports')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">📑 Relatórios</Button>
-              </Link>
-              <Link to={createPageUrl('AutomaticBilling')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">💳 Faturamento</Button>
-              </Link>
-              <Link to={createPageUrl('CreditAdjustments')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">⚖️ Ajustes</Button>
-              </Link>
-              <Link to={createPageUrl('ExpiringCredits')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">⏰ Expirações</Button>
-              </Link>
-              <Link to={createPageUrl('DeficitCompensation')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">⚖️ Compensação</Button>
-              </Link>
-              <Link to={createPageUrl('AllocationSimulator')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">🧮 Simulador</Button>
-              </Link>
-              <Link to={createPageUrl('PerformanceDashboard')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">📊 Performance</Button>
-              </Link>
-              <Link to={createPageUrl('AllocationPriorities')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">⭐ Prioridades</Button>
-              </Link>
-              <Link to={createPageUrl('TransactionHistory')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">📜 Histórico</Button>
-              </Link>
-              <Link to={createPageUrl('DistributorIntegrations')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">🔌 Integrações</Button>
-              </Link>
-              <Link to={createPageUrl('AIInnovations')} onClick={() => setMobileMenuOpen(false)}>
-                <Button className="w-full justify-start bg-purple-600 hover:bg-purple-700 text-white text-sm">🤖 IA</Button>
-              </Link>
-              <Link to={createPageUrl('Certificates')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Certificados</Button>
-              </Link>
-              <Link to={createPageUrl('WeatherForecast')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Previsão Tempo</Button>
-              </Link>
-              <Link to={createPageUrl('PaymentGateway')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Pagamentos</Button>
-              </Link>
-              <Link to={createPageUrl('Chatbot')} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-amber-400 text-sm">Chatbot</Button>
-              </Link>
-              <Button 
-                variant="outline" 
-                className="w-full justify-start border-white/30 text-white hover:bg-white/20 text-sm mt-2" 
-                onClick={() => base44.auth.logout()}
-              >
-                Sair
-              </Button>
-            </motion.div>
-          )}
-        </div>
-      </header>
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="lg:hidden text-white"
+                >
+                  <Menu className="w-6 h-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] overflow-y-auto">
+                <SheetHeader>
+                  <SheetTitle>Menu</SheetTitle>
+                </SheetHeader>
+                <div className="mt-6">
+                  <NavigationMenu onNavigate={() => setMobileMenuOpen(false)} />
+                </div>
+                <div className="mt-6">
+                  <Button 
+                    variant="outline" 
+                    className="w-full" 
+                    onClick={() => base44.auth.logout()}
+                  >
+                    Sair
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
+            </div>
+            </div>
+            </header>
 
       <main className="container mx-auto px-4 py-8">
+        {/* Quick Access */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-slate-900 mb-4">⚡ Acesso Rápido</h2>
+          <QuickAccessCards />
+        </div>
+
         {/* Stats */}
+        <h2 className="text-xl font-bold text-slate-900 mb-4">📊 Visão Geral</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Card className="border-0 shadow-sm">
