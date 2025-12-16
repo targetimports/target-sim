@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
                 }
 
                 // Conectar (gera QR)
-                const connectRes = await fetch(`${apiUrl}/instance/connect/${instanceName}`, {
+                const connectRes = await fetch(`${baseUrl}/instance/connect/${instanceName}`, {
                     method: 'GET',
                     headers
                 });
