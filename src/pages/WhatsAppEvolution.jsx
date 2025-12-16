@@ -356,67 +356,63 @@ export default function WhatsAppEvolution() {
                         Desconectar
                       </Button>
                     </>
+                  ) : (qrCode?.base64 || qrCode?.code) ? (
+                    <>
+                      <div className="p-4 bg-yellow-50 rounded-xl text-center">
+                        <QrCode className="w-12 h-12 text-yellow-600 mx-auto mb-3" />
+                        <p className="font-semibold text-yellow-900 mb-3">Escaneie o QR Code</p>
+                        <div className="bg-white p-4 rounded-lg">
+                          {qrCode?.base64 ? (
+                            <img 
+                              src={qrCode.base64}
+                              alt="QR Code"
+                              className="w-full max-w-[280px] mx-auto"
+                            />
+                          ) : (
+                            <img 
+                              src={`https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(qrCode?.code || qrCode)}`}
+                              alt="QR Code"
+                              className="w-full max-w-[280px] mx-auto"
+                            />
+                          )}
+                        </div>
+                        <p className="text-xs text-yellow-700 mt-3">
+                          WhatsApp → Menu → Aparelhos Conectados
+                        </p>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => refetchStatus()}
+                      >
+                        Atualizar Status
+                      </Button>
+                    </>
                   ) : connectionStatus === 'close' ? (
                     <>
-                      {qrCode?.base64 || qrCode?.code ? (
-                        <>
-                          <div className="p-4 bg-yellow-50 rounded-xl text-center">
-                            <QrCode className="w-12 h-12 text-yellow-600 mx-auto mb-3" />
-                            <p className="font-semibold text-yellow-900 mb-3">Escaneie o QR Code</p>
-                            <div className="bg-white p-4 rounded-lg">
-                              {qrCode?.base64 ? (
-                                <img 
-                                  src={qrCode.base64}
-                                  alt="QR Code"
-                                  className="w-full max-w-[280px] mx-auto"
-                                />
-                              ) : (
-                                <img 
-                                  src={`https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(qrCode?.code || qrCode)}`}
-                                  alt="QR Code"
-                                  className="w-full max-w-[280px] mx-auto"
-                                />
-                              )}
-                            </div>
-                            <p className="text-xs text-yellow-700 mt-3">
-                              WhatsApp → Menu → Aparelhos Conectados
-                            </p>
-                          </div>
-                          <Button 
-                            variant="outline" 
-                            className="w-full"
-                            onClick={() => refetchStatus()}
-                          >
-                            Atualizar Status
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <div className="p-4 bg-slate-50 rounded-xl text-center">
-                            <XCircle className="w-12 h-12 text-slate-400 mx-auto mb-2" />
-                            <p className="font-semibold text-slate-900">Desconectado</p>
-                          </div>
-                          <div className="space-y-2">
-                            <Button 
-                              className="w-full bg-green-600 hover:bg-green-700"
-                              onClick={() => connectMutation.mutate()}
-                              disabled={connectMutation.isPending || resetConnectionMutation.isPending}
-                            >
-                              {connectMutation.isPending ? 'Conectando...' : 'Conectar WhatsApp'}
-                            </Button>
-                            <Button 
-                              variant="outline"
-                              className="w-full"
-                              onClick={() => resetConnectionMutation.mutate()}
-                              disabled={connectMutation.isPending || resetConnectionMutation.isPending}
-                            >
-                              {resetConnectionMutation.isPending ? 'Resetando...' : '🔄 Resetar Conexão'}
-                            </Button>
-                          </div>
-                        </>
-                        )}
-                        </>
-                        ) : connectionStatus === 'connecting' ? (
+                      <div className="p-4 bg-slate-50 rounded-xl text-center">
+                        <XCircle className="w-12 h-12 text-slate-400 mx-auto mb-2" />
+                        <p className="font-semibold text-slate-900">Desconectado</p>
+                      </div>
+                      <div className="space-y-2">
+                        <Button 
+                          className="w-full bg-green-600 hover:bg-green-700"
+                          onClick={() => connectMutation.mutate()}
+                          disabled={connectMutation.isPending || resetConnectionMutation.isPending}
+                        >
+                          {connectMutation.isPending ? 'Conectando...' : 'Conectar WhatsApp'}
+                        </Button>
+                        <Button 
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => resetConnectionMutation.mutate()}
+                          disabled={connectMutation.isPending || resetConnectionMutation.isPending}
+                        >
+                          {resetConnectionMutation.isPending ? 'Resetando...' : '🔄 Resetar Conexão'}
+                        </Button>
+                      </div>
+                    </>
+                  ) : connectionStatus === 'connecting' ? (
                     <div className="p-4 bg-yellow-50 rounded-xl text-center">
                       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600 mx-auto mb-2"></div>
                       <p className="font-semibold text-yellow-900">Gerando QR Code...</p>
