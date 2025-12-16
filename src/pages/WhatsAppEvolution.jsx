@@ -49,8 +49,9 @@ export default function WhatsAppEvolution() {
   };
 
   const { data: status, refetch: refetchStatus, error: statusError } = useQuery({
-    queryKey: ['evolution-status'],
+    queryKey: ['evolution-status', apiUrl, apiKey, instanceName],
     queryFn: async () => {
+      if (!apiUrl) return null;
       const res = await base44.functions.invoke('evolutionAPI', {
         action: 'status',
         apiUrl,
@@ -60,8 +61,11 @@ export default function WhatsAppEvolution() {
       console.log('Status response:', res.data);
       return res.data;
     },
-    enabled: !!apiUrl,
-    refetchInterval: 5000,
+    enabled: !!apiUrl && apiUrl.length > 0,
+    refetchInterval: (data) => {
+      // Só refetch automático se apiUrl estiver configurado
+      return (apiUrl && apiUrl.length > 0) ? 5000 : false;
+    },
     retry: 3,
     retryDelay: 2000
   });
