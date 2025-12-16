@@ -106,6 +106,35 @@ export default function WhatsAppEvolution() {
     }
   });
 
+  const resetConnectionMutation = useMutation({
+    mutationFn: async () => {
+      // Desconectar primeiro
+      await base44.functions.invoke('evolutionAPI', {
+        action: 'disconnect',
+        apiUrl,
+        apiKey,
+        instanceName
+      });
+      // Aguardar um pouco
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Conectar novamente
+      const res = await base44.functions.invoke('evolutionAPI', {
+        action: 'connect',
+        apiUrl,
+        apiKey,
+        instanceName
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success('Conexão resetada, gerando novo QR Code...');
+      setTimeout(() => refetchStatus(), 2000);
+    },
+    onError: (error) => {
+      toast.error('Erro ao resetar: ' + error.message);
+    }
+  });
+
   const sendMessageMutation = useMutation({
     mutationFn: async (data) => {
       const res = await base44.functions.invoke('evolutionAPI', {
