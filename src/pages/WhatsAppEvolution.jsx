@@ -57,16 +57,11 @@ export default function WhatsAppEvolution() {
         apiKey,
         instanceName
       });
+      console.log('Status response:', res.data);
       return res.data;
     },
     enabled: !!apiUrl,
-    refetchInterval: (data) => {
-      // Só faz polling se conectado ou com QR code
-      if (data?.state === 'open' || data?.qrcode) {
-        return 5000;
-      }
-      return false; // Não faz polling automático
-    },
+    refetchInterval: 5000,
     retry: 3,
     retryDelay: 2000
   });
