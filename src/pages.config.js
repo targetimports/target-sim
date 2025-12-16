@@ -34,6 +34,13 @@ import SuperApp from './pages/SuperApp';
 import AIInnovations from './pages/AIInnovations';
 import WhatsAppCampaigns from './pages/WhatsAppCampaigns';
 import WhatsAppEvolution from './pages/WhatsAppEvolution';
+import EnergyAllocationManager from './pages/EnergyAllocationManager';
+import CreditBalanceManager from './pages/CreditBalanceManager';
+import MonthlyReconciliation from './pages/MonthlyReconciliation';
+import PlantCapacityManager from './pages/PlantCapacityManager';
+import OnboardingManager from './pages/OnboardingManager';
+import UtilityBillManager from './pages/UtilityBillManager';
+import RegulatoryReports from './pages/RegulatoryReports';
 import __Layout from './Layout.jsx';
 
 
@@ -74,6 +81,13 @@ export const PAGES = {
     "AIInnovations": AIInnovations,
     "WhatsAppCampaigns": WhatsAppCampaigns,
     "WhatsAppEvolution": WhatsAppEvolution,
+    "EnergyAllocationManager": EnergyAllocationManager,
+    "CreditBalanceManager": CreditBalanceManager,
+    "MonthlyReconciliation": MonthlyReconciliation,
+    "PlantCapacityManager": PlantCapacityManager,
+    "OnboardingManager": OnboardingManager,
+    "UtilityBillManager": UtilityBillManager,
+    "RegulatoryReports": RegulatoryReports,
 }
 
 export const pagesConfig = {
