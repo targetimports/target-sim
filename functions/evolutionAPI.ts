@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
 
                 // Se não existir, criar
                 if (!instanceExists) {
-                    const createRes = await fetch(`${apiUrl}/instance/create`, {
+                    const createRes = await fetch(`${baseUrl}/instance/create`, {
                         method: 'POST',
                         headers,
                         body: JSON.stringify({
