@@ -134,8 +134,8 @@ Deno.serve(async (req) => {
 
                 const status = await statusRes.json();
 
-                // Se desconectado, obter QR Code
-                if (status.state === 'close') {
+                // Se connecting ou close, tentar obter QR Code
+                if (status.state === 'close' || instance.connectionStatus === 'connecting') {
                     try {
                         const qrRes = await fetch(`${baseUrl}/instance/connect/${instanceName}`, {
                             method: 'GET',
@@ -144,6 +144,7 @@ Deno.serve(async (req) => {
 
                         if (qrRes.ok) {
                             const qrData = await qrRes.json();
+                            console.log('[Status] QR Code data:', qrData);
                             return Response.json({
                                 ...status,
                                 instance: instance,
