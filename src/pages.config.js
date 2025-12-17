@@ -53,6 +53,10 @@ import CustomerManagement from './pages/CustomerManagement';
 import AdvancedReports from './pages/AdvancedReports';
 import AutomatedAlerts from './pages/AutomatedAlerts';
 import ChurnPrediction from './pages/ChurnPrediction';
+import SalesPipeline from './pages/SalesPipeline';
+import LoyaltyProgram from './pages/LoyaltyProgram';
+import DocumentManager from './pages/DocumentManager';
+import PlantPerformanceDashboard from './pages/PlantPerformanceDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -112,6 +116,10 @@ export const PAGES = {
     "AdvancedReports": AdvancedReports,
     "AutomatedAlerts": AutomatedAlerts,
     "ChurnPrediction": ChurnPrediction,
+    "SalesPipeline": SalesPipeline,
+    "LoyaltyProgram": LoyaltyProgram,
+    "DocumentManager": DocumentManager,
+    "PlantPerformanceDashboard": PlantPerformanceDashboard,
 }
 
 export const pagesConfig = {
