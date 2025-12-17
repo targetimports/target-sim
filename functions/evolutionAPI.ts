@@ -9,8 +9,12 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const body = await req.json();
+        const body = await req.json().catch(() => ({}));
         const { action, apiUrl, apiKey, instanceName, phone, message } = body;
+        
+        if (!action) {
+            return Response.json({ error: 'Action é obrigatório' }, { status: 400 });
+        }
         
         console.log('[Evolution API] Action:', action, 'URL:', apiUrl, 'Instance:', instanceName);
 
