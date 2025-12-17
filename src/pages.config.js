@@ -51,6 +51,8 @@ import TransactionHistory from './pages/TransactionHistory';
 import DistributorIntegrations from './pages/DistributorIntegrations';
 import CustomerManagement from './pages/CustomerManagement';
 import AdvancedReports from './pages/AdvancedReports';
+import AutomatedAlerts from './pages/AutomatedAlerts';
+import ChurnPrediction from './pages/ChurnPrediction';
 import __Layout from './Layout.jsx';
 
 
@@ -108,6 +110,8 @@ export const PAGES = {
     "DistributorIntegrations": DistributorIntegrations,
     "CustomerManagement": CustomerManagement,
     "AdvancedReports": AdvancedReports,
+    "AutomatedAlerts": AutomatedAlerts,
+    "ChurnPrediction": ChurnPrediction,
 }
 
 export const pagesConfig = {
