@@ -35,11 +35,14 @@ const menuCategories = {
     color: 'border-blue-500 bg-blue-50',
     items: [
       { name: 'CRM Dashboard', url: 'CRMDashboard', icon: '📊' },
+      { name: 'CRM Integrações', url: 'CRMIntegrations', icon: '🔗' },
+      { name: 'Gestão Clientes', url: 'CustomerManagement', icon: '👥' },
       { name: 'Onboarding/Migração', url: 'OnboardingManager', icon: '📋' },
       { name: 'Ajustes de Crédito', url: 'CreditAdjustments', icon: '⚖️' },
       { name: 'Créditos Expirando', url: 'ExpiringCredits', icon: '⏰' },
-      { name: 'Prioridades Alocação', url: 'AllocationPriorities', icon: '⭐' },
-      { name: 'Central Suporte', url: 'SupportCenter', icon: '🎧' }
+      { name: 'Central Suporte', url: 'SupportCenter', icon: '🎧' },
+      { name: 'Programa Fidelidade', url: 'LoyaltyProgram', icon: '⭐' },
+      { name: 'Grupos Consumidores', url: 'ConsumerGroups', icon: '👨‍👩‍👧‍👦' }
     ]
   },
   'operations': {
@@ -48,17 +51,21 @@ const menuCategories = {
     items: [
       { name: 'Gerenciar Usinas', url: 'AdminPowerPlants', icon: '🏭' },
       { name: 'Monitoramento Usinas', url: 'PlantMonitoring', icon: '📡' },
+      { name: 'Performance Usinas', url: 'PlantPerformanceDashboard', icon: '📈' },
       { name: 'Manutenções', url: 'MaintenanceManagement', icon: '🔧' },
       { name: 'Contratos Proprietários', url: 'OwnerContracts', icon: '📄' },
+      { name: 'Contratos Usinas', url: 'AdminPowerPlantContracts', icon: '📋' },
       { name: 'Monitor Consumo', url: 'ConsumptionMonitor', icon: '📊' },
       { name: 'Ordens Serviço', url: 'AdminServiceOrders', icon: '🔨' }
     ]
   },
   'compliance': {
-    title: '📑 Regulatório',
+    title: '📑 Regulatório & Documentos',
     color: 'border-slate-500 bg-slate-50',
     items: [
       { name: 'Contas de Luz', url: 'UtilityBillManager', icon: '📄' },
+      { name: 'Gerenciar Documentos', url: 'DocumentManager', icon: '📁' },
+      { name: 'Dashboard Documentos', url: 'DocumentsDashboard', icon: '📊' },
       { name: 'Relatórios Regulatórios', url: 'RegulatoryReports', icon: '📑' },
       { name: 'Histórico Transações', url: 'TransactionHistory', icon: '📜' },
       { name: 'Integração Distribuidoras', url: 'DistributorIntegrations', icon: '🔌' },
@@ -66,11 +73,14 @@ const menuCategories = {
     ]
   },
   'marketing': {
-    title: '📢 Marketing',
+    title: '📢 Marketing & Vendas',
     color: 'border-pink-500 bg-pink-50',
     items: [
+      { name: 'Funil de Vendas', url: 'SalesPipeline', icon: '🎯' },
+      { name: 'Automação Leads', url: 'LeadAutomation', icon: '🤖' },
       { name: 'Campanhas WhatsApp', url: 'WhatsAppCampaigns', icon: '💬' },
       { name: 'WhatsApp Evolution API', url: 'WhatsAppEvolution', icon: '🟢' },
+      { name: 'Gestão WhatsApp', url: 'WhatsAppManagement', icon: '📱' },
       { name: 'Gerenciar Planos', url: 'AdminPlans', icon: '📦' },
       { name: 'Chatbot', url: 'Chatbot', icon: '🤖' }
     ]
@@ -80,24 +90,32 @@ const menuCategories = {
     color: 'border-cyan-500 bg-cyan-50',
     items: [
       { name: 'Mercado Créditos', url: 'EnergyCreditsMarket', icon: '💹' },
-      { name: 'Marketplace Créditos', url: 'CreditMarketplace', icon: '🛒' }
+      { name: 'Marketplace Créditos', url: 'CreditMarketplace', icon: '🛒' },
+      { name: 'Dashboard Prosumer', url: 'ProsumerDashboard', icon: '⚡' },
+      { name: 'Gamificação', url: 'Gamification', icon: '🎮' }
     ]
   },
   'analytics': {
-    title: '📊 Analytics',
+    title: '📊 Analytics & Relatórios',
     color: 'border-indigo-500 bg-indigo-50',
     items: [
       { name: 'Admin Analytics', url: 'AdminAnalytics', icon: '📊' },
       { name: 'Analytics Avançado', url: 'AdvancedAnalytics', icon: '📈' },
+      { name: 'Relatórios Avançados', url: 'AdvancedReports', icon: '📋' },
+      { name: 'Análise Churn', url: 'ChurnPrediction', icon: '📉' },
       { name: 'Previsão Tempo', url: 'WeatherForecast', icon: '🌤️' },
       { name: 'Dashboard Tarefas', url: 'TaskDashboard', icon: '✅' },
       { name: 'Gestão Tarefas', url: 'TaskManager', icon: '📋' }
     ]
   },
   'ai': {
-    title: '🤖 Inteligência Artificial',
+    title: '🤖 Automação & IA',
     color: 'border-violet-500 bg-violet-50',
     items: [
+      { name: 'Gestão Automações', url: 'AutomationManager', icon: '⚡' },
+      { name: 'Alertas Automáticos', url: 'AutomatedAlerts', icon: '🔔' },
+      { name: 'Notificações', url: 'NotificationManager', icon: '📬' },
+      { name: 'Central Notificações', url: 'NotificationCenter', icon: '🔔' },
       { name: 'IA Inovações', url: 'AIInnovations', icon: '🤖' }
     ]
   }
