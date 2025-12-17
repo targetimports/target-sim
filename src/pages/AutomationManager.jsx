@@ -265,11 +265,25 @@ export default function AutomationManager() {
                       </Badge>
                     </div>
 
-                    {automation.last_execution && (
-                      <p className="text-xs text-slate-500">
-                        Última execução: {format(new Date(automation.last_execution), 'dd/MM/yyyy HH:mm')}
-                      </p>
-                    )}
+                    <div className="space-y-1">
+                      {automation.schedule_type && automation.schedule_type !== 'immediate' && (
+                        <p className="text-xs text-slate-500 flex items-center gap-1">
+                          <Badge variant="outline" className="text-xs">
+                            {scheduleLabels[automation.schedule_type]}
+                          </Badge>
+                        </p>
+                      )}
+                      {automation.last_execution && (
+                        <p className="text-xs text-slate-500">
+                          Última execução: {format(new Date(automation.last_execution), 'dd/MM/yyyy HH:mm')}
+                        </p>
+                      )}
+                      {automation.execution_count > 0 && (
+                        <p className="text-xs text-slate-400">
+                          {automation.execution_count} execuções • {automation.success_count || 0} sucesso
+                        </p>
+                      )}
+                    </div>
 
                     <div className="flex items-center gap-2">
                       <Button size="sm" variant="outline" onClick={() => handleEdit(automation)}>
@@ -324,11 +338,25 @@ export default function AutomationManager() {
                       </Badge>
                     </div>
 
-                    {automation.last_execution && (
-                      <p className="text-xs text-slate-500">
-                        Última execução: {format(new Date(automation.last_execution), 'dd/MM/yyyy HH:mm')}
-                      </p>
-                    )}
+                    <div className="space-y-1">
+                      {automation.schedule_type && automation.schedule_type !== 'immediate' && (
+                        <p className="text-xs text-slate-500 flex items-center gap-1">
+                          <Badge variant="outline" className="text-xs">
+                            {scheduleLabels[automation.schedule_type]}
+                          </Badge>
+                        </p>
+                      )}
+                      {automation.last_execution && (
+                        <p className="text-xs text-slate-500">
+                          Última execução: {format(new Date(automation.last_execution), 'dd/MM/yyyy HH:mm')}
+                        </p>
+                      )}
+                      {automation.execution_count > 0 && (
+                        <p className="text-xs text-slate-400">
+                          {automation.execution_count} execuções • {automation.success_count || 0} sucesso
+                        </p>
+                      )}
+                    </div>
 
                     <div className="flex items-center gap-2">
                       <Button size="sm" variant="outline" onClick={() => handleEdit(automation)}>
