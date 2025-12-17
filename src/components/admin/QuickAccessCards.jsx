@@ -48,10 +48,10 @@ const quickAccessItems = [
     color: 'from-teal-500 to-cyan-500'
   },
   {
-    title: '🧮 Simulador',
-    description: 'Simular alocação',
-    url: 'AllocationSimulator',
-    color: 'from-violet-500 to-purple-500'
+    title: '✅ Tarefas',
+    description: 'Gestão de tarefas',
+    url: 'TaskManager',
+    color: 'from-indigo-500 to-purple-500'
   }
 ];
 

@@ -42,6 +42,11 @@ export default function SalesPipeline() {
     queryFn: () => base44.entities.SalesLead.list('-created_date', 500)
   });
 
+  const { data: leadTasks = [] } = useQuery({
+    queryKey: ['lead-tasks'],
+    queryFn: () => base44.entities.Task.filter({ related_to_type: 'lead' })
+  });
+
   // Filtros e busca
   const leads = allLeads
     .filter(lead => {
