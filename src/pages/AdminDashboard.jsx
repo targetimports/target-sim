@@ -25,6 +25,7 @@ import WhatsAppStatusIndicator from '../components/WhatsAppStatusIndicator';
 import NavigationMenu from '../components/admin/NavigationMenu';
 import QuickAccessCards from '../components/admin/QuickAccessCards';
 import DashboardCustomizer from '../components/dashboard/DashboardCustomizer';
+import NotificationBell from '../components/notifications/NotificationBell';
 import SubscriptionTrendsWidget from '../components/dashboard/widgets/SubscriptionTrendsWidget';
 import RevenueChartWidget from '../components/dashboard/widgets/RevenueChartWidget';
 import CustomerDistributionWidget from '../components/dashboard/widgets/CustomerDistributionWidget';
@@ -171,13 +172,14 @@ export default function AdminDashboard() {
                 <h1 className="text-lg font-bold">Target Sim - Admin</h1>
                 <p className="text-xs text-slate-400">Gestão de assinaturas</p>
               </div>
-              <div className="ml-4">
-                <WhatsAppStatusIndicator />
-              </div>
+              <div className="ml-4 flex items-center gap-2">
+                  <WhatsAppStatusIndicator />
+                </div>
             </div>
 
             {/* Desktop Menu */}
             <div className="hidden lg:flex items-center gap-2">
+              <NotificationBell userEmail={user?.email} />
               <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" className="text-slate-300 hover:text-amber-400">

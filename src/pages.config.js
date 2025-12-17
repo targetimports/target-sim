@@ -59,6 +59,7 @@ import DocumentManager from './pages/DocumentManager';
 import PlantPerformanceDashboard from './pages/PlantPerformanceDashboard';
 import LeadAutomation from './pages/LeadAutomation';
 import CustomerPortal from './pages/CustomerPortal';
+import NotificationManager from './pages/NotificationManager';
 import __Layout from './Layout.jsx';
 
 
@@ -124,6 +125,7 @@ export const PAGES = {
     "PlantPerformanceDashboard": PlantPerformanceDashboard,
     "LeadAutomation": LeadAutomation,
     "CustomerPortal": CustomerPortal,
+    "NotificationManager": NotificationManager,
 }
 
 export const pagesConfig = {

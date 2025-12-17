@@ -11,6 +11,7 @@ import InvoicesTab from '../components/portal/InvoicesTab';
 import ProfileTab from '../components/portal/ProfileTab';
 import SupportTab from '../components/portal/SupportTab';
 import FinancialDashboardTab from '../components/portal/FinancialDashboardTab';
+import NotificationBell from '../components/notifications/NotificationBell';
 
 export default function CustomerPortal() {
   const [activeTab, setActiveTab] = useState('financial');
@@ -42,14 +43,17 @@ export default function CustomerPortal() {
                 <p className="text-sm text-white/80">Olá, {user?.full_name || subscription?.customer_name}!</p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              className="text-white hover:bg-white/20"
-              onClick={() => base44.auth.logout()}
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Sair
-            </Button>
+            <div className="flex items-center gap-2">
+              <NotificationBell userEmail={user?.email} />
+              <Button
+                variant="ghost"
+                className="text-white hover:bg-white/20"
+                onClick={() => base44.auth.logout()}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sair
+              </Button>
+            </div>
           </div>
         </div>
       </header>
