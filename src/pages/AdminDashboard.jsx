@@ -11,7 +11,7 @@ import {
   Building2, Wallet, Activity, Menu, X, LayoutGrid
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import {
   DropdownMenu,
@@ -24,6 +24,12 @@ import { createPageUrl } from "@/utils";
 import WhatsAppStatusIndicator from '../components/WhatsAppStatusIndicator';
 import NavigationMenu from '../components/admin/NavigationMenu';
 import QuickAccessCards from '../components/admin/QuickAccessCards';
+import DashboardCustomizer from '../components/dashboard/DashboardCustomizer';
+import SubscriptionTrendsWidget from '../components/dashboard/widgets/SubscriptionTrendsWidget';
+import RevenueChartWidget from '../components/dashboard/widgets/RevenueChartWidget';
+import CustomerDistributionWidget from '../components/dashboard/widgets/CustomerDistributionWidget';
+import RecentActivityWidget from '../components/dashboard/widgets/RecentActivityWidget';
+import TopCustomersWidget from '../components/dashboard/widgets/TopCustomersWidget';
 import {
   Sheet,
   SheetContent,
@@ -37,6 +43,59 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Widgets disponíveis
+  const availableWidgets = [
+    { id: 'trends', title: 'Tendência de Assinaturas', description: 'Gráfico de crescimento mensal' },
+    { id: 'revenue', title: 'Receita Mensal', description: 'Faturamento por mês' },
+    { id: 'distribution', title: 'Distribuição de Clientes', description: 'PF vs PJ' },
+    { id: 'activity', title: 'Atividades Recentes', description: 'Últimas ações no sistema' },
+    { id: 'top', title: 'Top Clientes', description: 'Maiores contas' }
+  ];
+
+  // Buscar preferências do usuário
+  const { data: user } = useQuery({
+    queryKey: ['current-user'],
+    queryFn: () => base44.auth.me()
+  });
+
+  const { data: preferences } = useQuery({
+    queryKey: ['dashboard-preferences', user?.email],
+    queryFn: () => base44.entities.DashboardPreference.filter({ 
+      user_email: user?.email,
+      dashboard_type: 'admin'
+    }),
+    enabled: !!user?.email
+  });
+
+  const [visibleWidgets, setVisibleWidgets] = useState(
+    preferences?.[0]?.visible_widgets || ['trends', 'revenue', 'distribution', 'activity', 'top']
+  );
+
+  React.useEffect(() => {
+    if (preferences?.[0]?.visible_widgets) {
+      setVisibleWidgets(preferences[0].visible_widgets);
+    }
+  }, [preferences]);
+
+  // Salvar preferências
+  const savePreferences = async (newVisibleWidgets) => {
+    setVisibleWidgets(newVisibleWidgets);
+    
+    if (preferences && preferences.length > 0) {
+      await base44.entities.DashboardPreference.update(preferences[0].id, {
+        visible_widgets: newVisibleWidgets
+      });
+    } else {
+      await base44.entities.DashboardPreference.create({
+        user_email: user?.email,
+        dashboard_type: 'admin',
+        visible_widgets: newVisibleWidgets
+      });
+    }
+    queryClient.invalidateQueries(['dashboard-preferences']);
+  };
 
   const { data: subscriptions = [], refetch: refetchSubscriptions } = useQuery({
     queryKey: ['admin-subscriptions'],
@@ -56,6 +115,11 @@ export default function AdminDashboard() {
   const { data: powerPlants = [] } = useQuery({
     queryKey: ['admin-powerplants'],
     queryFn: () => base44.entities.PowerPlant.list()
+  });
+
+  const { data: tickets = [] } = useQuery({
+    queryKey: ['support-tickets'],
+    queryFn: () => base44.entities.SupportTicket.list('-created_date', 50)
   });
 
   const filteredSubscriptions = subscriptions.filter(sub => {
@@ -171,12 +235,43 @@ export default function AdminDashboard() {
       <main className="container mx-auto px-4 py-8">
         {/* Quick Access */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-slate-900 mb-4">⚡ Acesso Rápido</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-slate-900">⚡ Acesso Rápido</h2>
+            <DashboardCustomizer
+              availableWidgets={availableWidgets}
+              visibleWidgets={visibleWidgets}
+              onSave={savePreferences}
+            />
+          </div>
           <QuickAccessCards />
         </div>
 
         {/* Stats */}
         <h2 className="text-xl font-bold text-slate-900 mb-4">📊 Visão Geral</h2>
+        
+        {/* Widgets Interativos */}
+        <div className="grid lg:grid-cols-2 gap-6 mb-8">
+          {visibleWidgets.includes('trends') && (
+            <SubscriptionTrendsWidget subscriptions={subscriptions} />
+          )}
+          {visibleWidgets.includes('revenue') && (
+            <RevenueChartWidget invoices={invoices} />
+          )}
+          {visibleWidgets.includes('distribution') && (
+            <CustomerDistributionWidget subscriptions={subscriptions} />
+          )}
+          {visibleWidgets.includes('activity') && (
+            <RecentActivityWidget 
+              subscriptions={subscriptions}
+              invoices={invoices}
+              tickets={tickets}
+            />
+          )}
+          {visibleWidgets.includes('top') && (
+            <TopCustomersWidget subscriptions={subscriptions} />
+          )}
+        </div>
+
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Card className="border-0 shadow-sm">
