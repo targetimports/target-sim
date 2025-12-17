@@ -50,6 +50,7 @@ import PerformanceDashboard from './pages/PerformanceDashboard';
 import TransactionHistory from './pages/TransactionHistory';
 import DistributorIntegrations from './pages/DistributorIntegrations';
 import CustomerManagement from './pages/CustomerManagement';
+import AdvancedReports from './pages/AdvancedReports';
 import __Layout from './Layout.jsx';
 
 
@@ -106,6 +107,7 @@ export const PAGES = {
     "TransactionHistory": TransactionHistory,
     "DistributorIntegrations": DistributorIntegrations,
     "CustomerManagement": CustomerManagement,
+    "AdvancedReports": AdvancedReports,
 }
 
 export const pagesConfig = {
