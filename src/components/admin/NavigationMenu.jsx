@@ -89,7 +89,9 @@ const menuCategories = {
     items: [
       { name: 'Admin Analytics', url: 'AdminAnalytics', icon: '📊' },
       { name: 'Analytics Avançado', url: 'AdvancedAnalytics', icon: '📈' },
-      { name: 'Previsão Tempo', url: 'WeatherForecast', icon: '🌤️' }
+      { name: 'Previsão Tempo', url: 'WeatherForecast', icon: '🌤️' },
+      { name: 'Dashboard Tarefas', url: 'TaskDashboard', icon: '✅' },
+      { name: 'Gestão Tarefas', url: 'TaskManager', icon: '📋' }
     ]
   },
   'ai': {
