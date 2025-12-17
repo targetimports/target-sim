@@ -32,7 +32,9 @@ export default function AutomationManager() {
     trigger_config: {},
     action_type: 'send_whatsapp',
     action_config: {},
-    target_audience: 'customers'
+    target_audience: 'customers',
+    schedule_type: 'immediate',
+    schedule_config: {}
   });
 
   const { data: automations = [] } = useQuery({
@@ -83,7 +85,9 @@ export default function AutomationManager() {
       trigger_config: {},
       action_type: 'send_whatsapp',
       action_config: {},
-      target_audience: 'customers'
+      target_audience: 'customers',
+      schedule_type: 'immediate',
+      schedule_config: {}
     });
     setEditingAutomation(null);
   };
@@ -97,7 +101,9 @@ export default function AutomationManager() {
       trigger_config: automation.trigger_config || {},
       action_type: automation.action_type,
       action_config: automation.action_config || {},
-      target_audience: automation.target_audience
+      target_audience: automation.target_audience,
+      schedule_type: automation.schedule_type || 'immediate',
+      schedule_config: automation.schedule_config || {}
     });
     setIsDialogOpen(true);
   };
@@ -117,7 +123,12 @@ export default function AutomationManager() {
     ticket_high_priority: '🚨 Ticket de alta prioridade',
     lead_inactive: '⏰ Lead inativo por X dias',
     credit_expiring: '⚡ Crédito expirando',
-    payment_overdue: '❌ Pagamento vencido'
+    payment_overdue: '❌ Pagamento vencido',
+    lead_status_won: '🎉 Lead ganho',
+    lead_status_lost: '😔 Lead perdido',
+    invoice_payment_late: '⚠️ Fatura com atraso',
+    new_subscription: '✨ Nova assinatura',
+    subscription_cancelled: '❌ Assinatura cancelada'
   };
 
   const actionLabels = {
@@ -127,7 +138,17 @@ export default function AutomationManager() {
     add_to_campaign: '📢 Adicionar a campanha',
     notify_team: '👥 Notificar equipe',
     update_status: '🔄 Atualizar status',
-    create_notification: '🔔 Criar notificação'
+    create_notification: '🔔 Criar notificação',
+    create_follow_up_task: '📋 Criar tarefa de follow-up',
+    send_internal_notification: '📣 Notificação interna',
+    assign_to_user: '👤 Atribuir a usuário'
+  };
+
+  const scheduleLabels = {
+    immediate: '⚡ Imediato',
+    daily: '📅 Diário',
+    weekly: '📆 Semanal',
+    monthly: '🗓️ Mensal'
   };
 
   const customerAutomations = automations.filter(a => a.target_audience === 'customers');
@@ -445,17 +466,22 @@ export default function AutomationManager() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="invoice_due_soon">💰 Fatura próxima do vencimento</SelectItem>
-                  <SelectItem value="lead_no_contact">📞 Lead sem contato há X dias</SelectItem>
-                  <SelectItem value="ticket_high_priority">🚨 Ticket de alta prioridade</SelectItem>
-                  <SelectItem value="lead_inactive">⏰ Lead inativo por X dias</SelectItem>
-                  <SelectItem value="credit_expiring">⚡ Crédito expirando</SelectItem>
+                  <SelectItem value="invoice_payment_late">⚠️ Fatura com atraso</SelectItem>
                   <SelectItem value="payment_overdue">❌ Pagamento vencido</SelectItem>
+                  <SelectItem value="credit_expiring">⚡ Crédito expirando</SelectItem>
+                  <SelectItem value="lead_no_contact">📞 Lead sem contato há X dias</SelectItem>
+                  <SelectItem value="lead_inactive">⏰ Lead inativo por X dias</SelectItem>
+                  <SelectItem value="lead_status_won">🎉 Lead ganho</SelectItem>
+                  <SelectItem value="lead_status_lost">😔 Lead perdido</SelectItem>
+                  <SelectItem value="ticket_high_priority">🚨 Ticket de alta prioridade</SelectItem>
+                  <SelectItem value="new_subscription">✨ Nova assinatura</SelectItem>
+                  <SelectItem value="subscription_cancelled">❌ Assinatura cancelada</SelectItem>
                 </SelectContent>
               </Select>
 
-              {(formData.trigger_type === 'invoice_due_soon' || formData.trigger_type === 'lead_no_contact' || formData.trigger_type === 'lead_inactive') && (
+              {(formData.trigger_type === 'invoice_due_soon' || formData.trigger_type === 'lead_no_contact' || formData.trigger_type === 'lead_inactive' || formData.trigger_type === 'invoice_payment_late') && (
                 <div className="mt-3">
-                  <Label>Dias antes/depois</Label>
+                  <Label>Dias {formData.trigger_type === 'invoice_due_soon' ? 'antes' : 'após'}</Label>
                   <Input
                     type="number"
                     value={formData.trigger_config.days || ''}
@@ -481,8 +507,11 @@ export default function AutomationManager() {
                   <SelectItem value="send_whatsapp">💬 Enviar WhatsApp</SelectItem>
                   <SelectItem value="add_to_campaign">📢 Adicionar a campanha</SelectItem>
                   <SelectItem value="notify_team">👥 Notificar equipe</SelectItem>
-                  <SelectItem value="update_status">🔄 Atualizar status</SelectItem>
+                  <SelectItem value="send_internal_notification">📣 Notificação interna</SelectItem>
                   <SelectItem value="create_notification">🔔 Criar notificação</SelectItem>
+                  <SelectItem value="create_follow_up_task">📋 Criar tarefa de follow-up</SelectItem>
+                  <SelectItem value="update_status">🔄 Atualizar status</SelectItem>
+                  <SelectItem value="assign_to_user">👤 Atribuir a usuário</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -515,6 +544,160 @@ export default function AutomationManager() {
                     }))}
                     placeholder="Ex: lost, inactive"
                   />
+                </div>
+              )}
+
+              {formData.action_type === 'create_follow_up_task' && (
+                <div className="mt-3 space-y-3">
+                  <div>
+                    <Label>Título da tarefa</Label>
+                    <Input
+                      value={formData.action_config.task_title || ''}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        action_config: { ...prev.action_config, task_title: e.target.value }
+                      }))}
+                      placeholder="Ex: Ligar para lead"
+                    />
+                  </div>
+                  <div>
+                    <Label>Descrição da tarefa</Label>
+                    <Textarea
+                      value={formData.action_config.task_description || ''}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        action_config: { ...prev.action_config, task_description: e.target.value }
+                      }))}
+                      placeholder="Detalhes da tarefa..."
+                      rows={2}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {(formData.action_type === 'send_internal_notification' || formData.action_type === 'notify_team') && (
+                <div className="mt-3">
+                  <Label>Email da equipe</Label>
+                  <Input
+                    value={formData.action_config.team_email || ''}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      action_config: { ...prev.action_config, team_email: e.target.value }
+                    }))}
+                    placeholder="suporte@empresa.com"
+                  />
+                </div>
+              )}
+
+              {formData.action_type === 'assign_to_user' && (
+                <div className="mt-3">
+                  <Label>Email do usuário</Label>
+                  <Input
+                    value={formData.action_config.assign_to_email || ''}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      action_config: { ...prev.action_config, assign_to_email: e.target.value }
+                    }))}
+                    placeholder="usuario@empresa.com"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="border-t pt-4">
+              <h3 className="font-semibold mb-3">⏰ Agendamento</h3>
+              <Select value={formData.schedule_type} onValueChange={(v) => setFormData(prev => ({ ...prev, schedule_type: v }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="immediate">⚡ Imediato (executar assim que o gatilho ocorrer)</SelectItem>
+                  <SelectItem value="daily">📅 Diário (verificar todos os dias)</SelectItem>
+                  <SelectItem value="weekly">📆 Semanal (verificar semanalmente)</SelectItem>
+                  <SelectItem value="monthly">🗓️ Mensal (verificar mensalmente)</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {formData.schedule_type === 'daily' && (
+                <div className="mt-3">
+                  <Label>Horário de execução</Label>
+                  <Input
+                    type="time"
+                    value={formData.schedule_config.time || ''}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      schedule_config: { ...prev.schedule_config, time: e.target.value }
+                    }))}
+                  />
+                </div>
+              )}
+
+              {formData.schedule_type === 'weekly' && (
+                <div className="mt-3 space-y-3">
+                  <div>
+                    <Label>Dia da semana</Label>
+                    <Select 
+                      value={formData.schedule_config.day_of_week || ''} 
+                      onValueChange={(v) => setFormData(prev => ({
+                        ...prev,
+                        schedule_config: { ...prev.schedule_config, day_of_week: v }
+                      }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o dia" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="monday">Segunda-feira</SelectItem>
+                        <SelectItem value="tuesday">Terça-feira</SelectItem>
+                        <SelectItem value="wednesday">Quarta-feira</SelectItem>
+                        <SelectItem value="thursday">Quinta-feira</SelectItem>
+                        <SelectItem value="friday">Sexta-feira</SelectItem>
+                        <SelectItem value="saturday">Sábado</SelectItem>
+                        <SelectItem value="sunday">Domingo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Horário</Label>
+                    <Input
+                      type="time"
+                      value={formData.schedule_config.time || ''}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        schedule_config: { ...prev.schedule_config, time: e.target.value }
+                      }))}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {formData.schedule_type === 'monthly' && (
+                <div className="mt-3 space-y-3">
+                  <div>
+                    <Label>Dia do mês</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="31"
+                      value={formData.schedule_config.day_of_month || ''}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        schedule_config: { ...prev.schedule_config, day_of_month: parseInt(e.target.value) }
+                      }))}
+                      placeholder="1-31"
+                    />
+                  </div>
+                  <div>
+                    <Label>Horário</Label>
+                    <Input
+                      type="time"
+                      value={formData.schedule_config.time || ''}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        schedule_config: { ...prev.schedule_config, time: e.target.value }
+                      }))}
+                    />
+                  </div>
                 </div>
               )}
             </div>
