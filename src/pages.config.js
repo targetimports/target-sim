@@ -49,7 +49,6 @@ import AllocationSimulator from './pages/AllocationSimulator';
 import PerformanceDashboard from './pages/PerformanceDashboard';
 import TransactionHistory from './pages/TransactionHistory';
 import DistributorIntegrations from './pages/DistributorIntegrations';
-import ScanQRCode from './pages/ScanQRCode';
 import __Layout from './Layout.jsx';
 
 
@@ -105,7 +104,6 @@ export const PAGES = {
     "PerformanceDashboard": PerformanceDashboard,
     "TransactionHistory": TransactionHistory,
     "DistributorIntegrations": DistributorIntegrations,
-    "ScanQRCode": ScanQRCode,
 }
 
 export const pagesConfig = {
