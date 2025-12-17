@@ -28,10 +28,19 @@ export default function WhatsAppEvolution() {
   useEffect(() => {
     const savedConfig = localStorage.getItem('evolution_config');
     if (savedConfig) {
-      const config = JSON.parse(savedConfig);
-      setApiUrl(config.apiUrl || '');
-      setApiKey(config.apiKey || '');
-      setInstanceName(config.instanceName || 'targetsim');
+      try {
+        const config = JSON.parse(savedConfig);
+        if (config.apiUrl && config.instanceName) {
+          setApiUrl(config.apiUrl);
+          setApiKey(config.apiKey || '');
+          setInstanceName(config.instanceName);
+        } else {
+          setShowConfig(true);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar configuração salva:', error);
+        setShowConfig(true);
+      }
     } else {
       setShowConfig(true);
     }
