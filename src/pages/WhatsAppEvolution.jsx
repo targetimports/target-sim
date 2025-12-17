@@ -315,9 +315,22 @@ export default function WhatsAppEvolution() {
                 </p>
               </div>
 
-              <Button onClick={saveConfig} className="w-full bg-blue-600 hover:bg-blue-700">
-                Salvar Configuração
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => setShowConfig(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  onClick={saveConfig} 
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  disabled={!apiUrl || !instanceName}
+                >
+                  Salvar Configuração
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
