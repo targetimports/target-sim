@@ -37,11 +37,15 @@ Deno.serve(async (req) => {
         console.log('[Evolution API] Normalized URL:', baseUrl);
 
         const headers = {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         };
         
-        if (apiKey) {
-            headers['apikey'] = apiKey;
+        if (apiKey && apiKey.trim().length > 0) {
+            headers['apikey'] = apiKey.trim();
+            console.log('[Evolution API] Using API Key');
+        } else {
+            console.log('[Evolution API] No API Key provided');
         }
 
         if (action === 'connect') {
