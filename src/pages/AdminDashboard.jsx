@@ -24,8 +24,6 @@ import { createPageUrl } from "@/utils";
 import WhatsAppStatusIndicator from '../components/WhatsAppStatusIndicator';
 import NavigationMenu from '../components/admin/NavigationMenu';
 import QuickAccessCards from '../components/admin/QuickAccessCards';
-import NavigationMenu from '../components/admin/NavigationMenu';
-import QuickAccessCards from '../components/admin/QuickAccessCards';
 import {
   Sheet,
   SheetContent,
