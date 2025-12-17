@@ -48,9 +48,9 @@ const quickAccessItems = [
     color: 'from-teal-500 to-cyan-500'
   },
   {
-    title: '✅ Tarefas',
-    description: 'Gestão de tarefas',
-    url: 'TaskManager',
+    title: '📊 Tarefas',
+    description: 'Dashboard de tarefas',
+    url: 'TaskDashboard',
     color: 'from-indigo-500 to-purple-500'
   },
   {
