@@ -1,152 +1,111 @@
 import React, { useState, useEffect } from 'react';
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { MessageCircle, Wifi, WifiOff, AlertCircle, RefreshCw } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { MessageCircle, WifiOff } from 'lucide-react';
 import { toast } from 'sonner';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 export default function WhatsAppStatusIndicator() {
-  const [health, setHealth] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [retrying, setRetrying] = useState(false);
+  const [lastStatus, setLastStatus] = useState(null);
+  const queryClient = useQueryClient();
 
+  // Buscar configuração ativa
+  const { data: configs } = useQuery({
+    queryKey: ['evolution-config'],
+    queryFn: () => base44.entities.EvolutionConfig.filter({ is_active: true })
+  });
+
+  const config = configs?.[0];
+
+  // Verificar status da API
+  const { data: status, error } = useQuery({
+    queryKey: ['evolution-status-monitor', config?.api_url, config?.instance_name],
+    queryFn: async () => {
+      if (!config?.api_url || !config?.instance_name) return null;
+      
+      const res = await base44.functions.invoke('evolutionAPI', {
+        action: 'status',
+        apiUrl: config.api_url,
+        apiKey: config.api_key,
+        instanceName: config.instance_name
+      });
+      return res.data;
+    },
+    enabled: !!config?.api_url && !!config?.instance_name,
+    refetchInterval: 10000, // Verificar a cada 10 segundos
+    retry: 2
+  });
+
+  // Mutation para criar log
+  const createLog = useMutation({
+    mutationFn: (logData) => base44.entities.WhatsAppConnectionLog.create(logData)
+  });
+
+  // Monitorar mudanças de status
   useEffect(() => {
-    checkHealth();
-    
-    // Verifica a cada 30 segundos
-    const interval = setInterval(checkHealth, 30000);
-    
-    return () => clearInterval(interval);
-  }, []);
+    if (!config) return;
 
-  const checkHealth = async () => {
-    try {
-      const res = await base44.functions.invoke('whatsappMonitor', { action: 'get_health' });
-      setHealth(res.data);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error checking WhatsApp health:', error);
-      setLoading(false);
-    }
-  };
+    const currentStatus = status?.state || (error ? 'error' : null);
+    
+    // Se mudou o status, registrar log
+    if (currentStatus && currentStatus !== lastStatus) {
+      const logData = {
+        status: currentStatus === 'open' ? 'connected' : currentStatus === 'error' ? 'error' : 'disconnected',
+        event_type: currentStatus === 'open' ? 'connection_success' : 
+                   currentStatus === 'error' ? 'error' : 
+                   currentStatus === 'close' ? 'disconnected' : 'connection_failed',
+        message: currentStatus === 'open' ? 'WhatsApp conectado com sucesso' :
+                currentStatus === 'error' ? 'Erro ao conectar com Evolution API' :
+                currentStatus === 'close' ? 'WhatsApp desconectado' :
+                'Falha na conexão',
+        error_details: error?.message || status?.error || '',
+        instance_name: config.instance_name
+      };
 
-  const handleManualRetry = async () => {
-    setRetrying(true);
-    try {
-      const res = await base44.functions.invoke('whatsappMonitor', { action: 'manual_retry' });
-      if (res.data.success) {
-        toast.success('Tentativa de reconexão iniciada');
-        setTimeout(checkHealth, 2000);
-      } else {
-        toast.error('Falha ao tentar reconectar: ' + res.data.error);
+      createLog.mutate(logData);
+
+      // Exibir alerta se desconectou ou deu erro
+      if (currentStatus !== 'open' && lastStatus === 'open') {
+        toast.error('⚠️ WhatsApp desconectado!');
+      } else if (currentStatus === 'error') {
+        toast.error('❌ Erro na conexão com Evolution API');
       }
-    } catch (error) {
-      toast.error('Erro ao tentar reconectar');
-    } finally {
-      setRetrying(false);
+
+      setLastStatus(currentStatus);
     }
-  };
+  }, [status, error, lastStatus, config]);
 
-  if (loading || !health) {
-    return (
-      <Badge variant="outline" className="gap-2">
-        <MessageCircle className="w-3 h-3" />
-        <span className="text-xs">Verificando...</span>
-      </Badge>
-    );
-  }
+  if (!config) return null;
 
-  const statusConfig = {
-    connected: {
-      icon: Wifi,
-      color: 'bg-green-100 text-green-800 border-green-300',
-      label: 'WhatsApp Online',
-      description: 'Conectado e funcionando'
-    },
-    qr_code: {
-      icon: MessageCircle,
-      color: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-      label: 'Aguardando QR',
-      description: 'Escaneie o QR code para conectar'
-    },
-    connecting: {
-      icon: MessageCircle,
-      color: 'bg-blue-100 text-blue-800 border-blue-300',
-      label: 'Conectando',
-      description: 'Estabelecendo conexão...'
-    },
-    disconnected: {
-      icon: WifiOff,
-      color: 'bg-red-100 text-red-800 border-red-300',
-      label: 'WhatsApp Offline',
-      description: 'Não conectado'
-    }
-  };
-
-  const config = statusConfig[health.status] || statusConfig.disconnected;
-  const Icon = config.icon;
+  const connectionStatus = status?.state || (error ? 'error' : 'checking');
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Badge className={`gap-2 cursor-pointer ${config.color}`}>
-          <Icon className="w-3 h-3" />
-          <span className="text-xs">{config.label}</span>
+    <div className="flex items-center gap-2">
+      {connectionStatus === 'open' ? (
+        <Badge className="bg-green-100 text-green-800 flex items-center gap-2">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+          </span>
+          WhatsApp Online
         </Badge>
-      </PopoverTrigger>
-      <PopoverContent className="w-64" align="end">
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Icon className="w-4 h-4" />
-            <span className="font-semibold">{config.label}</span>
-          </div>
-          <p className="text-sm text-slate-600">{config.description}</p>
-          
-          {health.phone_number && (
-            <div className="text-xs text-slate-500 pt-2 border-t">
-              <p>Número: {health.phone_number}</p>
-            </div>
-          )}
-          
-          {health.uptime !== null && health.connected && (
-            <div className="text-xs text-slate-500">
-              <p>Online há: {health.uptime} minutos</p>
-            </div>
-          )}
-          
-          {!health.connected && health.last_connection && (
-            <div className="text-xs text-slate-500">
-              <p>Última conexão: {new Date(health.last_connection).toLocaleString('pt-BR')}</p>
-            </div>
-          )}
-          
-          {!health.connected && (
-            <Button 
-              size="sm" 
-              className="w-full mt-2"
-              onClick={handleManualRetry}
-              disabled={retrying}
-            >
-              {retrying ? (
-                <>
-                  <RefreshCw className="w-3 h-3 mr-2 animate-spin" />
-                  Reconectando...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="w-3 h-3 mr-2" />
-                  Tentar Reconectar
-                </>
-              )}
-            </Button>
-          )}
-        </div>
-      </PopoverContent>
-    </Popover>
+      ) : connectionStatus === 'error' || error ? (
+        <Badge className="bg-red-100 text-red-800 flex items-center gap-2">
+          <WifiOff className="w-3 h-3" />
+          API Offline
+        </Badge>
+      ) : connectionStatus === 'close' ? (
+        <Badge className="bg-slate-100 text-slate-800 flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-slate-400"></span>
+          WhatsApp Offline
+        </Badge>
+      ) : (
+        <Badge className="bg-blue-100 text-blue-800 flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-blue-400 animate-pulse"></span>
+          Verificando...
+        </Badge>
+      )}
+    </div>
   );
 }

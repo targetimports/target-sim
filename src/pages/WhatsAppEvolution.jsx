@@ -13,6 +13,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from "@/utils";
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import ConnectionLogs from '../components/whatsapp/ConnectionLogs';
 
 export default function WhatsAppEvolution() {
   const queryClient = useQueryClient();
@@ -514,7 +515,17 @@ export default function WhatsAppEvolution() {
             </div>
 
             {/* Messages History */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 space-y-6">
+              {/* Connection Logs */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Logs de Conexão</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ConnectionLogs />
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
                   <CardTitle>Histórico de Mensagens</CardTitle>
