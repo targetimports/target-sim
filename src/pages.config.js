@@ -58,6 +58,7 @@ import LoyaltyProgram from './pages/LoyaltyProgram';
 import DocumentManager from './pages/DocumentManager';
 import PlantPerformanceDashboard from './pages/PlantPerformanceDashboard';
 import LeadAutomation from './pages/LeadAutomation';
+import CustomerPortal from './pages/CustomerPortal';
 import __Layout from './Layout.jsx';
 
 
@@ -122,6 +123,7 @@ export const PAGES = {
     "DocumentManager": DocumentManager,
     "PlantPerformanceDashboard": PlantPerformanceDashboard,
     "LeadAutomation": LeadAutomation,
+    "CustomerPortal": CustomerPortal,
 }
 
 export const pagesConfig = {
