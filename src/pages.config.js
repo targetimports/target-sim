@@ -57,6 +57,7 @@ import SalesPipeline from './pages/SalesPipeline';
 import LoyaltyProgram from './pages/LoyaltyProgram';
 import DocumentManager from './pages/DocumentManager';
 import PlantPerformanceDashboard from './pages/PlantPerformanceDashboard';
+import LeadAutomation from './pages/LeadAutomation';
 import __Layout from './Layout.jsx';
 
 
@@ -120,6 +121,7 @@ export const PAGES = {
     "LoyaltyProgram": LoyaltyProgram,
     "DocumentManager": DocumentManager,
     "PlantPerformanceDashboard": PlantPerformanceDashboard,
+    "LeadAutomation": LeadAutomation,
 }
 
 export const pagesConfig = {

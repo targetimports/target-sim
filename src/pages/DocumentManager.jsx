@@ -2,21 +2,52 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Upload, Download, Check, X, ArrowLeft } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { FileText, Upload, Download, Check, X, ArrowLeft, Eye, Pen, Scan } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from "@/utils";
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import SignatureCanvas from '../components/documents/SignatureCanvas';
 
 export default function DocumentManager() {
   const queryClient = useQueryClient();
   const [uploading, setUploading] = useState(false);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [signatureDialogOpen, setSignatureDialogOpen] = useState(false);
+  const [ocrDialogOpen, setOcrDialogOpen] = useState(false);
+  const [selectedDoc, setSelectedDoc] = useState(null);
+  const [uploadForm, setUploadForm] = useState({
+    customerEmail: '',
+    documentType: 'other',
+    title: '',
+    requiresSignature: false
+  });
 
   const { data: documents = [] } = useQuery({
     queryKey: ['documents'],
     queryFn: () => base44.entities.Document.list('-created_date', 100)
+  });
+
+  const { data: subscriptions = [] } = useQuery({
+    queryKey: ['subscriptions'],
+    queryFn: () => base44.entities.Subscription.list()
   });
 
   const updateStatusMutation = useMutation({
@@ -27,32 +58,97 @@ export default function DocumentManager() {
     }
   });
 
-  const handleFileUpload = async (e, customerEmail) => {
+  const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    if (!uploadForm.customerEmail || !uploadForm.title) {
+      toast.error('Preencha todos os campos obrigatórios');
+      return;
+    }
 
     setUploading(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       
       await base44.entities.Document.create({
-        title: file.name,
-        document_type: 'other',
-        customer_email: customerEmail,
+        title: uploadForm.title,
+        document_type: uploadForm.documentType,
+        customer_email: uploadForm.customerEmail,
         file_url: file_url,
         file_name: file.name,
         file_size: file.size,
-        mime_type: file.type
+        mime_type: file.type,
+        requires_signature: uploadForm.requiresSignature
       });
 
       queryClient.invalidateQueries(['documents']);
       toast.success('Documento enviado!');
+      setUploadDialogOpen(false);
+      setUploadForm({ customerEmail: '', documentType: 'other', title: '', requiresSignature: false });
     } catch (error) {
       toast.error('Erro ao enviar documento');
     } finally {
       setUploading(false);
     }
   };
+
+  const saveSignatureMutation = useMutation({
+    mutationFn: async ({ docId, signatureData }) => {
+      await base44.entities.Document.update(docId, {
+        signed: true,
+        signed_date: new Date().toISOString(),
+        signed_by: uploadForm.customerEmail,
+        signature_data: signatureData
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['documents']);
+      setSignatureDialogOpen(false);
+      toast.success('Documento assinado!');
+    }
+  });
+
+  const processOCRMutation = useMutation({
+    mutationFn: async (doc) => {
+      toast.info('Processando OCR...');
+      
+      const schema = {
+        type: 'object',
+        properties: {
+          customer_name: { type: 'string' },
+          document_number: { type: 'string' },
+          value: { type: 'number' },
+          due_date: { type: 'string' },
+          issue_date: { type: 'string' }
+        }
+      };
+
+      const result = await base44.integrations.Core.ExtractDataFromUploadedFile({
+        file_url: doc.file_url,
+        json_schema: schema
+      });
+
+      if (result.status === 'success') {
+        await base44.entities.Document.update(doc.id, {
+          extracted_data: result.output,
+          ocr_processed: true,
+          ocr_confidence: 85
+        });
+        return result.output;
+      } else {
+        throw new Error(result.details || 'Erro no OCR');
+      }
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(['documents']);
+      setOcrDialogOpen(false);
+      toast.success('Dados extraídos com sucesso!');
+    },
+    onError: (error) => {
+      toast.error('Erro ao processar OCR: ' + error.message);
+    }
+  });
 
   const statusColors = {
     pending: 'bg-yellow-100 text-yellow-800',
@@ -91,6 +187,13 @@ export default function DocumentManager() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <Button onClick={() => setUploadDialogOpen(true)}>
+            <Upload className="w-4 h-4 mr-2" />
+            Novo Documento
+          </Button>
+        </div>
+
         <Card>
           <CardHeader>
             <CardTitle>Documentos ({documents.length})</CardTitle>
@@ -120,6 +223,27 @@ export default function DocumentManager() {
                       {doc.status === 'pending' ? 'Pendente' :
                        doc.status === 'approved' ? 'Aprovado' : 'Rejeitado'}
                     </Badge>
+
+                    {doc.requires_signature && !doc.signed && (
+                      <Badge className="bg-orange-100 text-orange-800">
+                        <Pen className="w-3 h-3 mr-1" />
+                        Requer Assinatura
+                      </Badge>
+                    )}
+
+                    {doc.signed && (
+                      <Badge className="bg-green-100 text-green-800">
+                        <Check className="w-3 h-3 mr-1" />
+                        Assinado
+                      </Badge>
+                    )}
+
+                    {doc.ocr_processed && (
+                      <Badge className="bg-blue-100 text-blue-800">
+                        <Scan className="w-3 h-3 mr-1" />
+                        OCR
+                      </Badge>
+                    )}
                     
                     {doc.status === 'pending' && (
                       <>
@@ -138,6 +262,46 @@ export default function DocumentManager() {
                           <X className="w-4 h-4" />
                         </Button>
                       </>
+                    )}
+
+                    {doc.requires_signature && !doc.signed && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedDoc(doc);
+                          setSignatureDialogOpen(true);
+                        }}
+                      >
+                        <Pen className="w-4 h-4" />
+                      </Button>
+                    )}
+
+                    {!doc.ocr_processed && ['invoice', 'power_bill', 'contract'].includes(doc.document_type) && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedDoc(doc);
+                          processOCRMutation.mutate(doc);
+                        }}
+                        disabled={processOCRMutation.isPending}
+                      >
+                        <Scan className="w-4 h-4" />
+                      </Button>
+                    )}
+
+                    {doc.extracted_data && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedDoc(doc);
+                          setOcrDialogOpen(true);
+                        }}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
                     )}
                     
                     <Button size="sm" variant="outline" asChild>
@@ -158,6 +322,124 @@ export default function DocumentManager() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Upload Dialog */}
+        <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Novo Documento</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Cliente *</Label>
+                <Select value={uploadForm.customerEmail} onValueChange={(v) => setUploadForm(prev => ({ ...prev, customerEmail: v }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o cliente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subscriptions.map(s => (
+                      <SelectItem key={s.id} value={s.customer_email}>
+                        {s.customer_name} - {s.customer_email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Título *</Label>
+                <Input
+                  value={uploadForm.title}
+                  onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Ex: Contrato de Adesão"
+                />
+              </div>
+
+              <div>
+                <Label>Tipo de Documento</Label>
+                <Select value={uploadForm.documentType} onValueChange={(v) => setUploadForm(prev => ({ ...prev, documentType: v }))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="contract">Contrato</SelectItem>
+                    <SelectItem value="invoice">Fatura</SelectItem>
+                    <SelectItem value="id_document">Documento de Identidade</SelectItem>
+                    <SelectItem value="proof_address">Comprovante de Endereço</SelectItem>
+                    <SelectItem value="power_bill">Conta de Luz</SelectItem>
+                    <SelectItem value="other">Outro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="requiresSignature"
+                  checked={uploadForm.requiresSignature}
+                  onChange={(e) => setUploadForm(prev => ({ ...prev, requiresSignature: e.target.checked }))}
+                  className="w-4 h-4"
+                />
+                <Label htmlFor="requiresSignature">Requer assinatura digital</Label>
+              </div>
+
+              <div>
+                <Label>Arquivo *</Label>
+                <Input
+                  type="file"
+                  onChange={handleFileUpload}
+                  disabled={uploading}
+                  accept=".pdf,.jpg,.jpeg,.png"
+                />
+              </div>
+
+              {uploading && (
+                <p className="text-sm text-blue-600">Enviando documento...</p>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Signature Dialog */}
+        <Dialog open={signatureDialogOpen} onOpenChange={setSignatureDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Assinatura Digital - {selectedDoc?.title}</DialogTitle>
+            </DialogHeader>
+            <SignatureCanvas
+              onSave={(signatureData) => {
+                saveSignatureMutation.mutate({
+                  docId: selectedDoc.id,
+                  signatureData
+                });
+              }}
+              onCancel={() => setSignatureDialogOpen(false)}
+            />
+          </DialogContent>
+        </Dialog>
+
+        {/* OCR Results Dialog */}
+        <Dialog open={ocrDialogOpen} onOpenChange={setOcrDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Dados Extraídos (OCR)</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              {selectedDoc?.extracted_data && (
+                <div className="p-4 bg-slate-50 rounded-lg">
+                  <pre className="text-sm whitespace-pre-wrap">
+                    {JSON.stringify(selectedDoc.extracted_data, null, 2)}
+                  </pre>
+                </div>
+              )}
+              {selectedDoc?.ocr_confidence && (
+                <p className="text-sm text-slate-600">
+                  Confiança: {selectedDoc.ocr_confidence}%
+                </p>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
