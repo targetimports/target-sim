@@ -10,9 +10,10 @@ import EnergyCreditsTab from '../components/portal/EnergyCreditsTab';
 import InvoicesTab from '../components/portal/InvoicesTab';
 import ProfileTab from '../components/portal/ProfileTab';
 import SupportTab from '../components/portal/SupportTab';
+import FinancialDashboardTab from '../components/portal/FinancialDashboardTab';
 
 export default function CustomerPortal() {
-  const [activeTab, setActiveTab] = useState('subscription');
+  const [activeTab, setActiveTab] = useState('financial');
 
   const { data: user } = useQuery({
     queryKey: ['current-user'],
@@ -56,7 +57,14 @@ export default function CustomerPortal() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white border border-slate-200 p-1 grid grid-cols-2 md:grid-cols-5 gap-1">
+          <TabsList className="bg-white border border-slate-200 p-1 grid grid-cols-2 md:grid-cols-6 gap-1">
+            <TabsTrigger 
+              value="financial" 
+              className="data-[state=active]:bg-slate-900 data-[state=active]:text-white flex items-center gap-2"
+            >
+              <CreditCard className="w-4 h-4" />
+              <span className="hidden sm:inline">Financeiro</span>
+            </TabsTrigger>
             <TabsTrigger 
               value="subscription" 
               className="data-[state=active]:bg-slate-900 data-[state=active]:text-white flex items-center gap-2"
@@ -93,6 +101,10 @@ export default function CustomerPortal() {
               <span className="hidden sm:inline">Suporte</span>
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="financial">
+            <FinancialDashboardTab subscription={subscription} userEmail={user?.email} />
+          </TabsContent>
 
           <TabsContent value="subscription">
             <SubscriptionDetailsTab subscription={subscription} userEmail={user?.email} />
