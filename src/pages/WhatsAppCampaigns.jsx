@@ -63,6 +63,11 @@ export default function WhatsAppCampaigns() {
     queryFn: () => base44.entities.Subscription.list('-created_date', 1000)
   });
 
+  const { data: leads = [] } = useQuery({
+    queryKey: ['sales-leads'],
+    queryFn: () => base44.entities.SalesLead.list('-created_date', 1000)
+  });
+
   const createTemplate = useMutation({
     mutationFn: (data) => base44.entities.MessageTemplate.create(data),
     onSuccess: () => {
@@ -164,6 +169,9 @@ export default function WhatsAppCampaigns() {
   };
 
   const getSegmentCount = (segment) => {
+    const now = new Date();
+    const daysAgo = (days) => new Date(now - days * 24 * 60 * 60 * 1000);
+    
     switch (segment) {
       case 'all': return subscriptions.length;
       case 'active': return subscriptions.filter(s => s.status === 'active').length;
@@ -171,6 +179,10 @@ export default function WhatsAppCampaigns() {
       case 'residential': return subscriptions.filter(s => s.customer_type === 'residential').length;
       case 'commercial': return subscriptions.filter(s => s.customer_type === 'commercial').length;
       case 'suspended': return subscriptions.filter(s => s.status === 'suspended').length;
+      case 'high_score_leads': return leads.filter(l => (l.ai_score || 0) >= 70 && new Date(l.last_interaction) < daysAgo(7)).length;
+      case 'no_interaction_30d': return leads.filter(l => l.last_interaction && new Date(l.last_interaction) < daysAgo(30)).length;
+      case 'qualified_leads': return leads.filter(l => l.status === 'qualified').length;
+      case 'new_leads': return leads.filter(l => l.status === 'new').length;
       default: return 0;
     }
   };
@@ -267,10 +279,10 @@ export default function WhatsAppCampaigns() {
                       <p className="text-sm text-slate-700">{campaign.message}</p>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
                       <div>
                         <p className="text-xs text-slate-500">Segmento</p>
-                        <p className="font-medium">{campaign.target_segment}</p>
+                        <p className="font-medium text-xs">{campaign.target_segment}</p>
                       </div>
                       <div>
                         <p className="text-xs text-slate-500">Destinatários</p>
@@ -278,13 +290,31 @@ export default function WhatsAppCampaigns() {
                       </div>
                       <div>
                         <p className="text-xs text-slate-500">Enviadas</p>
-                        <p className="font-medium text-green-600">{campaign.sent_count}</p>
+                        <p className="font-medium text-green-600">{campaign.sent_count || 0}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500">Lidas</p>
+                        <p className="font-medium text-blue-600">{campaign.read_count || 0}</p>
                       </div>
                       <div>
                         <p className="text-xs text-slate-500">Falhas</p>
-                        <p className="font-medium text-red-600">{campaign.failed_count}</p>
+                        <p className="font-medium text-red-600">{campaign.failed_count || 0}</p>
                       </div>
                     </div>
+
+                    {campaign.sent_count > 0 && (
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="flex-1 bg-slate-200 rounded-full h-2">
+                          <div 
+                            className="bg-green-600 h-2 rounded-full transition-all"
+                            style={{ width: `${(campaign.sent_count / campaign.total_recipients) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-slate-600">
+                          {((campaign.sent_count / campaign.total_recipients) * 100).toFixed(1)}% enviadas
+                        </span>
+                      </div>
+                    )}
 
                     {campaign.status === 'draft' && (
                       <Button 
@@ -462,12 +492,16 @@ export default function WhatsAppCampaigns() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos ({getSegmentCount('all')})</SelectItem>
+                  <SelectItem value="all">Todos clientes ({getSegmentCount('all')})</SelectItem>
                   <SelectItem value="active">Assinaturas ativas ({getSegmentCount('active')})</SelectItem>
                   <SelectItem value="pending">Pendentes ({getSegmentCount('pending')})</SelectItem>
                   <SelectItem value="residential">Pessoa Física ({getSegmentCount('residential')})</SelectItem>
                   <SelectItem value="commercial">Pessoa Jurídica ({getSegmentCount('commercial')})</SelectItem>
                   <SelectItem value="suspended">Suspensos ({getSegmentCount('suspended')})</SelectItem>
+                  <SelectItem value="high_score_leads">🎯 Leads alto score sem interação 7d ({getSegmentCount('high_score_leads')})</SelectItem>
+                  <SelectItem value="no_interaction_30d">⏰ Leads sem interação 30d ({getSegmentCount('no_interaction_30d')})</SelectItem>
+                  <SelectItem value="qualified_leads">✅ Leads qualificados ({getSegmentCount('qualified_leads')})</SelectItem>
+                  <SelectItem value="new_leads">🆕 Novos leads ({getSegmentCount('new_leads')})</SelectItem>
                 </SelectContent>
               </Select>
             </div>
