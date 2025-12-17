@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Target, Plus, ArrowLeft, TrendingUp, DollarSign } from 'lucide-react';
+import { Target, Plus, ArrowLeft, TrendingUp, DollarSign, Search } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -39,11 +39,36 @@ export default function SalesPipeline() {
     state: '',
     notes: ''
   });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterSource, setFilterSource] = useState('all');
+  const [sortBy, setSortBy] = useState('created_date');
 
-  const { data: leads = [] } = useQuery({
+  const { data: allLeads = [] } = useQuery({
     queryKey: ['sales-leads'],
-    queryFn: () => base44.entities.SalesLead.list('-created_date', 100)
+    queryFn: () => base44.entities.SalesLead.list('-created_date', 500)
   });
+
+  // Filtros e busca
+  const leads = allLeads
+    .filter(lead => {
+      const matchesSearch = !searchTerm || 
+        lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        lead.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        lead.phone?.includes(searchTerm);
+      const matchesStatus = filterStatus === 'all' || lead.status === filterStatus;
+      const matchesSource = filterSource === 'all' || lead.source === filterSource;
+      return matchesSearch && matchesStatus && matchesSource;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'ai_score') return (b.ai_score || 0) - (a.ai_score || 0);
+      if (sortBy === 'next_follow_up') {
+        if (!a.next_follow_up) return 1;
+        if (!b.next_follow_up) return -1;
+        return new Date(a.next_follow_up) - new Date(b.next_follow_up);
+      }
+      return new Date(b.created_date) - new Date(a.created_date);
+    });
 
   const createLead = useMutation({
     mutationFn: (data) => base44.entities.SalesLead.create({
@@ -125,6 +150,84 @@ export default function SalesPipeline() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {/* Filtros e busca */}
+        <Card className="mb-6">
+          <CardContent className="p-4">
+            <div className="grid md:grid-cols-5 gap-4">
+              <div className="md:col-span-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Input
+                    placeholder="Buscar por nome, email ou telefone..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos status</SelectItem>
+                  <SelectItem value="new">Novos</SelectItem>
+                  <SelectItem value="contacted">Contatados</SelectItem>
+                  <SelectItem value="qualified">Qualificados</SelectItem>
+                  <SelectItem value="proposal_sent">Proposta enviada</SelectItem>
+                  <SelectItem value="negotiating">Negociando</SelectItem>
+                  <SelectItem value="won">Ganhos</SelectItem>
+                  <SelectItem value="lost">Perdidos</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={filterSource} onValueChange={setFilterSource}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Origem" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas origens</SelectItem>
+                  <SelectItem value="website">Site</SelectItem>
+                  <SelectItem value="referral">Indicação</SelectItem>
+                  <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                  <SelectItem value="social_media">Redes Sociais</SelectItem>
+                  <SelectItem value="phone">Telefone</SelectItem>
+                  <SelectItem value="event">Evento</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Ordenar" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="created_date">Data de criação</SelectItem>
+                  <SelectItem value="ai_score">Score IA (maior)</SelectItem>
+                  <SelectItem value="next_follow_up">Próximo follow-up</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2 mt-3 text-sm text-slate-600">
+              <span className="font-medium">{leads.length}</span> leads {searchTerm || filterStatus !== 'all' || filterSource !== 'all' ? 'encontrados' : 'no total'}
+              {(searchTerm || filterStatus !== 'all' || filterSource !== 'all') && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setFilterStatus('all');
+                    setFilterSource('all');
+                  }}
+                >
+                  Limpar filtros
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Stats */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Card>
