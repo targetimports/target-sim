@@ -65,6 +65,7 @@ import AutomationManager from './pages/AutomationManager';
 import TaskManager from './pages/TaskManager';
 import CRMIntegrations from './pages/CRMIntegrations';
 import TaskDashboard from './pages/TaskDashboard';
+import TaskAutomationRules from './pages/TaskAutomationRules';
 import __Layout from './Layout.jsx';
 
 
@@ -136,6 +137,7 @@ export const PAGES = {
     "TaskManager": TaskManager,
     "CRMIntegrations": CRMIntegrations,
     "TaskDashboard": TaskDashboard,
+    "TaskAutomationRules": TaskAutomationRules,
 }
 
 export const pagesConfig = {

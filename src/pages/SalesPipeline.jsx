@@ -69,13 +69,24 @@ export default function SalesPipeline() {
     });
 
   const createLead = useMutation({
-    mutationFn: (data) => base44.entities.SalesLead.create({
-      ...data,
-      status: 'new',
-      stage: 'awareness',
-      score: 50,
-      estimated_value: data.average_bill ? data.average_bill * 0.15 : 0
-    }),
+    mutationFn: async (data) => {
+      const lead = await base44.entities.SalesLead.create({
+        ...data,
+        status: 'new',
+        stage: 'awareness',
+        score: 50,
+        estimated_value: data.average_bill ? data.average_bill * 0.15 : 0
+      });
+      
+      // Disparar automação de tarefas
+      await base44.functions.invoke('taskAutomation', {
+        trigger_type: 'lead_created',
+        entity_id: lead.id,
+        entity_data: lead
+      });
+      
+      return lead;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['sales-leads']);
       setIsDialogOpen(false);
@@ -94,7 +105,18 @@ export default function SalesPipeline() {
   });
 
   const updateStatus = useMutation({
-    mutationFn: ({ id, status }) => base44.entities.SalesLead.update(id, { status }),
+    mutationFn: async ({ id, status }) => {
+      const lead = await base44.entities.SalesLead.update(id, { status });
+      
+      // Disparar automação de tarefas
+      await base44.functions.invoke('taskAutomation', {
+        trigger_type: 'lead_status_changed',
+        entity_id: id,
+        entity_data: { ...lead, status }
+      });
+      
+      return lead;
+    },
     onSuccess: () => queryClient.invalidateQueries(['sales-leads'])
   });
 

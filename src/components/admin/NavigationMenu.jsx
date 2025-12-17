@@ -105,7 +105,8 @@ const menuCategories = {
       { name: 'Análise Churn', url: 'ChurnPrediction', icon: '📉' },
       { name: 'Previsão Tempo', url: 'WeatherForecast', icon: '🌤️' },
       { name: 'Dashboard Tarefas', url: 'TaskDashboard', icon: '✅' },
-      { name: 'Gestão Tarefas', url: 'TaskManager', icon: '📋' }
+      { name: 'Gestão Tarefas', url: 'TaskManager', icon: '📋' },
+      { name: 'Automação Tarefas', url: 'TaskAutomationRules', icon: '⚡' }
     ]
   },
   'ai': {
