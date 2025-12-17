@@ -63,6 +63,7 @@ import NotificationManager from './pages/NotificationManager';
 import DocumentsDashboard from './pages/DocumentsDashboard';
 import AutomationManager from './pages/AutomationManager';
 import TaskManager from './pages/TaskManager';
+import CRMIntegrations from './pages/CRMIntegrations';
 import __Layout from './Layout.jsx';
 
 
@@ -132,6 +133,7 @@ export const PAGES = {
     "DocumentsDashboard": DocumentsDashboard,
     "AutomationManager": AutomationManager,
     "TaskManager": TaskManager,
+    "CRMIntegrations": CRMIntegrations,
 }
 
 export const pagesConfig = {

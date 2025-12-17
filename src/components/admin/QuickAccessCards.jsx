@@ -52,6 +52,12 @@ const quickAccessItems = [
     description: 'Gestão de tarefas',
     url: 'TaskManager',
     color: 'from-indigo-500 to-purple-500'
+  },
+  {
+    title: '🔗 CRM',
+    description: 'Integrações CRM',
+    url: 'CRMIntegrations',
+    color: 'from-blue-500 to-purple-500'
   }
 ];
 
