@@ -108,6 +108,7 @@ Deno.serve(async (req) => {
         if (action === 'status') {
             try {
                 console.log('[Status] Checking instance:', instanceName, 'at', baseUrl);
+                console.log('[Status] Headers:', JSON.stringify(headers));
 
                 // Verificar se instância existe
                 const fetchRes = await fetch(`${baseUrl}/instance/fetchInstances?instanceName=${instanceName}`, {
@@ -116,6 +117,16 @@ Deno.serve(async (req) => {
                 });
 
                 console.log('[Status] Fetch status:', fetchRes.status);
+                
+                if (fetchRes.status === 403) {
+                    console.error('[Status] 403 Forbidden - API Key inválida ou faltando');
+                    return Response.json({
+                        state: 'close',
+                        instance: null,
+                        exists: false,
+                        error: 'Erro 403: API Key inválida ou ausente. Verifique a configuração da API Key no Railway.'
+                    });
+                }
 
                 if (!fetchRes.ok) {
                     console.log('[Status] Instance not found or error');
