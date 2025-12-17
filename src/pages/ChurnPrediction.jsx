@@ -38,13 +38,11 @@ export default function ChurnPrediction() {
       const predictionsToCreate = [];
 
       for (const sub of subscriptions.slice(0, 20)) {
-        // Fatores de risco
         const customerInvoices = invoices.filter(i => i.customer_email === sub.customer_email);
         const overdueInvoices = customerInvoices.filter(i => i.status === 'overdue').length;
         const customerTickets = tickets.filter(t => t.customer_email === sub.customer_email);
         const openTickets = customerTickets.filter(t => t.status !== 'resolved').length;
 
-        // Calcular probabilidade (simplificado)
         let probability = 0;
         const riskFactors = [];
         const actions = [];
@@ -89,13 +87,11 @@ export default function ChurnPrediction() {
         }
       }
 
-      // Limpar predições antigas
       const oldPredictions = await base44.entities.ChurnPrediction.list();
       for (const old of oldPredictions) {
         await base44.entities.ChurnPrediction.delete(old.id);
       }
 
-      // Criar novas
       for (const pred of predictionsToCreate) {
         await base44.entities.ChurnPrediction.create(pred);
       }
@@ -158,7 +154,6 @@ export default function ChurnPrediction() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Stats */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Card>
             <CardContent className="p-4">
@@ -217,7 +212,6 @@ export default function ChurnPrediction() {
           </Card>
         </div>
 
-        {/* Predictions */}
         <Card>
           <CardHeader>
             <CardTitle>Clientes em Risco</CardTitle>
