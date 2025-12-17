@@ -28,24 +28,40 @@ export default function WhatsAppEvolution() {
   useEffect(() => {
     const savedConfig = localStorage.getItem('evolution_config');
     if (savedConfig) {
-      const config = JSON.parse(savedConfig);
-      setApiUrl(config.apiUrl || '');
-      setApiKey(config.apiKey || '');
-      setInstanceName(config.instanceName || 'targetsim');
+      try {
+        const config = JSON.parse(savedConfig);
+        if (config.apiUrl) {
+          setApiUrl(config.apiUrl);
+          setApiKey(config.apiKey || '');
+          setInstanceName(config.instanceName || 'targetsim');
+        } else {
+          setShowConfig(true);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar config:', err);
+        setShowConfig(true);
+      }
     } else {
       setShowConfig(true);
     }
   }, []);
 
   const saveConfig = () => {
-    localStorage.setItem('evolution_config', JSON.stringify({
-      apiUrl,
-      apiKey,
-      instanceName
-    }));
+    if (!apiUrl || apiUrl.trim() === '') {
+      toast.error('URL da Evolution API é obrigatória');
+      return;
+    }
+    
+    const config = {
+      apiUrl: apiUrl.trim(),
+      apiKey: apiKey.trim(),
+      instanceName: instanceName.trim() || 'targetsim'
+    };
+    
+    localStorage.setItem('evolution_config', JSON.stringify(config));
     setShowConfig(false);
-    toast.success('Configuração salva');
-    refetchStatus();
+    toast.success('Configuração salva com sucesso');
+    setTimeout(() => refetchStatus(), 500);
   };
 
   const { data: status, refetch: refetchStatus, error: statusError } = useQuery({
@@ -271,6 +287,15 @@ export default function WhatsAppEvolution() {
                   placeholder="http://localhost:8080"
                   value={apiUrl}
                   onChange={(e) => setApiUrl(e.target.value)}
+                  onBlur={(e) => {
+                    const val = e.target.value.trim();
+                    setApiUrl(val);
+                    if (val) {
+                      const config = JSON.parse(localStorage.getItem('evolution_config') || '{}');
+                      config.apiUrl = val;
+                      localStorage.setItem('evolution_config', JSON.stringify(config));
+                    }
+                  }}
                 />
                 <p className="text-xs text-slate-500 mt-1">
                   Ex: http://localhost:8080 ou http://192.168.1.100:8080
@@ -283,6 +308,15 @@ export default function WhatsAppEvolution() {
                   placeholder="B6D711FCDE4D4FD5936544120E713976"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
+                  onBlur={(e) => {
+                    const val = e.target.value.trim();
+                    setApiKey(val);
+                    if (apiUrl) {
+                      const config = JSON.parse(localStorage.getItem('evolution_config') || '{}');
+                      config.apiKey = val;
+                      localStorage.setItem('evolution_config', JSON.stringify(config));
+                    }
+                  }}
                 />
                 <p className="text-xs text-slate-500 mt-1">
                   Deixe vazio se não configurou autenticação na Evolution API
@@ -295,6 +329,15 @@ export default function WhatsAppEvolution() {
                   placeholder="targetsim"
                   value={instanceName}
                   onChange={(e) => setInstanceName(e.target.value)}
+                  onBlur={(e) => {
+                    const val = e.target.value.trim() || 'targetsim';
+                    setInstanceName(val);
+                    if (apiUrl) {
+                      const config = JSON.parse(localStorage.getItem('evolution_config') || '{}');
+                      config.instanceName = val;
+                      localStorage.setItem('evolution_config', JSON.stringify(config));
+                    }
+                  }}
                 />
                 <p className="text-xs text-slate-500 mt-1">
                   Qualquer nome sem espaços (ex: meuwhatsapp, targetsim)
