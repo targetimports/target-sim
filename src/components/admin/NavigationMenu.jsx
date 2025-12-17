@@ -113,6 +113,7 @@ const menuCategories = {
     title: '🤖 Automação & IA',
     color: 'border-violet-500 bg-violet-50',
     items: [
+      { name: 'Dashboard IA', url: 'AIInsightsDashboard', icon: '🧠' },
       { name: 'Gestão Automações', url: 'AutomationManager', icon: '⚡' },
       { name: 'Alertas Automáticos', url: 'AutomatedAlerts', icon: '🔔' },
       { name: 'Notificações', url: 'NotificationManager', icon: '📬' },

@@ -58,6 +58,12 @@ const quickAccessItems = [
     description: 'Integrações CRM',
     url: 'CRMIntegrations',
     color: 'from-blue-500 to-purple-500'
+  },
+  {
+    title: '🧠 IA Insights',
+    description: 'Análises preditivas',
+    url: 'AIInsightsDashboard',
+    color: 'from-indigo-500 to-purple-500'
   }
 ];
 

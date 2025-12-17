@@ -66,6 +66,7 @@ import TaskManager from './pages/TaskManager';
 import CRMIntegrations from './pages/CRMIntegrations';
 import TaskDashboard from './pages/TaskDashboard';
 import TaskAutomationRules from './pages/TaskAutomationRules';
+import AIInsightsDashboard from './pages/AIInsightsDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -138,6 +139,7 @@ export const PAGES = {
     "CRMIntegrations": CRMIntegrations,
     "TaskDashboard": TaskDashboard,
     "TaskAutomationRules": TaskAutomationRules,
+    "AIInsightsDashboard": AIInsightsDashboard,
 }
 
 export const pagesConfig = {
