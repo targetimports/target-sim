@@ -25,41 +25,57 @@ export default function WhatsAppEvolution() {
     message: ''
   });
 
+  // Carregar configuração do banco de dados
+  const { data: savedConfigs } = useQuery({
+    queryKey: ['evolution-config'],
+    queryFn: () => base44.entities.EvolutionConfig.filter({ is_active: true })
+  });
+
   useEffect(() => {
-    const savedConfig = localStorage.getItem('evolution_config');
-    if (savedConfig) {
-      try {
-        const config = JSON.parse(savedConfig);
-        if (config.apiUrl && config.instanceName) {
-          setApiUrl(config.apiUrl);
-          setApiKey(config.apiKey || '');
-          setInstanceName(config.instanceName);
-        } else {
-          setShowConfig(true);
-        }
-      } catch (error) {
-        console.error('Erro ao carregar configuração salva:', error);
-        setShowConfig(true);
-      }
+    if (savedConfigs && savedConfigs.length > 0) {
+      const config = savedConfigs[0];
+      setApiUrl(config.api_url || '');
+      setApiKey(config.api_key || '');
+      setInstanceName(config.instance_name || 'targetsim');
     } else {
       setShowConfig(true);
     }
-  }, []);
+  }, [savedConfigs]);
+
+  const saveConfigMutation = useMutation({
+    mutationFn: async () => {
+      if (!apiUrl || !instanceName) {
+        throw new Error('URL da API e Nome da Instância são obrigatórios');
+      }
+
+      // Desativar configurações anteriores
+      if (savedConfigs && savedConfigs.length > 0) {
+        for (const config of savedConfigs) {
+          await base44.entities.EvolutionConfig.update(config.id, { is_active: false });
+        }
+      }
+
+      // Criar nova configuração ativa
+      return base44.entities.EvolutionConfig.create({
+        api_url: apiUrl,
+        api_key: apiKey,
+        instance_name: instanceName,
+        is_active: true
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['evolution-config']);
+      setShowConfig(false);
+      toast.success('Configuração salva no banco de dados');
+      refetchStatus();
+    },
+    onError: (error) => {
+      toast.error('Erro ao salvar: ' + error.message);
+    }
+  });
 
   const saveConfig = () => {
-    if (!apiUrl || !instanceName) {
-      toast.error('URL da API e Nome da Instância são obrigatórios');
-      return;
-    }
-    
-    localStorage.setItem('evolution_config', JSON.stringify({
-      apiUrl,
-      apiKey,
-      instanceName
-    }));
-    setShowConfig(false);
-    toast.success('Configuração salva com sucesso');
-    refetchStatus();
+    saveConfigMutation.mutate();
   };
 
   const { data: status, refetch: refetchStatus, error: statusError } = useQuery({
@@ -326,9 +342,9 @@ export default function WhatsAppEvolution() {
                 <Button 
                   onClick={saveConfig} 
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
-                  disabled={!apiUrl || !instanceName}
+                  disabled={!apiUrl || !instanceName || saveConfigMutation.isPending}
                 >
-                  Salvar Configuração
+                  {saveConfigMutation.isPending ? 'Salvando...' : 'Salvar Configuração'}
                 </Button>
               </div>
             </CardContent>
