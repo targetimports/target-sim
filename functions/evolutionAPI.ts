@@ -22,8 +22,19 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'API URL e Instance Name são obrigatórios' }, { status: 400 });
         }
 
-        // Remove trailing slash from apiUrl
-        const baseUrl = apiUrl.replace(/\/$/, '');
+        // Normalizar URL - remover porta se HTTPS com :80 ou HTTP com :443
+        let baseUrl = apiUrl.replace(/\/$/, '');
+        
+        // Se for HTTPS com :80, remover porta (conflito)
+        if (baseUrl.startsWith('https://') && baseUrl.includes(':80')) {
+            baseUrl = baseUrl.replace(':80', '');
+        }
+        // Se for HTTP com :443, trocar para HTTPS sem porta
+        if (baseUrl.startsWith('http://') && baseUrl.includes(':443')) {
+            baseUrl = baseUrl.replace('http://', 'https://').replace(':443', '');
+        }
+        
+        console.log('[Evolution API] Normalized URL:', baseUrl);
 
         const headers = {
             'Content-Type': 'application/json'
