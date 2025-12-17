@@ -38,13 +38,18 @@ export default function WhatsAppEvolution() {
   }, []);
 
   const saveConfig = () => {
+    if (!apiUrl || !instanceName) {
+      toast.error('URL da API e Nome da Instância são obrigatórios');
+      return;
+    }
+    
     localStorage.setItem('evolution_config', JSON.stringify({
       apiUrl,
       apiKey,
       instanceName
     }));
     setShowConfig(false);
-    toast.success('Configuração salva');
+    toast.success('Configuração salva com sucesso');
     refetchStatus();
   };
 
