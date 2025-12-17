@@ -62,6 +62,7 @@ import CustomerPortal from './pages/CustomerPortal';
 import NotificationManager from './pages/NotificationManager';
 import DocumentsDashboard from './pages/DocumentsDashboard';
 import AutomationManager from './pages/AutomationManager';
+import TaskManager from './pages/TaskManager';
 import __Layout from './Layout.jsx';
 
 
@@ -130,6 +131,7 @@ export const PAGES = {
     "NotificationManager": NotificationManager,
     "DocumentsDashboard": DocumentsDashboard,
     "AutomationManager": AutomationManager,
+    "TaskManager": TaskManager,
 }
 
 export const pagesConfig = {

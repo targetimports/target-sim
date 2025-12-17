@@ -284,7 +284,7 @@ export default function SalesPipeline() {
         <div className="grid lg:grid-cols-7 gap-4">
           {stages.map((stage) => {
             const stageLeads = leads.filter(l => l.status === stage.status);
-            
+
             return (
               <Card key={stage.status} className={stage.color}>
                 <CardHeader>
@@ -294,30 +294,39 @@ export default function SalesPipeline() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  {stageLeads.map((lead) => (
-                    <Card key={lead.id} className="p-3 bg-white">
-                      <p className="font-medium text-sm">{lead.name}</p>
-                      <p className="text-xs text-slate-500">{lead.email}</p>
-                      {lead.estimated_value > 0 && (
-                        <p className="text-xs font-semibold text-green-600 mt-1">
-                          R$ {lead.estimated_value.toFixed(0)}
-                        </p>
-                      )}
-                      <Select
-                        value={lead.status}
-                        onValueChange={(value) => updateStatus.mutate({ id: lead.id, status: value })}
-                      >
-                        <SelectTrigger className="mt-2 h-7 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {stages.map(s => (
-                            <SelectItem key={s.status} value={s.status}>{s.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </Card>
-                  ))}
+                  {stageLeads.map((lead) => {
+                    const leadTasksCount = leadTasks.filter(t => t.related_to_id === lead.id && t.status !== 'completed').length;
+
+                    return (
+                      <Card key={lead.id} className="p-3 bg-white">
+                        <p className="font-medium text-sm">{lead.name}</p>
+                        <p className="text-xs text-slate-500">{lead.email}</p>
+                        {lead.estimated_value > 0 && (
+                          <p className="text-xs font-semibold text-green-600 mt-1">
+                            R$ {lead.estimated_value.toFixed(0)}
+                          </p>
+                        )}
+                        {leadTasksCount > 0 && (
+                          <Badge variant="outline" className="mt-2 text-xs">
+                            📋 {leadTasksCount} tarefa{leadTasksCount > 1 ? 's' : ''}
+                          </Badge>
+                        )}
+                        <Select
+                          value={lead.status}
+                          onValueChange={(value) => updateStatus.mutate({ id: lead.id, status: value })}
+                        >
+                          <SelectTrigger className="mt-2 h-7 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {stages.map(s => (
+                              <SelectItem key={s.status} value={s.status}>{s.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </Card>
+                    );
+                  })}
                 </CardContent>
               </Card>
             );
