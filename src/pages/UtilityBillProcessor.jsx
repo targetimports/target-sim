@@ -247,13 +247,16 @@ export default function UtilityBillProcessor() {
                               <span className="font-medium">Referência:</span> {bill.reference_month}
                             </div>
                             <div>
+                              <span className="font-medium">NF:</span> {bill.invoice_number}
+                            </div>
+                            <div>
                               <span className="font-medium">kWh:</span> {bill.kwh_consumed?.toLocaleString()}
                             </div>
                             <div>
                               <span className="font-medium">Total:</span> R$ {bill.total_amount?.toFixed(2)}
                             </div>
-                            <div>
-                              <span className="font-medium">Base desconto:</span> R$ {bill.discount_base_value?.toFixed(2)}
+                            <div className="col-span-2">
+                              <span className="font-medium text-green-700">Base desconto (Energia):</span> R$ {bill.discount_base_value?.toFixed(2)}
                             </div>
                           </div>
                           {bill.other_charges?.length > 0 && (
@@ -326,18 +329,48 @@ export default function UtilityBillProcessor() {
 
               <Card className="bg-blue-50 border-blue-200">
                 <CardContent className="p-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-3">
                     <div>
-                      <p className="text-sm text-slate-600">Valor dos kWh (Base p/ desconto)</p>
-                      <p className="text-xl font-bold text-blue-700">
-                        R$ {viewData.summary.kwh_value?.toFixed(2)}
-                      </p>
+                      <p className="text-sm text-slate-600 mb-2">Base para Desconto (Energia)</p>
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div>
+                          <p className="text-slate-500">TUSD</p>
+                          <p className="font-semibold">R$ {viewData.summary.kwh_tusd?.toFixed(2)}</p>
+                        </div>
+                        <div>
+                          <p className="text-slate-500">TE</p>
+                          <p className="font-semibold">R$ {viewData.summary.kwh_te?.toFixed(2)}</p>
+                        </div>
+                        <div className="bg-green-100 p-2 rounded">
+                          <p className="text-slate-600">Total Energia</p>
+                          <p className="font-bold text-green-700">R$ {viewData.summary.discount_base?.toFixed(2)}</p>
+                        </div>
+                      </div>
                     </div>
                     <div>
-                      <p className="text-sm text-slate-600">Outras Cobranças (Não descontáveis)</p>
-                      <p className="text-xl font-bold text-amber-700">
-                        R$ {viewData.summary.other_charges?.toFixed(2)}
-                      </p>
+                      <p className="text-sm text-slate-600 mb-2">Outras Cobranças (Não descontáveis)</p>
+                      <div className="grid grid-cols-5 gap-2 text-xs">
+                        <div>
+                          <p className="text-slate-500">COSIP</p>
+                          <p className="font-semibold">R$ {viewData.summary.breakdown?.cosip?.toFixed(2) || '0.00'}</p>
+                        </div>
+                        <div>
+                          <p className="text-slate-500">Bandeiras</p>
+                          <p className="font-semibold">R$ {viewData.summary.breakdown?.flags?.toFixed(2) || '0.00'}</p>
+                        </div>
+                        <div>
+                          <p className="text-slate-500">Multas</p>
+                          <p className="font-semibold">R$ {viewData.summary.breakdown?.fines?.toFixed(2) || '0.00'}</p>
+                        </div>
+                        <div>
+                          <p className="text-slate-500">Juros</p>
+                          <p className="font-semibold">R$ {viewData.summary.breakdown?.interest?.toFixed(2) || '0.00'}</p>
+                        </div>
+                        <div className="bg-amber-100 p-2 rounded">
+                          <p className="text-slate-600">Total</p>
+                          <p className="font-bold text-amber-700">R$ {viewData.summary.non_discountable?.toFixed(2)}</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
