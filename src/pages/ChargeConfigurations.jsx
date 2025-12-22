@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export default function ChargeConfigurations() {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);
   const [editingCharge, setEditingCharge] = useState(null);
   const [formData, setFormData] = useState({
     charge_key: '',
@@ -26,6 +27,9 @@ export default function ChargeConfigurations() {
     category: 'other',
     notes: ''
   });
+  const [testFile, setTestFile] = useState(null);
+  const [testResults, setTestResults] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const { data: charges = [] } = useQuery({
     queryKey: ['charge-configurations'],
@@ -98,6 +102,29 @@ export default function ChargeConfigurations() {
   const discountableCount = charges.filter(c => c.is_discountable).length;
   const autoDiscoveredCount = charges.filter(c => c.auto_discovered).length;
 
+  const handleTestUpload = async () => {
+    if (!testFile) return;
+    
+    setIsProcessing(true);
+    try {
+      // Upload arquivo
+      const { data: uploadResult } = await base44.integrations.Core.UploadFile({ file: testFile });
+      
+      // Processar (modo teste - usar email fake)
+      const { data: processResult } = await base44.functions.invoke('processUtilityBill', {
+        customer_email: 'test@test.com',
+        file_url: uploadResult.file_url
+      });
+
+      setTestResults(processResult);
+      toast.success('PDF processado! Veja as cobranças encontradas.');
+    } catch (error) {
+      toast.error('Erro ao processar PDF: ' + error.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50">
       <header className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
@@ -117,13 +144,23 @@ export default function ChargeConfigurations() {
                 </div>
               </div>
             </div>
-            <Button
-              onClick={() => { resetForm(); setIsDialogOpen(true); }}
-              className="bg-white text-purple-600 hover:bg-white/90"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Nova Cobrança
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setIsTestDialogOpen(true)}
+                variant="outline"
+                className="border-white/30 text-white hover:bg-white/20"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Testar PDF
+              </Button>
+              <Button
+                onClick={() => { resetForm(); setIsDialogOpen(true); }}
+                className="bg-white text-purple-600 hover:bg-white/90"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Cobrança
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -246,6 +283,84 @@ export default function ChargeConfigurations() {
           )}
         </div>
       </main>
+
+      {/* Test PDF Dialog */}
+      <Dialog open={isTestDialogOpen} onOpenChange={setIsTestDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Testar Mapeamento de Cobranças</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Fazer upload de PDF de fatura</Label>
+              <Input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => setTestFile(e.target.files[0])}
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                O sistema vai identificar todas as cobranças e você poderá configurá-las
+              </p>
+            </div>
+
+            <Button 
+              onClick={handleTestUpload} 
+              disabled={!testFile || isProcessing}
+              className="w-full"
+            >
+              {isProcessing ? 'Processando...' : 'Processar PDF'}
+            </Button>
+
+            {testResults && (
+              <div className="space-y-4 border-t pt-4">
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <p className="font-semibold text-sm mb-2">Resumo</p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>Total: R$ {testResults.summary?.total?.toFixed(2)}</div>
+                    <div>kWh: {testResults.summary?.kwh_consumed}</div>
+                    <div className="text-green-700">Descontável: R$ {testResults.summary?.discount_base?.toFixed(2)}</div>
+                    <div className="text-amber-700">Não descontável: R$ {testResults.summary?.non_discountable?.toFixed(2)}</div>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-sm mb-2">Cobranças Encontradas</p>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {testResults.summary?.all_charges?.map((charge, i) => (
+                      <div key={i} className={`p-3 rounded border ${charge.is_discountable ? 'bg-green-50 border-green-200' : 'bg-slate-50 border-slate-200'}`}>
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="font-medium text-sm">{charge.label}</p>
+                            <p className="text-xs text-slate-500">{charge.key}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold">R$ {charge.value?.toFixed(2)}</p>
+                            <Badge className={charge.is_discountable ? 'bg-green-600' : 'bg-slate-600'}>
+                              {charge.is_discountable ? 'Descontável' : 'Não descontável'}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={() => {
+                    queryClient.invalidateQueries(['charge-configurations']);
+                    setIsTestDialogOpen(false);
+                    setTestResults(null);
+                    setTestFile(null);
+                  }}
+                  className="w-full"
+                >
+                  Fechar e Atualizar Lista
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
