@@ -15,42 +15,70 @@ Deno.serve(async (req) => {
     const schema = {
       type: "object",
       properties: {
-        customer_name: { type: "string", description: "Nome do cliente na fatura" },
-        customer_cpf_cnpj: { type: "string", description: "CPF ou CNPJ do cliente" },
-        installation_number: { type: "string", description: "Código/Número da instalação" },
-        customer_code: { type: "string", description: "Código do cliente" },
-        reference_month: { type: "string", description: "Mês de referência (MM/YYYY)" },
-        due_date: { type: "string", description: "Data de vencimento" },
-        invoice_number: { type: "string", description: "Número da nota fiscal" },
-        total_amount: { type: "number", description: "Valor TOTAL a pagar da fatura" },
-        kwh_consumed: { type: "number", description: "Total de kWh consumidos no período" },
-        kwh_tusd_value: { type: "number", description: "Valor do Consumo-TUSD (Tarifa de Uso do Sistema de Distribuição)" },
-        kwh_te_value: { type: "number", description: "Valor do Consumo-TE (Tarifa de Energia)" },
-        kwh_total_value: { type: "number", description: "Soma total dos valores de energia (TUSD + TE)" },
-        cosip_value: { type: "number", description: "Contribuição de Iluminação Pública (COSIP/CIP)" },
-        tariff_flags_value: { type: "number", description: "Bandeiras tarifárias" },
-        fines_value: { type: "number", description: "Multas" },
-        interest_value: { type: "number", description: "Juros" },
+        customer_name: { type: "string", description: "Nome completo do cliente conforme aparece na fatura" },
+        customer_cpf_cnpj: { type: "string", description: "CPF ou CNPJ do cliente com pontuação" },
+        installation_number: { type: "string", description: "Número da instalação ou UC (Unidade Consumidora)" },
+        customer_code: { type: "string", description: "Código ou número do cliente" },
+        reference_month: { type: "string", description: "Mês de referência no formato MM/YYYY" },
+        due_date: { type: "string", description: "Data de vencimento no formato DD/MM/YYYY" },
+        invoice_number: { type: "string", description: "Número da nota fiscal ou documento" },
+        total_amount: { 
+          type: "number", 
+          description: "VALOR TOTAL A PAGAR em Reais (R$) - normalmente o valor final destacado da fatura. Extraia apenas o número, sem R$ ou vírgulas. Use ponto para decimal. Exemplo: se aparecer R$ 1.234,56 extraia como 1234.56"
+        },
+        kwh_consumed: { 
+          type: "number", 
+          description: "Total de kWh consumidos. Procure por 'Consumo' ou 'Energia Consumida' em kWh. Extraia apenas o número."
+        },
+        kwh_tusd_value: { 
+          type: "number", 
+          description: "Valor em Reais da TUSD (Tarifa de Uso). Procure por linhas com 'TUSD' ou 'Tarifa de Uso'. Converta para número decimal."
+        },
+        kwh_te_value: { 
+          type: "number", 
+          description: "Valor em Reais da TE (Tarifa de Energia). Procure por 'TE' ou 'Tarifa de Energia'. Converta para número decimal."
+        },
+        kwh_total_value: { 
+          type: "number", 
+          description: "Soma dos valores de TUSD + TE em Reais. Se não estiver explícito, calcule somando os dois valores acima."
+        },
+        cosip_value: { 
+          type: "number", 
+          description: "Valor da Contribuição de Iluminação Pública (COSIP, CIP ou CIP/COSIP) em Reais. Converta para decimal."
+        },
+        tariff_flags_value: { 
+          type: "number", 
+          description: "Valor das Bandeiras Tarifárias em Reais (pode ser verde/amarela/vermelha). Converta para decimal."
+        },
+        fines_value: { 
+          type: "number", 
+          description: "Valor de Multas em Reais, se houver. Converta para decimal."
+        },
+        interest_value: { 
+          type: "number", 
+          description: "Valor de Juros em Reais, se houver. Converta para decimal."
+        },
         other_charges: {
           type: "array",
           items: {
             type: "object",
             properties: {
-              description: { type: "string", description: "Descrição do item" },
-              amount: { type: "number", description: "Valor" }
+              description: { type: "string", description: "Nome da cobrança" },
+              amount: { type: "number", description: "Valor em número decimal" }
             }
           },
-          description: "Lista de todas as outras cobranças (multas, juros, taxas, COSIP, etc.)"
+          description: "Lista de TODAS as outras cobranças visíveis na fatura que não se encaixam nas categorias acima. Inclua o nome e valor convertido para decimal. Exemplos: taxas adicionais, débitos anteriores, créditos, etc."
         },
         taxes: {
           type: "object",
           properties: {
-            icms: { type: "number", description: "Valor de ICMS" },
-            pis: { type: "number", description: "Valor de PIS" },
-            cofins: { type: "number", description: "Valor de COFINS" }
-          }
+            icms: { type: "number", description: "Valor do imposto ICMS em Reais (decimal)" },
+            pis: { type: "number", description: "Valor do imposto PIS em Reais (decimal)" },
+            cofins: { type: "number", description: "Valor do imposto COFINS em Reais (decimal)" }
+          },
+          description: "Impostos podem aparecer embutidos ou em seção separada. Procure por 'Impostos', 'Tributos' ou similar."
         },
-        utility_company: { type: "string", description: "Nome da concessionária (ex: Neoenergia, CEMIG, CPFL)" }
+        utility_company: { type: "string", description: "Nome da distribuidora de energia (Neoenergia, CEMIG, CPFL, Enel, etc)" }
       }
     };
 
