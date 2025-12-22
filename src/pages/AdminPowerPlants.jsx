@@ -37,6 +37,7 @@ export default function AdminPowerPlants() {
     capacity_kw: '',
     monthly_generation_kwh: '',
     annual_generation_kwh: '',
+    accumulated_credits_kwh: '',
     location: '',
     city: '',
     state: '',
@@ -56,7 +57,8 @@ export default function AdminPowerPlants() {
       ...data,
       capacity_kw: parseFloat(data.capacity_kw),
       monthly_generation_kwh: data.monthly_generation_kwh ? parseFloat(data.monthly_generation_kwh) : undefined,
-      annual_generation_kwh: data.annual_generation_kwh ? parseFloat(data.annual_generation_kwh) : undefined
+      annual_generation_kwh: data.annual_generation_kwh ? parseFloat(data.annual_generation_kwh) : undefined,
+      accumulated_credits_kwh: data.accumulated_credits_kwh ? parseFloat(data.accumulated_credits_kwh) : undefined
     }),
     onSuccess: () => {
       queryClient.invalidateQueries(['powerplants']);
@@ -70,7 +72,8 @@ export default function AdminPowerPlants() {
       ...data,
       capacity_kw: parseFloat(data.capacity_kw),
       monthly_generation_kwh: data.monthly_generation_kwh ? parseFloat(data.monthly_generation_kwh) : undefined,
-      annual_generation_kwh: data.annual_generation_kwh ? parseFloat(data.annual_generation_kwh) : undefined
+      annual_generation_kwh: data.annual_generation_kwh ? parseFloat(data.annual_generation_kwh) : undefined,
+      accumulated_credits_kwh: data.accumulated_credits_kwh ? parseFloat(data.accumulated_credits_kwh) : undefined
     }),
     onSuccess: () => {
       queryClient.invalidateQueries(['powerplants']);
@@ -91,6 +94,7 @@ export default function AdminPowerPlants() {
       capacity_kw: '',
       monthly_generation_kwh: '',
       annual_generation_kwh: '',
+      accumulated_credits_kwh: '',
       location: '',
       city: '',
       state: '',
@@ -110,6 +114,7 @@ export default function AdminPowerPlants() {
       capacity_kw: plant.capacity_kw?.toString() || '',
       monthly_generation_kwh: plant.monthly_generation_kwh?.toString() || '',
       annual_generation_kwh: plant.annual_generation_kwh?.toString() || '',
+      accumulated_credits_kwh: plant.accumulated_credits_kwh?.toString() || '',
       location: plant.location || '',
       city: plant.city || '',
       state: plant.state || '',
@@ -281,12 +286,17 @@ export default function AdminPowerPlants() {
                       <Zap className="w-4 h-4" />
                       <span>{plant.capacity_kw?.toLocaleString()} kWp</span>
                     </div>
-                    {plant.monthly_generation_kwh && (
+                    {plant.operation_mode === 'accumulated_balance' && plant.accumulated_credits_kwh ? (
+                      <div className="flex items-center gap-2 text-sm font-semibold text-amber-700">
+                        <Zap className="w-4 h-4" />
+                        <span>{plant.accumulated_credits_kwh?.toLocaleString()} kWh acumulados</span>
+                      </div>
+                    ) : plant.monthly_generation_kwh ? (
                       <div className="flex items-center gap-2 text-sm font-semibold text-amber-700">
                         <Zap className="w-4 h-4" />
                         <span>{plant.monthly_generation_kwh?.toLocaleString()} kWh/mês</span>
                       </div>
-                    )}
+                    ) : null}
                     {plant.start_date && (
                       <div className="flex items-center gap-2 text-sm text-slate-600">
                         <Calendar className="w-4 h-4" />
@@ -298,7 +308,7 @@ export default function AdminPowerPlants() {
                         {statusLabels[plant.status]}
                       </Badge>
                       <Badge variant="outline" className="text-xs">
-                        {plant.operation_mode === 'accumulated_balance' ? 'Saldo Acumulado' : 'Geração Mensal'}
+                        {plant.operation_mode === 'accumulated_balance' ? 'Crédito Acumulado' : 'Geração Mensal'}
                       </Badge>
                     </div>
                   </div>
@@ -375,35 +385,49 @@ export default function AdminPowerPlants() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="monthly_generation">Geração Mensal</SelectItem>
-                  <SelectItem value="accumulated_balance">Saldo Acumulado</SelectItem>
+                  <SelectItem value="accumulated_balance">Crédito Acumulado</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-slate-500">
-                Geração Mensal: energia gerada é distribuída mensalmente. Saldo Acumulado: créditos acumulam ao longo do tempo.
+                Geração Mensal: energia gerada é distribuída mensalmente. Crédito Acumulado: créditos acumulam ao longo do tempo.
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            {formData.operation_mode === 'accumulated_balance' ? (
               <div className="space-y-2">
-                <Label>Geração Mensal (kWh)</Label>
+                <Label>Créditos Acumulados (kWh) *</Label>
                 <Input
                   type="number"
-                  value={formData.monthly_generation_kwh}
-                  onChange={(e) => setFormData(prev => ({ ...prev, monthly_generation_kwh: e.target.value }))}
-                  placeholder="Ex: 150000"
+                  value={formData.accumulated_credits_kwh}
+                  onChange={(e) => setFormData(prev => ({ ...prev, accumulated_credits_kwh: e.target.value }))}
+                  placeholder="Ex: 500000"
+                  required={formData.operation_mode === 'accumulated_balance'}
                 />
-                <p className="text-xs text-slate-500">Energia gerada por mês para rateio</p>
+                <p className="text-xs text-slate-500">Total de kWh de crédito disponível nesta usina</p>
               </div>
-              <div className="space-y-2">
-                <Label>Geração Anual (kWh)</Label>
-                <Input
-                  type="number"
-                  value={formData.annual_generation_kwh}
-                  onChange={(e) => setFormData(prev => ({ ...prev, annual_generation_kwh: e.target.value }))}
-                  placeholder="Ex: 1800000"
-                />
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Geração Mensal (kWh)</Label>
+                  <Input
+                    type="number"
+                    value={formData.monthly_generation_kwh}
+                    onChange={(e) => setFormData(prev => ({ ...prev, monthly_generation_kwh: e.target.value }))}
+                    placeholder="Ex: 150000"
+                  />
+                  <p className="text-xs text-slate-500">Energia gerada por mês para rateio</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Geração Anual (kWh)</Label>
+                  <Input
+                    type="number"
+                    value={formData.annual_generation_kwh}
+                    onChange={(e) => setFormData(prev => ({ ...prev, annual_generation_kwh: e.target.value }))}
+                    placeholder="Ex: 1800000"
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="space-y-2">
               <Label>Endereço</Label>

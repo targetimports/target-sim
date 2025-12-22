@@ -1,145 +1,151 @@
-import Home from './pages/Home';
-import Subscribe from './pages/Subscribe';
-import CustomerDashboard from './pages/CustomerDashboard';
+import AIInnovations from './pages/AIInnovations';
+import AIInsightsDashboard from './pages/AIInsightsDashboard';
+import AccountsManagement from './pages/AccountsManagement';
+import AdminAnalytics from './pages/AdminAnalytics';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminPlans from './pages/AdminPlans';
-import AdminPowerPlants from './pages/AdminPowerPlants';
-import ConsumptionMonitor from './pages/ConsumptionMonitor';
-import SupportCenter from './pages/SupportCenter';
-import ServiceOrders from './pages/ServiceOrders';
-import AdminServiceOrders from './pages/AdminServiceOrders';
-import AdminAnalytics from './pages/AdminAnalytics';
-import PowerPlantManager from './pages/PowerPlantManager';
-import EnergyCreditsMarket from './pages/EnergyCreditsMarket';
-import ProsumerDashboard from './pages/ProsumerDashboard';
-import ConsumerGroups from './pages/ConsumerGroups';
-import CreditMarketplace from './pages/CreditMarketplace';
 import AdminPowerPlantContracts from './pages/AdminPowerPlantContracts';
-import FinancialDashboard from './pages/FinancialDashboard';
-import EnergyPurchaseManagement from './pages/EnergyPurchaseManagement';
-import AccountsManagement from './pages/AccountsManagement';
-import OwnerContracts from './pages/OwnerContracts';
-import NotificationCenter from './pages/NotificationCenter';
-import Gamification from './pages/Gamification';
-import Certificates from './pages/Certificates';
-import WeatherForecast from './pages/WeatherForecast';
-import PaymentGateway from './pages/PaymentGateway';
-import MaintenanceManagement from './pages/MaintenanceManagement';
+import AdminPowerPlants from './pages/AdminPowerPlants';
+import AdminServiceOrders from './pages/AdminServiceOrders';
 import AdvancedAnalytics from './pages/AdvancedAnalytics';
-import Chatbot from './pages/Chatbot';
+import AdvancedReports from './pages/AdvancedReports';
+import AllocationSimulator from './pages/AllocationSimulator';
+import AutomatedAlerts from './pages/AutomatedAlerts';
+import AutomaticBilling from './pages/AutomaticBilling';
+import AutomationManager from './pages/AutomationManager';
 import CRMDashboard from './pages/CRMDashboard';
+import CRMIntegrations from './pages/CRMIntegrations';
+import Certificates from './pages/Certificates';
+import Chatbot from './pages/Chatbot';
+import ChurnPrediction from './pages/ChurnPrediction';
+import ConsumerGroups from './pages/ConsumerGroups';
+import ConsumptionMonitor from './pages/ConsumptionMonitor';
+import ContractManagement from './pages/ContractManagement';
+import CreditAdjustments from './pages/CreditAdjustments';
+import CreditBalanceManager from './pages/CreditBalanceManager';
+import CreditMarketplace from './pages/CreditMarketplace';
+import CreditSystem from './pages/CreditSystem';
+import CustomerDashboard from './pages/CustomerDashboard';
+import CustomerManagement from './pages/CustomerManagement';
+import CustomerPortal from './pages/CustomerPortal';
+import DeficitCompensation from './pages/DeficitCompensation';
+import DistributorIntegrations from './pages/DistributorIntegrations';
+import DocumentManager from './pages/DocumentManager';
+import DocumentsDashboard from './pages/DocumentsDashboard';
+import EnergyAllocationManager from './pages/EnergyAllocationManager';
+import EnergyCreditsMarket from './pages/EnergyCreditsMarket';
+import EnergyPurchaseManagement from './pages/EnergyPurchaseManagement';
+import ExpiringCredits from './pages/ExpiringCredits';
+import FinancialDashboard from './pages/FinancialDashboard';
+import Gamification from './pages/Gamification';
+import Home from './pages/Home';
+import LeadAutomation from './pages/LeadAutomation';
+import LoyaltyProgram from './pages/LoyaltyProgram';
+import MaintenanceManagement from './pages/MaintenanceManagement';
+import MonthlyReconciliation from './pages/MonthlyReconciliation';
+import NotificationCenter from './pages/NotificationCenter';
+import NotificationManager from './pages/NotificationManager';
+import OnboardingManager from './pages/OnboardingManager';
+import OwnerContracts from './pages/OwnerContracts';
+import PaymentGateway from './pages/PaymentGateway';
+import PerformanceDashboard from './pages/PerformanceDashboard';
+import PlantCapacityManager from './pages/PlantCapacityManager';
 import PlantMonitoring from './pages/PlantMonitoring';
-import WhatsAppManagement from './pages/WhatsAppManagement';
+import PlantOwnerContracts from './pages/PlantOwnerContracts';
+import PlantPerformanceDashboard from './pages/PlantPerformanceDashboard';
+import PowerPlantManager from './pages/PowerPlantManager';
+import ProsumerDashboard from './pages/ProsumerDashboard';
+import RegulatoryReports from './pages/RegulatoryReports';
+import SalesPipeline from './pages/SalesPipeline';
+import ServiceOrders from './pages/ServiceOrders';
+import Subscribe from './pages/Subscribe';
 import SuperApp from './pages/SuperApp';
-import AIInnovations from './pages/AIInnovations';
+import SupportCenter from './pages/SupportCenter';
+import TaskAutomationRules from './pages/TaskAutomationRules';
+import TaskDashboard from './pages/TaskDashboard';
+import TaskManager from './pages/TaskManager';
+import TransactionHistory from './pages/TransactionHistory';
+import UtilityBillManager from './pages/UtilityBillManager';
+import WeatherForecast from './pages/WeatherForecast';
 import WhatsAppCampaigns from './pages/WhatsAppCampaigns';
 import WhatsAppEvolution from './pages/WhatsAppEvolution';
-import EnergyAllocationManager from './pages/EnergyAllocationManager';
-import CreditBalanceManager from './pages/CreditBalanceManager';
-import MonthlyReconciliation from './pages/MonthlyReconciliation';
-import PlantCapacityManager from './pages/PlantCapacityManager';
-import OnboardingManager from './pages/OnboardingManager';
-import UtilityBillManager from './pages/UtilityBillManager';
-import RegulatoryReports from './pages/RegulatoryReports';
-import AutomaticBilling from './pages/AutomaticBilling';
-import CreditAdjustments from './pages/CreditAdjustments';
-import ExpiringCredits from './pages/ExpiringCredits';
-import DeficitCompensation from './pages/DeficitCompensation';
-import AllocationSimulator from './pages/AllocationSimulator';
-import PerformanceDashboard from './pages/PerformanceDashboard';
-import TransactionHistory from './pages/TransactionHistory';
-import DistributorIntegrations from './pages/DistributorIntegrations';
-import CustomerManagement from './pages/CustomerManagement';
-import AdvancedReports from './pages/AdvancedReports';
-import AutomatedAlerts from './pages/AutomatedAlerts';
-import ChurnPrediction from './pages/ChurnPrediction';
-import SalesPipeline from './pages/SalesPipeline';
-import LoyaltyProgram from './pages/LoyaltyProgram';
-import DocumentManager from './pages/DocumentManager';
-import PlantPerformanceDashboard from './pages/PlantPerformanceDashboard';
-import LeadAutomation from './pages/LeadAutomation';
-import CustomerPortal from './pages/CustomerPortal';
-import NotificationManager from './pages/NotificationManager';
-import DocumentsDashboard from './pages/DocumentsDashboard';
-import AutomationManager from './pages/AutomationManager';
-import TaskManager from './pages/TaskManager';
-import CRMIntegrations from './pages/CRMIntegrations';
-import TaskDashboard from './pages/TaskDashboard';
-import TaskAutomationRules from './pages/TaskAutomationRules';
-import AIInsightsDashboard from './pages/AIInsightsDashboard';
+import WhatsAppManagement from './pages/WhatsAppManagement';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Home": Home,
-    "Subscribe": Subscribe,
-    "CustomerDashboard": CustomerDashboard,
+    "AIInnovations": AIInnovations,
+    "AIInsightsDashboard": AIInsightsDashboard,
+    "AccountsManagement": AccountsManagement,
+    "AdminAnalytics": AdminAnalytics,
     "AdminDashboard": AdminDashboard,
     "AdminPlans": AdminPlans,
-    "AdminPowerPlants": AdminPowerPlants,
-    "ConsumptionMonitor": ConsumptionMonitor,
-    "SupportCenter": SupportCenter,
-    "ServiceOrders": ServiceOrders,
-    "AdminServiceOrders": AdminServiceOrders,
-    "AdminAnalytics": AdminAnalytics,
-    "PowerPlantManager": PowerPlantManager,
-    "EnergyCreditsMarket": EnergyCreditsMarket,
-    "ProsumerDashboard": ProsumerDashboard,
-    "ConsumerGroups": ConsumerGroups,
-    "CreditMarketplace": CreditMarketplace,
     "AdminPowerPlantContracts": AdminPowerPlantContracts,
-    "FinancialDashboard": FinancialDashboard,
-    "EnergyPurchaseManagement": EnergyPurchaseManagement,
-    "AccountsManagement": AccountsManagement,
-    "OwnerContracts": OwnerContracts,
-    "NotificationCenter": NotificationCenter,
-    "Gamification": Gamification,
-    "Certificates": Certificates,
-    "WeatherForecast": WeatherForecast,
-    "PaymentGateway": PaymentGateway,
-    "MaintenanceManagement": MaintenanceManagement,
+    "AdminPowerPlants": AdminPowerPlants,
+    "AdminServiceOrders": AdminServiceOrders,
     "AdvancedAnalytics": AdvancedAnalytics,
-    "Chatbot": Chatbot,
+    "AdvancedReports": AdvancedReports,
+    "AllocationSimulator": AllocationSimulator,
+    "AutomatedAlerts": AutomatedAlerts,
+    "AutomaticBilling": AutomaticBilling,
+    "AutomationManager": AutomationManager,
     "CRMDashboard": CRMDashboard,
+    "CRMIntegrations": CRMIntegrations,
+    "Certificates": Certificates,
+    "Chatbot": Chatbot,
+    "ChurnPrediction": ChurnPrediction,
+    "ConsumerGroups": ConsumerGroups,
+    "ConsumptionMonitor": ConsumptionMonitor,
+    "ContractManagement": ContractManagement,
+    "CreditAdjustments": CreditAdjustments,
+    "CreditBalanceManager": CreditBalanceManager,
+    "CreditMarketplace": CreditMarketplace,
+    "CreditSystem": CreditSystem,
+    "CustomerDashboard": CustomerDashboard,
+    "CustomerManagement": CustomerManagement,
+    "CustomerPortal": CustomerPortal,
+    "DeficitCompensation": DeficitCompensation,
+    "DistributorIntegrations": DistributorIntegrations,
+    "DocumentManager": DocumentManager,
+    "DocumentsDashboard": DocumentsDashboard,
+    "EnergyAllocationManager": EnergyAllocationManager,
+    "EnergyCreditsMarket": EnergyCreditsMarket,
+    "EnergyPurchaseManagement": EnergyPurchaseManagement,
+    "ExpiringCredits": ExpiringCredits,
+    "FinancialDashboard": FinancialDashboard,
+    "Gamification": Gamification,
+    "Home": Home,
+    "LeadAutomation": LeadAutomation,
+    "LoyaltyProgram": LoyaltyProgram,
+    "MaintenanceManagement": MaintenanceManagement,
+    "MonthlyReconciliation": MonthlyReconciliation,
+    "NotificationCenter": NotificationCenter,
+    "NotificationManager": NotificationManager,
+    "OnboardingManager": OnboardingManager,
+    "OwnerContracts": OwnerContracts,
+    "PaymentGateway": PaymentGateway,
+    "PerformanceDashboard": PerformanceDashboard,
+    "PlantCapacityManager": PlantCapacityManager,
     "PlantMonitoring": PlantMonitoring,
-    "WhatsAppManagement": WhatsAppManagement,
+    "PlantOwnerContracts": PlantOwnerContracts,
+    "PlantPerformanceDashboard": PlantPerformanceDashboard,
+    "PowerPlantManager": PowerPlantManager,
+    "ProsumerDashboard": ProsumerDashboard,
+    "RegulatoryReports": RegulatoryReports,
+    "SalesPipeline": SalesPipeline,
+    "ServiceOrders": ServiceOrders,
+    "Subscribe": Subscribe,
     "SuperApp": SuperApp,
-    "AIInnovations": AIInnovations,
+    "SupportCenter": SupportCenter,
+    "TaskAutomationRules": TaskAutomationRules,
+    "TaskDashboard": TaskDashboard,
+    "TaskManager": TaskManager,
+    "TransactionHistory": TransactionHistory,
+    "UtilityBillManager": UtilityBillManager,
+    "WeatherForecast": WeatherForecast,
     "WhatsAppCampaigns": WhatsAppCampaigns,
     "WhatsAppEvolution": WhatsAppEvolution,
-    "EnergyAllocationManager": EnergyAllocationManager,
-    "CreditBalanceManager": CreditBalanceManager,
-    "MonthlyReconciliation": MonthlyReconciliation,
-    "PlantCapacityManager": PlantCapacityManager,
-    "OnboardingManager": OnboardingManager,
-    "UtilityBillManager": UtilityBillManager,
-    "RegulatoryReports": RegulatoryReports,
-    "AutomaticBilling": AutomaticBilling,
-    "CreditAdjustments": CreditAdjustments,
-    "ExpiringCredits": ExpiringCredits,
-    "DeficitCompensation": DeficitCompensation,
-    "AllocationSimulator": AllocationSimulator,
-    "PerformanceDashboard": PerformanceDashboard,
-    "TransactionHistory": TransactionHistory,
-    "DistributorIntegrations": DistributorIntegrations,
-    "CustomerManagement": CustomerManagement,
-    "AdvancedReports": AdvancedReports,
-    "AutomatedAlerts": AutomatedAlerts,
-    "ChurnPrediction": ChurnPrediction,
-    "SalesPipeline": SalesPipeline,
-    "LoyaltyProgram": LoyaltyProgram,
-    "DocumentManager": DocumentManager,
-    "PlantPerformanceDashboard": PlantPerformanceDashboard,
-    "LeadAutomation": LeadAutomation,
-    "CustomerPortal": CustomerPortal,
-    "NotificationManager": NotificationManager,
-    "DocumentsDashboard": DocumentsDashboard,
-    "AutomationManager": AutomationManager,
-    "TaskManager": TaskManager,
-    "CRMIntegrations": CRMIntegrations,
-    "TaskDashboard": TaskDashboard,
-    "TaskAutomationRules": TaskAutomationRules,
-    "AIInsightsDashboard": AIInsightsDashboard,
+    "WhatsAppManagement": WhatsAppManagement,
 }
 
 export const pagesConfig = {
