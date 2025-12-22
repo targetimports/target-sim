@@ -69,21 +69,84 @@ Deno.serve(async (req) => {
 
     const extractedData = result.output;
 
-    // Calcular valor base para desconto (APENAS energia: TUSD + TE)
-    const kwh_tusd = extractedData.kwh_tusd_value || 0;
-    const kwh_te = extractedData.kwh_te_value || 0;
-    const discount_base = kwh_tusd + kwh_te;
+    // Buscar configurações de cobranças
+    const chargeConfigs = await base44.asServiceRole.entities.ChargeConfiguration.list();
+    const configMap = {};
+    chargeConfigs.forEach(c => {
+      configMap[c.charge_key] = c;
+    });
+
+    // Registrar/atualizar cobranças encontradas
+    const allCharges = [];
     
-    // Valores não descontáveis (tudo que NÃO é kWh)
-    const cosip = extractedData.cosip_value || 0;
-    const flags = extractedData.tariff_flags_value || 0;
-    const fines = extractedData.fines_value || 0;
-    const interest = extractedData.interest_value || 0;
-    const taxes_total = (extractedData.taxes?.icms || 0) + 
-                        (extractedData.taxes?.pis || 0) + 
-                        (extractedData.taxes?.cofins || 0);
-    
-    const non_discountable = extractedData.total_amount - discount_base;
+    // Mapear cobranças conhecidas
+    const knownCharges = [
+      { key: 'consumo_tusd', label: 'Consumo TUSD', value: extractedData.kwh_tusd_value, category: 'energy' },
+      { key: 'consumo_te', label: 'Consumo TE', value: extractedData.kwh_te_value, category: 'energy' },
+      { key: 'cosip', label: 'COSIP/Iluminação Pública', value: extractedData.cosip_value, category: 'fees' },
+      { key: 'bandeiras', label: 'Bandeiras Tarifárias', value: extractedData.tariff_flags_value, category: 'fees' },
+      { key: 'multa', label: 'Multa', value: extractedData.fines_value, category: 'fines' },
+      { key: 'juros', label: 'Juros', value: extractedData.interest_value, category: 'fines' },
+      { key: 'icms', label: 'ICMS', value: extractedData.taxes?.icms, category: 'taxes' },
+      { key: 'pis', label: 'PIS', value: extractedData.taxes?.pis, category: 'taxes' },
+      { key: 'cofins', label: 'COFINS', value: extractedData.taxes?.cofins, category: 'taxes' }
+    ];
+
+    // Adicionar outras cobranças encontradas
+    if (extractedData.other_charges) {
+      extractedData.other_charges.forEach(charge => {
+        const key = charge.description.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        knownCharges.push({
+          key: key,
+          label: charge.description,
+          value: charge.amount,
+          category: 'other',
+          auto_discovered: true
+        });
+      });
+    }
+
+    // Processar cada cobrança
+    let discount_base = 0;
+    let non_discountable = 0;
+
+    for (const charge of knownCharges) {
+      if (!charge.value || charge.value === 0) continue;
+
+      // Verificar se configuração existe
+      if (!configMap[charge.key]) {
+        // Criar nova configuração (padrão: energia é descontável, resto não)
+        const newConfig = await base44.asServiceRole.entities.ChargeConfiguration.create({
+          charge_key: charge.key,
+          charge_label: charge.label,
+          is_discountable: charge.category === 'energy',
+          category: charge.category,
+          auto_discovered: charge.auto_discovered || false,
+          first_seen_date: new Date().toISOString(),
+          occurrences: 1
+        });
+        configMap[charge.key] = newConfig;
+      } else {
+        // Atualizar contador de ocorrências
+        await base44.asServiceRole.entities.ChargeConfiguration.update(configMap[charge.key].id, {
+          occurrences: (configMap[charge.key].occurrences || 0) + 1
+        });
+      }
+
+      // Adicionar ao total apropriado
+      if (configMap[charge.key].is_discountable) {
+        discount_base += charge.value;
+      } else {
+        non_discountable += charge.value;
+      }
+
+      allCharges.push({
+        key: charge.key,
+        label: charge.label,
+        value: charge.value,
+        is_discountable: configMap[charge.key].is_discountable
+      });
+    }
 
     // Salvar fatura processada
     const utilityBill = await base44.asServiceRole.entities.UtilityBill.create({
@@ -99,13 +162,7 @@ Deno.serve(async (req) => {
       total_amount: extractedData.total_amount,
       kwh_consumed: extractedData.kwh_consumed,
       kwh_value: discount_base,
-      kwh_tusd_value: kwh_tusd,
-      kwh_te_value: kwh_te,
-      cosip_value: cosip,
-      tariff_flags_value: flags,
-      fines_value: fines,
-      interest_value: interest,
-      other_charges: extractedData.other_charges || [],
+      other_charges: allCharges,
       taxes: extractedData.taxes || {},
       discount_base_value: discount_base,
       non_discountable_value: non_discountable,
@@ -122,16 +179,8 @@ Deno.serve(async (req) => {
         total: extractedData.total_amount,
         kwh_consumed: extractedData.kwh_consumed,
         discount_base: discount_base,
-        kwh_tusd: kwh_tusd,
-        kwh_te: kwh_te,
         non_discountable: non_discountable,
-        breakdown: {
-          cosip: cosip,
-          flags: flags,
-          fines: fines,
-          interest: interest,
-          taxes: taxes_total
-        }
+        all_charges: allCharges
       }
     });
   } catch (error) {

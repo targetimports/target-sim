@@ -71,6 +71,7 @@ import WhatsAppCampaigns from './pages/WhatsAppCampaigns';
 import WhatsAppEvolution from './pages/WhatsAppEvolution';
 import WhatsAppManagement from './pages/WhatsAppManagement';
 import UtilityBillProcessor from './pages/UtilityBillProcessor';
+import ChargeConfigurations from './pages/ChargeConfigurations';
 import __Layout from './Layout.jsx';
 
 
@@ -148,6 +149,7 @@ export const PAGES = {
     "WhatsAppEvolution": WhatsAppEvolution,
     "WhatsAppManagement": WhatsAppManagement,
     "UtilityBillProcessor": UtilityBillProcessor,
+    "ChargeConfigurations": ChargeConfigurations,
 }
 
 export const pagesConfig = {

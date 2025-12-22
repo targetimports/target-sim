@@ -331,45 +331,29 @@ export default function UtilityBillProcessor() {
                 <CardContent className="p-4">
                   <div className="space-y-3">
                     <div>
-                      <p className="text-sm text-slate-600 mb-2">Base para Desconto (Energia)</p>
-                      <div className="grid grid-cols-3 gap-2 text-xs">
-                        <div>
-                          <p className="text-slate-500">TUSD</p>
-                          <p className="font-semibold">R$ {viewData.summary.kwh_tusd?.toFixed(2)}</p>
-                        </div>
-                        <div>
-                          <p className="text-slate-500">TE</p>
-                          <p className="font-semibold">R$ {viewData.summary.kwh_te?.toFixed(2)}</p>
-                        </div>
-                        <div className="bg-green-100 p-2 rounded">
-                          <p className="text-slate-600">Total Energia</p>
-                          <p className="font-bold text-green-700">R$ {viewData.summary.discount_base?.toFixed(2)}</p>
-                        </div>
+                      <p className="text-sm font-semibold text-green-700 mb-2">
+                        ✅ Valores Descontáveis: R$ {viewData.summary.discount_base?.toFixed(2)}
+                      </p>
+                      <div className="space-y-1">
+                        {viewData.summary.all_charges?.filter(c => c.is_discountable).map((charge, i) => (
+                          <div key={i} className="flex justify-between text-xs bg-green-50 p-2 rounded">
+                            <span>{charge.label}</span>
+                            <span className="font-semibold">R$ {charge.value?.toFixed(2)}</span>
+                          </div>
+                        ))}
                       </div>
                     </div>
                     <div>
-                      <p className="text-sm text-slate-600 mb-2">Outras Cobranças (Não descontáveis)</p>
-                      <div className="grid grid-cols-5 gap-2 text-xs">
-                        <div>
-                          <p className="text-slate-500">COSIP</p>
-                          <p className="font-semibold">R$ {viewData.summary.breakdown?.cosip?.toFixed(2) || '0.00'}</p>
-                        </div>
-                        <div>
-                          <p className="text-slate-500">Bandeiras</p>
-                          <p className="font-semibold">R$ {viewData.summary.breakdown?.flags?.toFixed(2) || '0.00'}</p>
-                        </div>
-                        <div>
-                          <p className="text-slate-500">Multas</p>
-                          <p className="font-semibold">R$ {viewData.summary.breakdown?.fines?.toFixed(2) || '0.00'}</p>
-                        </div>
-                        <div>
-                          <p className="text-slate-500">Juros</p>
-                          <p className="font-semibold">R$ {viewData.summary.breakdown?.interest?.toFixed(2) || '0.00'}</p>
-                        </div>
-                        <div className="bg-amber-100 p-2 rounded">
-                          <p className="text-slate-600">Total</p>
-                          <p className="font-bold text-amber-700">R$ {viewData.summary.non_discountable?.toFixed(2)}</p>
-                        </div>
+                      <p className="text-sm font-semibold text-amber-700 mb-2">
+                        ❌ Valores Não Descontáveis: R$ {viewData.summary.non_discountable?.toFixed(2)}
+                      </p>
+                      <div className="space-y-1">
+                        {viewData.summary.all_charges?.filter(c => !c.is_discountable).map((charge, i) => (
+                          <div key={i} className="flex justify-between text-xs bg-amber-50 p-2 rounded">
+                            <span>{charge.label}</span>
+                            <span className="font-semibold">R$ {charge.value?.toFixed(2)}</span>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>

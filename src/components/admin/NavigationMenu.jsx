@@ -64,6 +64,7 @@ const menuCategories = {
     color: 'border-slate-500 bg-slate-50',
     items: [
       { name: 'Processador OCR', url: 'UtilityBillProcessor', icon: '🤖' },
+      { name: 'Config. Cobranças', url: 'ChargeConfigurations', icon: '⚙️' },
       { name: 'Contas de Luz', url: 'UtilityBillManager', icon: '📄' },
       { name: 'Gerenciar Documentos', url: 'DocumentManager', icon: '📁' },
       { name: 'Dashboard Documentos', url: 'DocumentsDashboard', icon: '📊' },
