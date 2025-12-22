@@ -317,55 +317,88 @@ export default function ChargeConfigurations() {
 
             {testResults && (
               <div className="space-y-4">
-                <Card className="bg-green-50 border-green-200">
-                  <CardContent className="p-4">
-                    <h3 className="font-bold text-green-800 mb-2">✅ Processamento Concluído</h3>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div>
-                        <span className="text-slate-600">Total:</span>
-                        <span className="font-bold ml-2">R$ {testResults.summary?.total?.toFixed(2)}</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-600">kWh:</span>
-                        <span className="font-bold ml-2">{testResults.summary?.kwh_consumed}</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-600">Descontável:</span>
-                        <span className="font-bold ml-2 text-green-700">R$ {testResults.summary?.discount_base?.toFixed(2)}</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-600">Não Descontável:</span>
-                        <span className="font-bold ml-2 text-amber-700">R$ {testResults.summary?.non_discountable?.toFixed(2)}</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Cobranças Identificadas</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {testResults.summary?.all_charges?.map((charge, i) => (
-                        <div key={i} className={`p-3 rounded-lg border ${charge.is_discountable ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <p className="font-semibold">{charge.label}</p>
-                              <p className="text-xs text-slate-500">{charge.key}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-bold">R$ {charge.value?.toFixed(2)}</p>
-                              <Badge className={charge.is_discountable ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}>
-                                {charge.is_discountable ? 'Descontável' : 'Não Descontável'}
-                              </Badge>
-                            </div>
+                {testResults.success ? (
+                  <>
+                    <Card className="bg-green-50 border-green-200">
+                      <CardContent className="p-4">
+                        <h3 className="font-bold text-green-800 mb-2">✅ Processamento Concluído</h3>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <span className="text-slate-600">Total:</span>
+                            <span className="font-bold ml-2">R$ {testResults.summary?.total?.toFixed(2) || '0.00'}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-600">kWh:</span>
+                            <span className="font-bold ml-2">{testResults.summary?.kwh_consumed || '0'}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-600">Descontável:</span>
+                            <span className="font-bold ml-2 text-green-700">R$ {testResults.summary?.discount_base?.toFixed(2) || '0.00'}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-600">Não Descontável:</span>
+                            <span className="font-bold ml-2 text-amber-700">R$ {testResults.summary?.non_discountable?.toFixed(2) || '0.00'}</span>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                      </CardContent>
+                    </Card>
+
+                    {testResults.summary?.all_charges && testResults.summary.all_charges.length > 0 ? (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base">Cobranças Identificadas ({testResults.summary.all_charges.length})</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            {testResults.summary.all_charges.map((charge, i) => (
+                              <div key={i} className={`p-3 rounded-lg border ${charge.is_discountable ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
+                                <div className="flex justify-between items-center">
+                                  <div>
+                                    <p className="font-semibold">{charge.label}</p>
+                                    <p className="text-xs text-slate-500">{charge.key}</p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="font-bold">R$ {charge.value?.toFixed(2)}</p>
+                                    <Badge className={charge.is_discountable ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}>
+                                      {charge.is_discountable ? 'Descontável' : 'Não Descontável'}
+                                    </Badge>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      <Card className="bg-amber-50 border-amber-200">
+                        <CardContent className="p-4 text-center">
+                          <p className="text-amber-800 font-semibold">⚠️ Nenhuma cobrança identificada</p>
+                          <p className="text-sm text-amber-700 mt-1">O PDF pode não ser uma fatura de energia ou estar em formato não reconhecido.</p>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {testResults.extracted_data && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base">Dados Brutos Extraídos</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <pre className="text-xs bg-slate-100 p-3 rounded overflow-x-auto">
+                            {JSON.stringify(testResults.extracted_data, null, 2)}
+                          </pre>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </>
+                ) : (
+                  <Card className="bg-red-50 border-red-200">
+                    <CardContent className="p-4">
+                      <h3 className="font-bold text-red-800 mb-2">❌ Erro no Processamento</h3>
+                      <p className="text-sm text-red-700">{testResults.error || 'Erro desconhecido'}</p>
+                    </CardContent>
+                  </Card>
+                )}
 
                 <div className="flex gap-2">
                   <Button
