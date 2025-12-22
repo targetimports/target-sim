@@ -73,6 +73,7 @@ import WhatsAppCampaigns from './pages/WhatsAppCampaigns';
 import WhatsAppEvolution from './pages/WhatsAppEvolution';
 import WhatsAppManagement from './pages/WhatsAppManagement';
 import RateioManagement from './pages/RateioManagement';
+import InvoiceTemplateEditor from './pages/InvoiceTemplateEditor';
 import __Layout from './Layout.jsx';
 
 
@@ -152,6 +153,7 @@ export const PAGES = {
     "WhatsAppEvolution": WhatsAppEvolution,
     "WhatsAppManagement": WhatsAppManagement,
     "RateioManagement": RateioManagement,
+    "InvoiceTemplateEditor": InvoiceTemplateEditor,
 }
 
 export const pagesConfig = {
