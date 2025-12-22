@@ -85,18 +85,19 @@ export default function ChargeConfigurations() {
 
     try {
       // Upload file
-      const { data: uploadData } = await base44.integrations.Core.UploadFile({ file: testFile });
+      const uploadResult = await base44.integrations.Core.UploadFile({ file: testFile });
       
       // Process with OCR test (no customer/subscription)
-      const { data: result } = await base44.functions.invoke('processUtilityBill', {
-        file_url: uploadData.file_url,
+      const processResult = await base44.functions.invoke('processUtilityBill', {
+        file_url: uploadResult.file_url,
         test_mode: true
       });
 
-      setTestResults(result);
+      setTestResults(processResult);
       queryClient.invalidateQueries(['charge-configurations']);
       toast.success('Fatura processada! Novas cobranças foram descobertas.');
     } catch (error) {
+      console.error('Erro detalhado:', error);
       toast.error('Erro ao processar fatura: ' + error.message);
     } finally {
       setIsProcessing(false);

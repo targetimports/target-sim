@@ -16,6 +16,7 @@ import AutomationManager from './pages/AutomationManager';
 import CRMDashboard from './pages/CRMDashboard';
 import CRMIntegrations from './pages/CRMIntegrations';
 import Certificates from './pages/Certificates';
+import ChargeConfigurations from './pages/ChargeConfigurations';
 import Chatbot from './pages/Chatbot';
 import ChurnPrediction from './pages/ChurnPrediction';
 import ConsumerGroups from './pages/ConsumerGroups';
@@ -66,12 +67,11 @@ import TaskDashboard from './pages/TaskDashboard';
 import TaskManager from './pages/TaskManager';
 import TransactionHistory from './pages/TransactionHistory';
 import UtilityBillManager from './pages/UtilityBillManager';
+import UtilityBillProcessor from './pages/UtilityBillProcessor';
 import WeatherForecast from './pages/WeatherForecast';
 import WhatsAppCampaigns from './pages/WhatsAppCampaigns';
 import WhatsAppEvolution from './pages/WhatsAppEvolution';
 import WhatsAppManagement from './pages/WhatsAppManagement';
-import UtilityBillProcessor from './pages/UtilityBillProcessor';
-import ChargeConfigurations from './pages/ChargeConfigurations';
 import __Layout from './Layout.jsx';
 
 
@@ -94,6 +94,7 @@ export const PAGES = {
     "CRMDashboard": CRMDashboard,
     "CRMIntegrations": CRMIntegrations,
     "Certificates": Certificates,
+    "ChargeConfigurations": ChargeConfigurations,
     "Chatbot": Chatbot,
     "ChurnPrediction": ChurnPrediction,
     "ConsumerGroups": ConsumerGroups,
@@ -144,12 +145,11 @@ export const PAGES = {
     "TaskManager": TaskManager,
     "TransactionHistory": TransactionHistory,
     "UtilityBillManager": UtilityBillManager,
+    "UtilityBillProcessor": UtilityBillProcessor,
     "WeatherForecast": WeatherForecast,
     "WhatsAppCampaigns": WhatsAppCampaigns,
     "WhatsAppEvolution": WhatsAppEvolution,
     "WhatsAppManagement": WhatsAppManagement,
-    "UtilityBillProcessor": UtilityBillProcessor,
-    "ChargeConfigurations": ChargeConfigurations,
 }
 
 export const pagesConfig = {
