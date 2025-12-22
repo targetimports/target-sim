@@ -82,10 +82,11 @@ Deno.serve(async (req) => {
       }
     };
 
-    // Extrair dados do PDF
+    // Extrair dados do PDF com instruções claras para o LLM
     const result = await base44.integrations.Core.ExtractDataFromUploadedFile({
       file_url,
-      json_schema: schema
+      json_schema: schema,
+      extraction_instructions: "Esta é uma fatura de energia elétrica brasileira. IMPORTANTE: Todos os valores monetários em Reais devem ser convertidos para números decimais (ex: R$ 1.234,56 vira 1234.56). Procure cuidadosamente por todas as cobranças e seus valores na fatura, incluindo consumo de energia, taxas, impostos e outras cobranças. Valores em kWh também devem ser extraídos como números. Se um valor não for encontrado, use 0."
     });
 
     if (result.status === 'error') {
