@@ -97,11 +97,12 @@ export default function ChargeConfigurations() {
       });
       console.log('4. Resultado do processamento:', processResult);
 
-      setTestResults(processResult);
+      const resultData = processResult.data || processResult;
+      setTestResults(resultData);
       queryClient.invalidateQueries(['charge-configurations']);
       
-      if (processResult.success && processResult.summary?.all_charges?.length > 0) {
-        toast.success(`✅ ${processResult.summary.all_charges.length} cobrança(s) identificada(s)!`);
+      if (resultData.success && resultData.summary?.all_charges?.length > 0) {
+        toast.success(`✅ ${resultData.summary.all_charges.length} cobrança(s) identificada(s)!`);
       } else {
         toast.warning('⚠️ PDF processado mas nenhuma cobrança identificada.');
       }
