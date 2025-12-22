@@ -84,21 +84,32 @@ export default function ChargeConfigurations() {
     setTestResults(null);
 
     try {
+      console.log('1. Iniciando upload do arquivo...');
       // Upload file
       const uploadResult = await base44.integrations.Core.UploadFile({ file: testFile });
+      console.log('2. Upload concluído:', uploadResult);
       
       // Process with OCR test (no customer/subscription)
+      console.log('3. Processando com OCR...');
       const processResult = await base44.functions.invoke('processUtilityBill', {
         file_url: uploadResult.file_url,
         test_mode: true
       });
+      console.log('4. Resultado do processamento:', processResult);
 
       setTestResults(processResult);
       queryClient.invalidateQueries(['charge-configurations']);
-      toast.success('Fatura processada! Novas cobranças foram descobertas.');
+      
+      if (processResult.success && processResult.summary?.all_charges?.length > 0) {
+        toast.success(`✅ ${processResult.summary.all_charges.length} cobrança(s) identificada(s)!`);
+      } else {
+        toast.warning('⚠️ PDF processado mas nenhuma cobrança identificada.');
+      }
     } catch (error) {
       console.error('Erro detalhado:', error);
+      console.error('Stack:', error.stack);
       toast.error('Erro ao processar fatura: ' + error.message);
+      setTestResults({ success: false, error: error.message });
     } finally {
       setIsProcessing(false);
     }
