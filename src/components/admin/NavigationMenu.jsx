@@ -10,6 +10,7 @@ const menuCategories = {
     title: '⚡ Gestão de Energia',
     color: 'border-amber-500 bg-amber-50',
     items: [
+      { name: 'Gestão Rateio Lei 14.300', url: 'RateioManagement', icon: '⚖️' },
       { name: 'Rateio de Energia', url: 'EnergyAllocationManager', icon: '⚡' },
       { name: 'Saldo de Créditos', url: 'CreditBalanceManager', icon: '💰' },
       { name: 'Reconciliação Mensal', url: 'MonthlyReconciliation', icon: '🔄' },
