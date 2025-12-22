@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { file_url, customer_email, subscription_id } = await req.json();
+    const { file_url, customer_email, subscription_id, test_mode } = await req.json();
 
     // Schema para extrair dados da fatura (padrão brasileiro)
     const schema = {
