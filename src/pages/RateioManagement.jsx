@@ -46,10 +46,15 @@ export default function RateioManagement() {
     queryFn: () => base44.entities.PowerPlant.list()
   });
 
-  const { data: subscriptions = [] } = useQuery({
+  const { data: allSubscriptions = [] } = useQuery({
     queryKey: ['subscriptions-active'],
     queryFn: () => base44.entities.Subscription.filter({ status: 'active' })
   });
+
+  // Filtrar apenas assinaturas vinculadas à usina selecionada
+  const subscriptions = formData.power_plant_id 
+    ? allSubscriptions.filter(sub => sub.power_plant_id === formData.power_plant_id)
+    : [];
 
   const createRequest = useMutation({
     mutationFn: (data) => base44.entities.RateioRequest.create(data),
@@ -463,6 +468,16 @@ export default function RateioManagement() {
 
             <div>
               <Label className="mb-3 block">Unidades Consumidoras no Rateio</Label>
+              {!formData.power_plant_id && (
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800 mb-3">
+                  ⚠️ Selecione uma usina primeiro para ver os clientes vinculados
+                </div>
+              )}
+              {formData.power_plant_id && subscriptions.length === 0 && (
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600 mb-3">
+                  Nenhum cliente vinculado a esta usina ainda
+                </div>
+              )}
               <div className="border border-slate-200 rounded-lg p-4 max-h-64 overflow-y-auto space-y-2">
                 {subscriptions.map(sub => {
                   const isSelected = selectedSubscriptions.find(s => s.id === sub.id);
