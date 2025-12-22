@@ -148,8 +148,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Salvar fatura processada
-    const utilityBill = await base44.asServiceRole.entities.UtilityBill.create({
+    // Se for modo teste, não salvar fatura
+    let utilityBill = null;
+    
+    if (!test_mode) {
+      // Salvar fatura processada
+      utilityBill = await base44.asServiceRole.entities.UtilityBill.create({
       customer_email,
       subscription_id,
       file_url,
@@ -169,7 +173,8 @@ Deno.serve(async (req) => {
       ocr_processed: true,
       extracted_data: extractedData,
       status: 'processed'
-    });
+      });
+    }
 
     return Response.json({
       success: true,

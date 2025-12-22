@@ -77,6 +77,32 @@ export default function ChargeConfigurations() {
     createCharge.mutate(formData);
   };
 
+  const handleTestUpload = async () => {
+    if (!testFile) return;
+
+    setIsProcessing(true);
+    setTestResults(null);
+
+    try {
+      // Upload file
+      const { data: uploadData } = await base44.integrations.Core.UploadFile({ file: testFile });
+      
+      // Process with OCR test (no customer/subscription)
+      const { data: result } = await base44.functions.invoke('processUtilityBill', {
+        file_url: uploadData.file_url,
+        test_mode: true
+      });
+
+      setTestResults(result);
+      queryClient.invalidateQueries(['charge-configurations']);
+      toast.success('Fatura processada! Novas cobranças foram descobertas.');
+    } catch (error) {
+      toast.error('Erro ao processar fatura: ' + error.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const categoryLabels = {
     energy: 'Energia',
     taxes: 'Impostos',
@@ -153,13 +179,23 @@ export default function ChargeConfigurations() {
                 <Sparkles className="w-4 h-4 mr-2" />
                 Testar PDF
               </Button>
-              <Button
-                onClick={() => { resetForm(); setIsDialogOpen(true); }}
-                className="bg-white text-purple-600 hover:bg-white/90"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Nova Cobrança
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setIsTestDialogOpen(true)}
+                  variant="outline"
+                  className="border-white/30 text-white hover:bg-white/20"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Testar Fatura
+                </Button>
+                <Button
+                  onClick={() => { resetForm(); setIsDialogOpen(true); }}
+                  className="bg-white text-purple-600 hover:bg-white/90"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nova Cobrança
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -356,6 +392,109 @@ export default function ChargeConfigurations() {
                 >
                   Fechar e Atualizar Lista
                 </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Test Upload Dialog */}
+      <Dialog open={isTestDialogOpen} onOpenChange={setIsTestDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Testar Mapeamento de Fatura</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="border-2 border-dashed border-purple-300 rounded-lg p-8 text-center">
+              <Input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => setTestFile(e.target.files[0])}
+                className="max-w-sm mx-auto"
+              />
+              <p className="text-sm text-slate-500 mt-2">
+                Faça upload de uma fatura PDF para descobrir automaticamente as cobranças
+              </p>
+            </div>
+
+            <Button
+              onClick={handleTestUpload}
+              disabled={!testFile || isProcessing}
+              className="w-full"
+            >
+              {isProcessing ? 'Processando...' : 'Processar Fatura'}
+            </Button>
+
+            {testResults && (
+              <div className="space-y-4">
+                <Card className="bg-green-50 border-green-200">
+                  <CardContent className="p-4">
+                    <h3 className="font-bold text-green-800 mb-2">✅ Processamento Concluído</h3>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="text-slate-600">Total:</span>
+                        <span className="font-bold ml-2">R$ {testResults.summary?.total?.toFixed(2)}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-600">kWh:</span>
+                        <span className="font-bold ml-2">{testResults.summary?.kwh_consumed}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-600">Descontável:</span>
+                        <span className="font-bold ml-2 text-green-700">R$ {testResults.summary?.discount_base?.toFixed(2)}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-600">Não Descontável:</span>
+                        <span className="font-bold ml-2 text-amber-700">R$ {testResults.summary?.non_discountable?.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Cobranças Identificadas</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {testResults.summary?.all_charges?.map((charge, i) => (
+                        <div key={i} className={`p-3 rounded-lg border ${charge.is_discountable ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="font-semibold">{charge.label}</p>
+                              <p className="text-xs text-slate-500">{charge.key}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold">R$ {charge.value?.toFixed(2)}</p>
+                              <Badge className={charge.is_discountable ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}>
+                                {charge.is_discountable ? 'Descontável' : 'Não Descontável'}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      setTestResults(null);
+                      setTestFile(null);
+                    }}
+                  >
+                    Testar Outra
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    onClick={() => setIsTestDialogOpen(false)}
+                  >
+                    Fechar
+                  </Button>
+                </div>
               </div>
             )}
           </div>
