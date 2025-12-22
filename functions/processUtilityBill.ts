@@ -14,71 +14,71 @@ Deno.serve(async (req) => {
     // Schema para extrair dados da fatura (padrão brasileiro)
     const schema = {
       type: "object",
+      description: "Fatura de energia elétrica brasileira. IMPORTANTE: Converta TODOS os valores monetários brasileiros (ex: R$ 1.234,56) para número decimal (1234.56). Procure atentamente em tabelas, seções de 'Detalhamento' ou 'Valores Faturados'.",
       properties: {
-        customer_name: { type: "string", description: "Nome completo do cliente conforme aparece na fatura" },
-        customer_cpf_cnpj: { type: "string", description: "CPF ou CNPJ do cliente com pontuação" },
-        installation_number: { type: "string", description: "Número da instalação ou UC (Unidade Consumidora)" },
-        customer_code: { type: "string", description: "Código ou número do cliente" },
-        reference_month: { type: "string", description: "Mês de referência no formato MM/YYYY" },
-        due_date: { type: "string", description: "Data de vencimento no formato DD/MM/YYYY" },
-        invoice_number: { type: "string", description: "Número da nota fiscal ou documento" },
+        customer_name: { type: "string", description: "Nome do cliente" },
+        customer_cpf_cnpj: { type: "string", description: "CPF ou CNPJ" },
+        installation_number: { type: "string", description: "Número da instalação/UC" },
+        customer_code: { type: "string", description: "Código do cliente" },
+        reference_month: { type: "string", description: "Mês de referência (MM/YYYY)" },
+        due_date: { type: "string", description: "Data de vencimento (DD/MM/YYYY)" },
+        invoice_number: { type: "string", description: "Número da nota fiscal" },
         total_amount: { 
           type: "number", 
-          description: "VALOR TOTAL A PAGAR em Reais (R$) - normalmente o valor final destacado da fatura. Extraia apenas o número, sem R$ ou vírgulas. Use ponto para decimal. Exemplo: se aparecer R$ 1.234,56 extraia como 1234.56"
+          description: "VALOR TOTAL A PAGAR da fatura. Procure por seção 'Total a Pagar', 'Valor Total' ou similar, geralmente em destaque. Converta R$ 1.234,56 para 1234.56. Exemplo: se vir 'R$ 850,43' retorne 850.43"
         },
         kwh_consumed: { 
           type: "number", 
-          description: "Total de kWh consumidos. Procure por 'Consumo' ou 'Energia Consumida' em kWh. Extraia apenas o número."
+          description: "Total kWh consumidos. Procure seção 'Consumo', 'Histórico de Consumo' ou tabela com kWh. Exemplo: '450 kWh' retorne 450"
         },
         kwh_tusd_value: { 
           type: "number", 
-          description: "Valor em Reais da TUSD (Tarifa de Uso). Procure por linhas com 'TUSD' ou 'Tarifa de Uso'. Converta para número decimal."
+          description: "Valor da TUSD (Tarifa de Uso do Sistema de Distribuição). Procure linha/coluna 'Energia Elétrica TUSD' ou 'Consumo TUSD' na tabela de valores. Converta para decimal. Exemplo: 'R$ 245,80' retorne 245.80"
         },
         kwh_te_value: { 
           type: "number", 
-          description: "Valor em Reais da TE (Tarifa de Energia). Procure por 'TE' ou 'Tarifa de Energia'. Converta para número decimal."
+          description: "Valor da TE (Tarifa de Energia). Procure 'Energia Elétrica TE' ou 'Consumo TE' na tabela. Converta para decimal. Exemplo: 'R$ 356,20' retorne 356.20"
         },
         kwh_total_value: { 
           type: "number", 
-          description: "Soma dos valores de TUSD + TE em Reais. Se não estiver explícito, calcule somando os dois valores acima."
+          description: "Soma TUSD + TE. Se não explícito, calcule somando os dois valores acima"
         },
         cosip_value: { 
           type: "number", 
-          description: "Valor da Contribuição de Iluminação Pública (COSIP, CIP ou CIP/COSIP) em Reais. Converta para decimal."
+          description: "Contribuição de Iluminação Pública. Procure linha 'COSIP', 'CIP', 'Contrib. Iluminação' na tabela. Converta para decimal."
         },
         tariff_flags_value: { 
           type: "number", 
-          description: "Valor das Bandeiras Tarifárias em Reais (pode ser verde/amarela/vermelha). Converta para decimal."
+          description: "Bandeiras Tarifárias. Procure linha 'Bandeira', 'Adicional Bandeira' na tabela. Converta para decimal."
         },
         fines_value: { 
           type: "number", 
-          description: "Valor de Multas em Reais, se houver. Converta para decimal."
+          description: "Multas. Procure 'Multa', 'Multa por Atraso'. Converta para decimal. Se não houver, use 0."
         },
         interest_value: { 
           type: "number", 
-          description: "Valor de Juros em Reais, se houver. Converta para decimal."
+          description: "Juros. Procure 'Juros', 'Juros de Mora'. Converta para decimal. Se não houver, use 0."
         },
         other_charges: {
           type: "array",
           items: {
             type: "object",
             properties: {
-              description: { type: "string", description: "Nome da cobrança" },
-              amount: { type: "number", description: "Valor em número decimal" }
+              description: { type: "string" },
+              amount: { type: "number" }
             }
           },
-          description: "Lista de TODAS as outras cobranças visíveis na fatura que não se encaixam nas categorias acima. Inclua o nome e valor convertido para decimal. Exemplos: taxas adicionais, débitos anteriores, créditos, etc."
+          description: "TODAS as outras cobranças da tabela de valores que não foram mapeadas acima (ex: 'Débitos Anteriores', 'Taxa de Urgência', etc). Extraia nome e valor convertido."
         },
         taxes: {
           type: "object",
           properties: {
-            icms: { type: "number", description: "Valor do imposto ICMS em Reais (decimal)" },
-            pis: { type: "number", description: "Valor do imposto PIS em Reais (decimal)" },
-            cofins: { type: "number", description: "Valor do imposto COFINS em Reais (decimal)" }
-          },
-          description: "Impostos podem aparecer embutidos ou em seção separada. Procure por 'Impostos', 'Tributos' ou similar."
+            icms: { type: "number", description: "Imposto ICMS. Procure 'ICMS' na seção de impostos ou tributos. Pode estar embutido. Converta para decimal." },
+            pis: { type: "number", description: "Imposto PIS. Procure 'PIS'. Converta para decimal." },
+            cofins: { type: "number", description: "Imposto COFINS. Procure 'COFINS'. Converta para decimal." }
+          }
         },
-        utility_company: { type: "string", description: "Nome da distribuidora de energia (Neoenergia, CEMIG, CPFL, Enel, etc)" }
+        utility_company: { type: "string", description: "Nome da concessionária (Neoenergia, CEMIG, CPFL, Enel)" }
       }
     };
 
