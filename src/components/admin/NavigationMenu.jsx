@@ -63,6 +63,7 @@ const menuCategories = {
     title: '📑 Regulatório & Documentos',
     color: 'border-slate-500 bg-slate-50',
     items: [
+      { name: 'Processador OCR', url: 'UtilityBillProcessor', icon: '🤖' },
       { name: 'Contas de Luz', url: 'UtilityBillManager', icon: '📄' },
       { name: 'Gerenciar Documentos', url: 'DocumentManager', icon: '📁' },
       { name: 'Dashboard Documentos', url: 'DocumentsDashboard', icon: '📊' },
