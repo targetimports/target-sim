@@ -40,6 +40,7 @@ import ExpiringCredits from './pages/ExpiringCredits';
 import FinancialDashboard from './pages/FinancialDashboard';
 import Gamification from './pages/Gamification';
 import Home from './pages/Home';
+import InvoiceTemplateEditor from './pages/InvoiceTemplateEditor';
 import LeadAutomation from './pages/LeadAutomation';
 import LoyaltyProgram from './pages/LoyaltyProgram';
 import MaintenanceManagement from './pages/MaintenanceManagement';
@@ -56,6 +57,7 @@ import PlantOwnerContracts from './pages/PlantOwnerContracts';
 import PlantPerformanceDashboard from './pages/PlantPerformanceDashboard';
 import PowerPlantManager from './pages/PowerPlantManager';
 import ProsumerDashboard from './pages/ProsumerDashboard';
+import RateioManagement from './pages/RateioManagement';
 import RegulatoryReports from './pages/RegulatoryReports';
 import SalesPipeline from './pages/SalesPipeline';
 import ServiceOrders from './pages/ServiceOrders';
@@ -72,8 +74,6 @@ import WeatherForecast from './pages/WeatherForecast';
 import WhatsAppCampaigns from './pages/WhatsAppCampaigns';
 import WhatsAppEvolution from './pages/WhatsAppEvolution';
 import WhatsAppManagement from './pages/WhatsAppManagement';
-import RateioManagement from './pages/RateioManagement';
-import InvoiceTemplateEditor from './pages/InvoiceTemplateEditor';
 import __Layout from './Layout.jsx';
 
 
@@ -120,6 +120,7 @@ export const PAGES = {
     "FinancialDashboard": FinancialDashboard,
     "Gamification": Gamification,
     "Home": Home,
+    "InvoiceTemplateEditor": InvoiceTemplateEditor,
     "LeadAutomation": LeadAutomation,
     "LoyaltyProgram": LoyaltyProgram,
     "MaintenanceManagement": MaintenanceManagement,
@@ -136,6 +137,7 @@ export const PAGES = {
     "PlantPerformanceDashboard": PlantPerformanceDashboard,
     "PowerPlantManager": PowerPlantManager,
     "ProsumerDashboard": ProsumerDashboard,
+    "RateioManagement": RateioManagement,
     "RegulatoryReports": RegulatoryReports,
     "SalesPipeline": SalesPipeline,
     "ServiceOrders": ServiceOrders,
@@ -152,8 +154,6 @@ export const PAGES = {
     "WhatsAppCampaigns": WhatsAppCampaigns,
     "WhatsAppEvolution": WhatsAppEvolution,
     "WhatsAppManagement": WhatsAppManagement,
-    "RateioManagement": RateioManagement,
-    "InvoiceTemplateEditor": InvoiceTemplateEditor,
 }
 
 export const pagesConfig = {

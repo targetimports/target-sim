@@ -25,6 +25,7 @@ import WhatsAppStatusIndicator from '../components/WhatsAppStatusIndicator';
 import NavigationMenu from '../components/admin/NavigationMenu';
 import QuickAccessCards from '../components/admin/QuickAccessCards';
 import DashboardCustomizer from '../components/dashboard/DashboardCustomizer';
+import QuickAccessCustomizer from '../components/dashboard/QuickAccessCustomizer';
 import NotificationBell from '../components/notifications/NotificationBell';
 import SubscriptionTrendsWidget from '../components/dashboard/widgets/SubscriptionTrendsWidget';
 import RevenueChartWidget from '../components/dashboard/widgets/RevenueChartWidget';
@@ -55,6 +56,20 @@ export default function AdminDashboard() {
     { id: 'top', title: 'Top Clientes', description: 'Maiores contas' }
   ];
 
+  // Quick access items disponíveis
+  const availableQuickAccess = [
+    { id: 'rateio', title: '⚡ Rateio de Energia', description: 'Alocar energia para clientes' },
+    { id: 'billing', title: '💳 Faturamento', description: 'Gerar faturas mensais' },
+    { id: 'performance', title: '📊 Performance', description: 'Dashboard de utilização' },
+    { id: 'credits', title: '💰 Saldo Créditos', description: 'Ver créditos clientes' },
+    { id: 'reconciliation', title: '🔄 Reconciliação', description: 'Verificar geração real' },
+    { id: 'expiring', title: '⏰ Expirações', description: 'Créditos expirando' },
+    { id: 'onboarding', title: '📋 Onboarding', description: 'Novos clientes' },
+    { id: 'tasks', title: '📊 Tarefas', description: 'Dashboard de tarefas' },
+    { id: 'crm', title: '🔗 CRM', description: 'Integrações CRM' },
+    { id: 'ai', title: '🧠 IA Insights', description: 'Análises preditivas' }
+  ];
+
   // Buscar preferências do usuário
   const { data: user } = useQuery({
     queryKey: ['current-user'],
@@ -74,9 +89,14 @@ export default function AdminDashboard() {
     preferences?.[0]?.visible_widgets || ['trends', 'revenue', 'distribution', 'activity', 'top']
   );
 
+  const [visibleQuickAccess, setVisibleQuickAccess] = useState(
+    preferences?.[0]?.visible_quick_access || ['rateio', 'billing', 'performance', 'credits', 'reconciliation']
+  );
+
   React.useEffect(() => {
-    if (preferences?.[0]?.visible_widgets) {
-      setVisibleWidgets(preferences[0].visible_widgets);
+    if (preferences?.[0]) {
+      setVisibleWidgets(preferences[0].visible_widgets || ['trends', 'revenue', 'distribution', 'activity', 'top']);
+      setVisibleQuickAccess(preferences[0].visible_quick_access || ['rateio', 'billing', 'performance', 'credits', 'reconciliation']);
     }
   }, [preferences]);
 
@@ -93,6 +113,23 @@ export default function AdminDashboard() {
         user_email: user?.email,
         dashboard_type: 'admin',
         visible_widgets: newVisibleWidgets
+      });
+    }
+    queryClient.invalidateQueries(['dashboard-preferences']);
+  };
+
+  const saveQuickAccessPreferences = async (newVisibleItems) => {
+    setVisibleQuickAccess(newVisibleItems);
+    
+    if (preferences && preferences.length > 0) {
+      await base44.entities.DashboardPreference.update(preferences[0].id, {
+        visible_quick_access: newVisibleItems
+      });
+    } else {
+      await base44.entities.DashboardPreference.create({
+        user_email: user?.email,
+        dashboard_type: 'admin',
+        visible_quick_access: newVisibleItems
       });
     }
     queryClient.invalidateQueries(['dashboard-preferences']);
@@ -239,13 +276,13 @@ export default function AdminDashboard() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-slate-900">⚡ Acesso Rápido</h2>
-            <DashboardCustomizer
-              availableWidgets={availableWidgets}
-              visibleWidgets={visibleWidgets}
-              onSave={savePreferences}
+            <QuickAccessCustomizer
+              availableItems={availableQuickAccess}
+              visibleItems={visibleQuickAccess}
+              onSave={saveQuickAccessPreferences}
             />
           </div>
-          <QuickAccessCards />
+          <QuickAccessCards visibleItems={visibleQuickAccess} />
         </div>
 
         {/* Stats */}

@@ -85,7 +85,7 @@ export default function QuickAccessCards({ visibleItems = quickAccessItems.map(i
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {filteredItems.map((item) => (
-        <Link key={item.url} to={createPageUrl(item.url)}>
+        <Link key={item.id} to={createPageUrl(item.url)}>
           <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer h-full">
             <CardContent className="p-0">
               <div className={`bg-gradient-to-br ${item.color} p-4 text-white`}>
