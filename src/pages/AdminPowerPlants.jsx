@@ -355,7 +355,7 @@ export default function AdminPowerPlants() {
                 <Label>Tipo *</Label>
                 <Select value={formData.type} onValueChange={(v) => setFormData(prev => ({ ...prev, type: v }))}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder={`${typeIcons[formData.type]} ${typeLabels[formData.type]}`} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="solar">☀️ Solar</SelectItem>
