@@ -353,9 +353,9 @@ export default function AdminPowerPlants() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Tipo *</Label>
-                <Select value={formData.type} onValueChange={(v) => setFormData(prev => ({ ...prev, type: v }))}>
+                <Select value={formData.type || 'solar'} onValueChange={(value) => setFormData({ ...formData, type: value })}>
                   <SelectTrigger>
-                    <SelectValue placeholder={`${typeIcons[formData.type]} ${typeLabels[formData.type]}`} />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="solar">☀️ Solar</SelectItem>
@@ -379,7 +379,7 @@ export default function AdminPowerPlants() {
 
             <div className="space-y-2">
               <Label>Modo de Operação *</Label>
-              <Select value={formData.operation_mode} onValueChange={(v) => setFormData(prev => ({ ...prev, operation_mode: v }))}>
+              <Select value={formData.operation_mode || 'monthly_generation'} onValueChange={(value) => setFormData({ ...formData, operation_mode: value })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -449,7 +449,7 @@ export default function AdminPowerPlants() {
               </div>
               <div className="space-y-2">
                 <Label>Estado</Label>
-                <Select value={formData.state} onValueChange={(v) => setFormData(prev => ({ ...prev, state: v }))}>
+                <Select value={formData.state || ''} onValueChange={(value) => setFormData({ ...formData, state: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="UF" />
                   </SelectTrigger>
@@ -465,7 +465,7 @@ export default function AdminPowerPlants() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Status</Label>
-                <Select value={formData.status} onValueChange={(v) => setFormData(prev => ({ ...prev, status: v }))}>
+                <Select value={formData.status || 'operational'} onValueChange={(value) => setFormData({ ...formData, status: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
