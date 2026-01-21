@@ -9,6 +9,10 @@ export default function QuickAccessCustomizer({ availableItems, visibleItems, on
   const [isOpen, setIsOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState(visibleItems);
 
+  React.useEffect(() => {
+    setSelectedItems(visibleItems);
+  }, [visibleItems]);
+
   const handleToggle = (itemId) => {
     setSelectedItems(prev => 
       prev.includes(itemId) 
