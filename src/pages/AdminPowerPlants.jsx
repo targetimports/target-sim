@@ -503,7 +503,7 @@ export default function AdminPowerPlants() {
                   <SelectTrigger>
                     <SelectValue placeholder="UF" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent position="popper" sideOffset={5}>
                     {STATES.map(state => (
                       <SelectItem key={state} value={state}>{state}</SelectItem>
                     ))}
