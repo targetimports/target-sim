@@ -57,6 +57,7 @@ export default function AdminPowerPlants() {
   const createPlant = useMutation({
     mutationFn: (data) => base44.entities.PowerPlant.create({
       ...data,
+      type: 'solar',
       capacity_kw: parseFloat(data.capacity_kw),
       monthly_generation_kwh: data.monthly_generation_kwh ? parseFloat(data.monthly_generation_kwh) : undefined,
       annual_generation_kwh: data.annual_generation_kwh ? parseFloat(data.annual_generation_kwh) : undefined,
@@ -72,6 +73,7 @@ export default function AdminPowerPlants() {
   const updatePlant = useMutation({
     mutationFn: ({ id, data }) => base44.entities.PowerPlant.update(id, {
       ...data,
+      type: 'solar',
       capacity_kw: parseFloat(data.capacity_kw),
       monthly_generation_kwh: data.monthly_generation_kwh ? parseFloat(data.monthly_generation_kwh) : undefined,
       annual_generation_kwh: data.annual_generation_kwh ? parseFloat(data.annual_generation_kwh) : undefined,
