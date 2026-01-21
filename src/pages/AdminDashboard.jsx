@@ -95,13 +95,8 @@ export default function AdminDashboard() {
     enabled: !!user?.email
   });
 
-  const [visibleWidgets, setVisibleWidgets] = useState(
-    preferences?.[0]?.visible_widgets || ['trends', 'revenue', 'distribution', 'activity', 'top']
-  );
-
-  const [visibleQuickAccess, setVisibleQuickAccess] = useState(
-    preferences?.[0]?.visible_quick_access || ['rateio', 'billing', 'performance', 'credits', 'reconciliation']
-  );
+  const [visibleWidgets, setVisibleWidgets] = useState(['trends', 'revenue', 'distribution', 'activity', 'top']);
+  const [visibleQuickAccess, setVisibleQuickAccess] = useState(['rateio', 'billing', 'performance', 'credits', 'reconciliation']);
 
   React.useEffect(() => {
     if (preferences?.[0]) {
