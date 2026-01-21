@@ -139,24 +139,12 @@ export default function AdminPowerPlants() {
 
   const filteredPlants = activeTab === 'all' 
     ? powerPlants 
-    : powerPlants.filter(p => p.type === activeTab);
+    : powerPlants.filter(p => p.operation_mode === activeTab);
 
   const totalCapacity = powerPlants.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
   const operationalPlants = powerPlants.filter(p => p.status === 'operational').length;
 
-  const typeIcons = {
-    solar: '☀️',
-    wind: '💨',
-    hydro: '💧',
-    biomass: '🌱'
-  };
 
-  const typeLabels = {
-    solar: 'Solar',
-    wind: 'Eólica',
-    hydro: 'Hidrelétrica',
-    biomass: 'Biomassa'
-  };
 
   const statusColors = {
     operational: 'bg-amber-100 text-amber-900',
@@ -246,23 +234,17 @@ export default function AdminPowerPlants() {
           </Card>
         </div>
 
-        {/* Tabs por tipo */}
+        {/* Tabs por modo de geração */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
           <TabsList className="bg-white border border-slate-200 p-1">
             <TabsTrigger value="all" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
-              Todas ({powerPlants.length})
+              Todas as Usinas ({powerPlants.length})
             </TabsTrigger>
-            <TabsTrigger value="solar" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
-              ☀️ Solar ({powerPlants.filter(p => p.type === 'solar').length})
+            <TabsTrigger value="monthly_generation" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
+              ⚡ Geração Mensal ({powerPlants.filter(p => p.operation_mode === 'monthly_generation').length})
             </TabsTrigger>
-            <TabsTrigger value="wind" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
-              💨 Eólica ({powerPlants.filter(p => p.type === 'wind').length})
-            </TabsTrigger>
-            <TabsTrigger value="hydro" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
-              💧 Hidrelétrica ({powerPlants.filter(p => p.type === 'hydro').length})
-            </TabsTrigger>
-            <TabsTrigger value="biomass" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
-              🌱 Biomassa ({powerPlants.filter(p => p.type === 'biomass').length})
+            <TabsTrigger value="accumulated_balance" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
+              💰 Crédito Acumulado ({powerPlants.filter(p => p.operation_mode === 'accumulated_balance').length})
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -288,10 +270,10 @@ export default function AdminPowerPlants() {
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">{typeIcons[plant.type]}</span>
+                      <span className="text-2xl">☀️</span>
                       <div>
                         <h3 className="font-semibold text-slate-900">{plant.name}</h3>
-                        <p className="text-sm text-slate-500">{typeLabels[plant.type]}</p>
+                        <p className="text-sm text-slate-500">Usina Solar</p>
                       </div>
                     </div>
                     <div className="flex gap-1">
@@ -349,8 +331,8 @@ export default function AdminPowerPlants() {
           <Card className="border-0 shadow-sm">
             <CardContent className="p-12 text-center">
               <Sun className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Nenhuma usina deste tipo</h3>
-              <p className="text-slate-500">Não há usinas cadastradas para este tipo</p>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Nenhuma usina neste modo</h3>
+              <p className="text-slate-500">Não há usinas cadastradas com este modo de operação</p>
             </CardContent>
           </Card>
         )}
@@ -387,31 +369,16 @@ export default function AdminPowerPlants() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Tipo *</Label>
-                <Select value={formData.type || 'solar'} onValueChange={(value) => setFormData({ ...formData, type: value })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="solar">☀️ Solar</SelectItem>
-                    <SelectItem value="wind">💨 Eólica</SelectItem>
-                    <SelectItem value="hydro">💧 Hidrelétrica</SelectItem>
-                    <SelectItem value="biomass">🌱 Biomassa</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Capacidade Instalada (kWp) *</Label>
-                <Input
-                  type="number"
-                  value={formData.capacity_kw}
-                  onChange={(e) => setFormData(prev => ({ ...prev, capacity_kw: e.target.value }))}
-                  placeholder="Ex: 5000"
-                  required
-                />
-              </div>
+            <div className="space-y-2">
+              <Label>Capacidade Instalada (kWp) *</Label>
+              <Input
+                type="number"
+                value={formData.capacity_kw}
+                onChange={(e) => setFormData(prev => ({ ...prev, capacity_kw: e.target.value }))}
+                placeholder="Ex: 5000"
+                required
+              />
+              <p className="text-xs text-slate-500">Potência nominal da usina solar</p>
             </div>
 
             <div className="space-y-2">
