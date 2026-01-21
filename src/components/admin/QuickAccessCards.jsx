@@ -147,10 +147,10 @@ const quickAccessItems = [
   }
 ];
 
-export default function QuickAccessCards({ visibleItems = quickAccessItems.map(i => i.id) }) {
+export default function QuickAccessCards({ visibleItems = [] }) {
   const filteredItems = visibleItems.length > 0 
     ? quickAccessItems.filter(item => visibleItems.includes(item.id))
-    : quickAccessItems;
+    : [];
 
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
