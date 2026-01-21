@@ -397,7 +397,7 @@ export default function AdminPowerPlants() {
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent position="popper" sideOffset={5}>
                     <SelectItem value="A">Grupo A</SelectItem>
                     <SelectItem value="B">Grupo B</SelectItem>
                   </SelectContent>
@@ -409,7 +409,7 @@ export default function AdminPowerPlants() {
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent position="popper" sideOffset={5}>
                     <SelectItem value="GD1">GD1</SelectItem>
                     <SelectItem value="GD2">GD2</SelectItem>
                   </SelectContent>
