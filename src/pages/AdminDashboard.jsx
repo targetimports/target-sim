@@ -99,9 +99,13 @@ export default function AdminDashboard() {
   const [visibleQuickAccess, setVisibleQuickAccess] = useState(['rateio', 'billing', 'performance', 'credits', 'reconciliation']);
 
   React.useEffect(() => {
-    if (preferences?.[0]) {
-      setVisibleWidgets(preferences[0].visible_widgets || ['trends', 'revenue', 'distribution', 'activity', 'top']);
-      setVisibleQuickAccess(preferences[0].visible_quick_access || ['rateio', 'billing', 'performance', 'credits', 'reconciliation']);
+    if (preferences && preferences.length > 0 && preferences[0]) {
+      if (preferences[0].visible_widgets) {
+        setVisibleWidgets(preferences[0].visible_widgets);
+      }
+      if (preferences[0].visible_quick_access) {
+        setVisibleQuickAccess(preferences[0].visible_quick_access);
+      }
     }
   }, [preferences]);
 
