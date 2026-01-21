@@ -20,6 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const STATES = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 
@@ -31,6 +32,7 @@ export default function AdminPowerPlants() {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPlant, setEditingPlant] = useState(null);
+  const [activeTab, setActiveTab] = useState('all');
   const [formData, setFormData] = useState({
     name: '',
     type: 'solar',
@@ -134,6 +136,10 @@ export default function AdminPowerPlants() {
       createPlant.mutate(formData);
     }
   };
+
+  const filteredPlants = activeTab === 'all' 
+    ? powerPlants 
+    : powerPlants.filter(p => p.type === activeTab);
 
   const totalCapacity = powerPlants.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
   const operationalPlants = powerPlants.filter(p => p.status === 'operational').length;
@@ -240,9 +246,30 @@ export default function AdminPowerPlants() {
           </Card>
         </div>
 
+        {/* Tabs por tipo */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <TabsList className="bg-white border border-slate-200 p-1">
+            <TabsTrigger value="all" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
+              Todas ({powerPlants.length})
+            </TabsTrigger>
+            <TabsTrigger value="solar" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
+              ☀️ Solar ({powerPlants.filter(p => p.type === 'solar').length})
+            </TabsTrigger>
+            <TabsTrigger value="wind" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
+              💨 Eólica ({powerPlants.filter(p => p.type === 'wind').length})
+            </TabsTrigger>
+            <TabsTrigger value="hydro" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
+              💧 Hidrelétrica ({powerPlants.filter(p => p.type === 'hydro').length})
+            </TabsTrigger>
+            <TabsTrigger value="biomass" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
+              🌱 Biomassa ({powerPlants.filter(p => p.type === 'biomass').length})
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         {/* Plants Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {powerPlants.map((plant) => (
+          {filteredPlants.map((plant) => (
             <motion.div
               key={plant.id}
               initial={{ opacity: 0, y: 20 }}
@@ -317,6 +344,16 @@ export default function AdminPowerPlants() {
             </motion.div>
           ))}
         </div>
+
+        {filteredPlants.length === 0 && powerPlants.length > 0 && (
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-12 text-center">
+              <Sun className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Nenhuma usina deste tipo</h3>
+              <p className="text-slate-500">Não há usinas cadastradas para este tipo</p>
+            </CardContent>
+          </Card>
+        )}
 
         {powerPlants.length === 0 && (
           <Card className="border-0 shadow-sm">
