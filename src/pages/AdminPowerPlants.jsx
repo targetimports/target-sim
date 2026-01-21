@@ -496,7 +496,7 @@ export default function AdminPowerPlants() {
               </div>
               <div className="space-y-2">
                 <Label>Estado</Label>
-                <Select value={formData.state || ''} onValueChange={(value) => setFormData({ ...formData, state: value })}>
+                <Select value={formData.state || ''} onValueChange={(value) => setFormData(prev => ({ ...prev, state: value }))}>
                   <SelectTrigger>
                     <SelectValue placeholder="UF" />
                   </SelectTrigger>
