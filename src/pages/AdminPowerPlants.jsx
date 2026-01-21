@@ -371,12 +371,15 @@ export default function AdminPowerPlants() {
       </main>
 
       {/* Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={(open) => {
+        setIsDialogOpen(open);
+        if (!open) resetForm();
+      }}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingPlant ? 'Editar usina' : 'Nova usina'}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" key={editingPlant?.id || 'new'}>
             <div className="space-y-2">
               <Label>Nome da usina *</Label>
               <Input
