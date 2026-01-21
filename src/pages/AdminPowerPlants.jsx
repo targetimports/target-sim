@@ -433,7 +433,7 @@ export default function AdminPowerPlants() {
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent position="popper" sideOffset={5}>
                   <SelectItem value="monthly_generation">Geração Mensal</SelectItem>
                   <SelectItem value="accumulated_balance">Crédito Acumulado</SelectItem>
                 </SelectContent>
