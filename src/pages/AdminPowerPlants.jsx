@@ -36,6 +36,8 @@ export default function AdminPowerPlants() {
   const [formData, setFormData] = useState({
     name: '',
     type: 'solar',
+    tariff_group: '',
+    gd_type: '',
     capacity_kw: '',
     monthly_generation_kwh: '',
     annual_generation_kwh: '',
@@ -95,6 +97,8 @@ export default function AdminPowerPlants() {
     setFormData({
       name: '',
       type: 'solar',
+      tariff_group: '',
+      gd_type: '',
       capacity_kw: '',
       monthly_generation_kwh: '',
       annual_generation_kwh: '',
@@ -115,6 +119,8 @@ export default function AdminPowerPlants() {
     setFormData({
       name: plant.name,
       type: plant.type,
+      tariff_group: plant.tariff_group || '',
+      gd_type: plant.gd_type || '',
       capacity_kw: plant.capacity_kw?.toString() || '',
       monthly_generation_kwh: plant.monthly_generation_kwh?.toString() || '',
       annual_generation_kwh: plant.annual_generation_kwh?.toString() || '',
@@ -314,13 +320,23 @@ export default function AdminPowerPlants() {
                         <span>Desde {format(new Date(plant.start_date), 'MM/yyyy')}</span>
                       </div>
                     )}
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       <Badge className={statusColors[plant.status]}>
                         {statusLabels[plant.status]}
                       </Badge>
                       <Badge variant="outline" className="text-xs">
                         {plant.operation_mode === 'accumulated_balance' ? 'Crédito Acumulado' : 'Geração Mensal'}
                       </Badge>
+                      {plant.tariff_group && (
+                        <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                          Grupo {plant.tariff_group}
+                        </Badge>
+                      )}
+                      {plant.gd_type && (
+                        <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
+                          {plant.gd_type}
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -371,16 +387,41 @@ export default function AdminPowerPlants() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Capacidade Instalada (kWp) *</Label>
-              <Input
-                type="number"
-                value={formData.capacity_kw}
-                onChange={(e) => setFormData(prev => ({ ...prev, capacity_kw: e.target.value }))}
-                placeholder="Ex: 5000"
-                required
-              />
-              <p className="text-xs text-slate-500">Potência nominal da usina solar</p>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Grupo Tarifário *</Label>
+                <Select value={formData.tariff_group || ''} onValueChange={(value) => setFormData({ ...formData, tariff_group: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="A">Grupo A</SelectItem>
+                    <SelectItem value="B">Grupo B</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Tipo GD *</Label>
+                <Select value={formData.gd_type || ''} onValueChange={(value) => setFormData({ ...formData, gd_type: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="GD1">GD1</SelectItem>
+                    <SelectItem value="GD2">GD2</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Capacidade (kWp) *</Label>
+                <Input
+                  type="number"
+                  value={formData.capacity_kw}
+                  onChange={(e) => setFormData(prev => ({ ...prev, capacity_kw: e.target.value }))}
+                  placeholder="Ex: 5000"
+                  required
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
