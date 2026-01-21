@@ -426,7 +426,7 @@ export default function AdminPowerPlants() {
 
             <div className="space-y-2">
               <Label>Modo de Operação *</Label>
-              <Select value={formData.operation_mode || 'monthly_generation'} onValueChange={(value) => setFormData({ ...formData, operation_mode: value })}>
+              <Select value={formData.operation_mode || 'monthly_generation'} onValueChange={(value) => setFormData(prev => ({ ...prev, operation_mode: value }))}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
