@@ -519,7 +519,7 @@ export default function AdminPowerPlants() {
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent position="popper" sideOffset={5}>
                     <SelectItem value="operational">Operacional</SelectItem>
                     <SelectItem value="maintenance">Manutenção</SelectItem>
                     <SelectItem value="under_construction">Em construção</SelectItem>
