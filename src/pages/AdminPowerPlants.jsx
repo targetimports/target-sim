@@ -390,7 +390,7 @@ export default function AdminPowerPlants() {
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Grupo Tarifário *</Label>
-                <Select value={formData.tariff_group || ''} onValueChange={(value) => setFormData({ ...formData, tariff_group: value })}>
+                <Select value={formData.tariff_group || ''} onValueChange={(value) => setFormData(prev => ({ ...prev, tariff_group: value }))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
@@ -402,7 +402,7 @@ export default function AdminPowerPlants() {
               </div>
               <div className="space-y-2">
                 <Label>Tipo GD *</Label>
-                <Select value={formData.gd_type || ''} onValueChange={(value) => setFormData({ ...formData, gd_type: value })}>
+                <Select value={formData.gd_type || ''} onValueChange={(value) => setFormData(prev => ({ ...prev, gd_type: value }))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
