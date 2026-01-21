@@ -128,20 +128,26 @@ export default function AdminDashboard() {
   };
 
   const saveQuickAccessPreferences = async (newVisibleItems) => {
-    setVisibleQuickAccess(newVisibleItems);
-    
-    if (preferences && preferences.length > 0) {
-      await base44.entities.DashboardPreference.update(preferences[0].id, {
-        visible_quick_access: newVisibleItems
-      });
-    } else {
-      await base44.entities.DashboardPreference.create({
-        user_email: user?.email,
-        dashboard_type: 'admin',
-        visible_quick_access: newVisibleItems
-      });
+    try {
+      setVisibleQuickAccess(newVisibleItems);
+      
+      if (preferences && preferences.length > 0) {
+        await base44.entities.DashboardPreference.update(preferences[0].id, {
+          visible_quick_access: newVisibleItems,
+          visible_widgets: visibleWidgets
+        });
+      } else {
+        await base44.entities.DashboardPreference.create({
+          user_email: user?.email,
+          dashboard_type: 'admin',
+          visible_quick_access: newVisibleItems,
+          visible_widgets: visibleWidgets
+        });
+      }
+      await queryClient.invalidateQueries(['dashboard-preferences']);
+    } catch (error) {
+      console.error('Erro ao salvar preferências:', error);
     }
-    queryClient.invalidateQueries(['dashboard-preferences']);
   };
 
   const { data: subscriptions = [], refetch: refetchSubscriptions } = useQuery({
