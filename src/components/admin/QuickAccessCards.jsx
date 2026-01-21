@@ -74,6 +74,76 @@ const quickAccessItems = [
     description: 'Análises preditivas',
     url: 'AIInsightsDashboard',
     color: 'from-indigo-500 to-purple-500'
+  },
+  {
+    id: 'customers',
+    title: '👥 Clientes',
+    description: 'Gestão de clientes',
+    url: 'CustomerManagement',
+    color: 'from-blue-500 to-cyan-500'
+  },
+  {
+    id: 'plants',
+    title: '🏭 Usinas',
+    description: 'Gerenciar usinas',
+    url: 'AdminPowerPlants',
+    color: 'from-yellow-500 to-amber-500'
+  },
+  {
+    id: 'analytics',
+    title: '📈 Analytics',
+    description: 'Relatórios e métricas',
+    url: 'AdminAnalytics',
+    color: 'from-violet-500 to-purple-500'
+  },
+  {
+    id: 'financial',
+    title: '💵 Financeiro',
+    description: 'Dashboard financeiro',
+    url: 'FinancialDashboard',
+    color: 'from-green-500 to-teal-500'
+  },
+  {
+    id: 'support',
+    title: '🎧 Suporte',
+    description: 'Central de suporte',
+    url: 'SupportCenter',
+    color: 'from-pink-500 to-rose-500'
+  },
+  {
+    id: 'documents',
+    title: '📁 Documentos',
+    description: 'Gerenciar documentos',
+    url: 'DocumentManager',
+    color: 'from-slate-500 to-gray-500'
+  },
+  {
+    id: 'automation',
+    title: '⚡ Automações',
+    description: 'Gestão de automações',
+    url: 'AutomationManager',
+    color: 'from-purple-500 to-indigo-500'
+  },
+  {
+    id: 'whatsapp',
+    title: '💬 WhatsApp',
+    description: 'Gestão WhatsApp',
+    url: 'WhatsAppManagement',
+    color: 'from-green-500 to-emerald-500'
+  },
+  {
+    id: 'sales',
+    title: '🎯 Vendas',
+    description: 'Funil de vendas',
+    url: 'SalesPipeline',
+    color: 'from-orange-500 to-red-500'
+  },
+  {
+    id: 'reports',
+    title: '📋 Relatórios',
+    description: 'Relatórios avançados',
+    url: 'AdvancedReports',
+    color: 'from-indigo-500 to-blue-500'
   }
 ];
 

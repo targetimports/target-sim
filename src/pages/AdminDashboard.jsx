@@ -67,7 +67,17 @@ export default function AdminDashboard() {
     { id: 'onboarding', title: '📋 Onboarding', description: 'Novos clientes' },
     { id: 'tasks', title: '📊 Tarefas', description: 'Dashboard de tarefas' },
     { id: 'crm', title: '🔗 CRM', description: 'Integrações CRM' },
-    { id: 'ai', title: '🧠 IA Insights', description: 'Análises preditivas' }
+    { id: 'ai', title: '🧠 IA Insights', description: 'Análises preditivas' },
+    { id: 'customers', title: '👥 Clientes', description: 'Gestão de clientes' },
+    { id: 'plants', title: '🏭 Usinas', description: 'Gerenciar usinas' },
+    { id: 'analytics', title: '📈 Analytics', description: 'Relatórios e métricas' },
+    { id: 'financial', title: '💵 Financeiro', description: 'Dashboard financeiro' },
+    { id: 'support', title: '🎧 Suporte', description: 'Central de suporte' },
+    { id: 'documents', title: '📁 Documentos', description: 'Gerenciar documentos' },
+    { id: 'automation', title: '⚡ Automações', description: 'Gestão de automações' },
+    { id: 'whatsapp', title: '💬 WhatsApp', description: 'Gestão WhatsApp' },
+    { id: 'sales', title: '🎯 Vendas', description: 'Funil de vendas' },
+    { id: 'reports', title: '📋 Relatórios', description: 'Relatórios avançados' }
   ];
 
   // Buscar preferências do usuário
