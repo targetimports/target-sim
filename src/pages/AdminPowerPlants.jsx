@@ -512,7 +512,7 @@ export default function AdminPowerPlants() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Status</Label>
-                <Select value={formData.status || 'operational'} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+                <Select value={formData.status || 'operational'} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
