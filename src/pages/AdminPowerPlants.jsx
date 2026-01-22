@@ -20,6 +20,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const STATES = [
@@ -33,6 +43,8 @@ export default function AdminPowerPlants() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPlant, setEditingPlant] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [plantToDelete, setPlantToDelete] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     type: 'solar',
@@ -106,8 +118,23 @@ export default function AdminPowerPlants() {
 
   const deletePlant = useMutation({
     mutationFn: (id) => base44.entities.PowerPlant.delete(id),
-    onSuccess: () => queryClient.invalidateQueries(['powerplants'])
+    onSuccess: () => {
+      queryClient.invalidateQueries(['powerplants']);
+      setDeleteConfirmOpen(false);
+      setPlantToDelete(null);
+    }
   });
+
+  const handleDeleteClick = (plant) => {
+    setPlantToDelete(plant);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (plantToDelete) {
+      deletePlant.mutate(plantToDelete.id);
+    }
+  };
 
   const resetForm = () => {
     setFormData({
@@ -391,7 +418,7 @@ export default function AdminPowerPlants() {
                       <Button variant="ghost" size="icon" onClick={() => openEditDialog(plant)}>
                         <Pencil className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => deletePlant.mutate(plant.id)}>
+                      <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(plant)}>
                         <Trash2 className="w-4 h-4 text-red-500" />
                       </Button>
                     </div>
@@ -790,6 +817,24 @@ export default function AdminPowerPlants() {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tem certeza que deseja excluir esta usina?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. A usina <strong>{plantToDelete?.name}</strong> será permanentemente removida do sistema.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPlantToDelete(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              Sim, excluir usina
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      </div>
+      );
+      }
