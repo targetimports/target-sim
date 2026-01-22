@@ -749,7 +749,7 @@ export default function AdminPowerPlants() {
                 <div className="space-y-2">
                   <Label>Senha</Label>
                   <Input
-                    type="password"
+                    type="text"
                     value={formData.utility_portal_password}
                     onChange={(e) => setFormData(prev => ({ ...prev, utility_portal_password: e.target.value }))}
                     placeholder="Senha do portal"
