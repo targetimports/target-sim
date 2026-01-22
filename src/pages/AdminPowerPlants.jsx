@@ -161,6 +161,7 @@ export default function AdminPowerPlants() {
   const constructionPhase2 = powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_2');
 
   const monthlyGenCapacity = monthlyGenPlants.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
+  const monthlyGenKwh = monthlyGenPlants.reduce((sum, p) => sum + (p.monthly_generation_kwh || 0), 0);
   const accumulatedCredits = accumulatedPlants.reduce((sum, p) => sum + (p.accumulated_credits_kwh || 0), 0);
   const constructionPhase1Capacity = constructionPhase1.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
   const constructionPhase2Capacity = constructionPhase2.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
@@ -236,6 +237,7 @@ export default function AdminPowerPlants() {
                 <div>
                   <p className="text-sm text-slate-500">Geração Mensal</p>
                   <p className="text-2xl font-bold">{(monthlyGenCapacity / 1000).toFixed(1)} MWp</p>
+                  <p className="text-xs text-slate-400">{(monthlyGenKwh / 1000).toFixed(0)}k kWh/mês</p>
                 </div>
               </div>
             </CardContent>
