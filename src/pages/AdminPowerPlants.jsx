@@ -219,8 +219,8 @@ export default function AdminPowerPlants() {
     ? powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_2')
     : powerPlants.filter(p => p.operation_mode === activeTab && p.status !== 'under_construction');
 
-  const monthlyGenPlants = powerPlants.filter(p => p.operation_mode === 'monthly_generation' && p.status !== 'under_construction');
-  const accumulatedPlants = powerPlants.filter(p => p.operation_mode === 'accumulated_balance' && p.status !== 'under_construction');
+  const monthlyGenPlants = powerPlants.filter(p => p.operation_mode === 'monthly_generation' && p.status === 'operational');
+  const accumulatedPlants = powerPlants.filter(p => p.operation_mode === 'accumulated_balance' && (p.status === 'compensando' || p.status === 'disponivel'));
   const constructionPhase1 = powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_1');
   const constructionPhase2 = powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_2');
   const leasingPlants = powerPlants.filter(p => p.leasing_active === true);
