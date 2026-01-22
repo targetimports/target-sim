@@ -55,6 +55,7 @@ export default function AdminPowerPlants() {
     leasing_client_email: '',
     leasing_client_name: '',
     leasing_monthly_value: '',
+    leasing_asset_value: '',
     leasing_contract_start: '',
     leasing_contract_end: '',
     leasing_notes: ''
@@ -158,6 +159,7 @@ export default function AdminPowerPlants() {
       leasing_client_email: plant.leasing_client_email || '',
       leasing_client_name: plant.leasing_client_name || '',
       leasing_monthly_value: plant.leasing_monthly_value?.toString() || '',
+      leasing_asset_value: plant.leasing_asset_value?.toString() || '',
       leasing_contract_start: plant.leasing_contract_start || '',
       leasing_contract_end: plant.leasing_contract_end || '',
       leasing_notes: plant.leasing_notes || ''
@@ -719,16 +721,29 @@ export default function AdminPowerPlants() {
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Valor Mensal (R$) *</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={formData.leasing_monthly_value}
-                      onChange={(e) => setFormData(prev => ({ ...prev, leasing_monthly_value: e.target.value }))}
-                      placeholder="Ex: 5000.00"
-                      required={formData.leasing_active}
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Valor Mensal (R$) *</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.leasing_monthly_value}
+                        onChange={(e) => setFormData(prev => ({ ...prev, leasing_monthly_value: e.target.value }))}
+                        placeholder="Ex: 5000.00"
+                        required={formData.leasing_active}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Valor Patrimonial (R$) *</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.leasing_asset_value}
+                        onChange={(e) => setFormData(prev => ({ ...prev, leasing_asset_value: e.target.value }))}
+                        placeholder="Ex: 500000.00"
+                        required={formData.leasing_active}
+                      />
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
