@@ -90,6 +90,8 @@ export default function AdminPowerPlants() {
       monthly_generation_kwh: data.monthly_generation_kwh ? parseFloat(data.monthly_generation_kwh) : undefined,
       annual_generation_kwh: data.annual_generation_kwh ? parseFloat(data.annual_generation_kwh) : undefined,
       accumulated_credits_kwh: data.accumulated_credits_kwh ? parseFloat(data.accumulated_credits_kwh) : undefined,
+      initial_balance_kwh: data.initial_balance_kwh ? parseFloat(data.initial_balance_kwh) : undefined,
+      available_balance_kwh: data.available_balance_kwh ? parseFloat(data.available_balance_kwh) : undefined,
       reading_day: data.reading_day ? parseInt(data.reading_day) : undefined,
       leasing_monthly_value: data.leasing_monthly_value ? parseFloat(data.leasing_monthly_value) : undefined,
       leasing_asset_value: data.leasing_asset_value ? parseFloat(data.leasing_asset_value) : undefined
