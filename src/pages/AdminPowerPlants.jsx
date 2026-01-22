@@ -294,10 +294,10 @@ export default function AdminPowerPlants() {
               💰 Crédito Acumulado ({powerPlants.filter(p => p.operation_mode === 'accumulated_balance').length})
             </TabsTrigger>
             <TabsTrigger value="construction_phase_1" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
-              🏗️ Fase 1 ({powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_1').length})
+              🏗️ Construção Fase 1 ({powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_1').length})
             </TabsTrigger>
             <TabsTrigger value="construction_phase_2" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
-              🏗️ Fase 2 ({powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_2').length})
+              🏗️ Construção Fase 2 ({powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_2').length})
             </TabsTrigger>
           </TabsList>
         </Tabs>
