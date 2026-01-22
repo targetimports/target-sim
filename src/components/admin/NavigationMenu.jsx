@@ -51,6 +51,7 @@ const menuCategories = {
     color: 'border-purple-500 bg-purple-50',
     items: [
       { name: 'Gerenciar Usinas', url: 'AdminPowerPlants', icon: '🏭' },
+      { name: 'Integração Solarman', url: 'SolarmanIntegration', icon: '☀️' },
       { name: 'Monitoramento Usinas', url: 'PlantMonitoring', icon: '📡' },
       { name: 'Performance Usinas', url: 'PlantPerformanceDashboard', icon: '📈' },
       { name: 'Manutenções', url: 'MaintenanceManagement', icon: '🔧' },
