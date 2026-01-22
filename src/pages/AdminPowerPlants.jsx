@@ -84,7 +84,7 @@ export default function AdminPowerPlants() {
     mutationFn: (data) => base44.entities.PowerPlant.create({
       ...data,
       type: 'solar',
-      capacity_kw: parseFloat(data.capacity_kw),
+      capacity_kw: data.capacity_kw ? parseFloat(data.capacity_kw) : undefined,
       monthly_generation_kwh: data.monthly_generation_kwh ? parseFloat(data.monthly_generation_kwh) : undefined,
       annual_generation_kwh: data.annual_generation_kwh ? parseFloat(data.annual_generation_kwh) : undefined,
       accumulated_credits_kwh: data.accumulated_credits_kwh ? parseFloat(data.accumulated_credits_kwh) : undefined,
@@ -103,7 +103,7 @@ export default function AdminPowerPlants() {
     mutationFn: ({ id, data }) => base44.entities.PowerPlant.update(id, {
       ...data,
       type: 'solar',
-      capacity_kw: parseFloat(data.capacity_kw),
+      capacity_kw: data.capacity_kw ? parseFloat(data.capacity_kw) : undefined,
       monthly_generation_kwh: data.monthly_generation_kwh ? parseFloat(data.monthly_generation_kwh) : undefined,
       annual_generation_kwh: data.annual_generation_kwh ? parseFloat(data.annual_generation_kwh) : undefined,
       accumulated_credits_kwh: data.accumulated_credits_kwh ? parseFloat(data.accumulated_credits_kwh) : undefined,
@@ -535,6 +535,22 @@ export default function AdminPowerPlants() {
               />
             </div>
 
+            <div className="space-y-2">
+              <Label>Modo de Operação *</Label>
+              <Select value={formData.operation_mode || 'monthly_generation'} onValueChange={(value) => setFormData(prev => ({ ...prev, operation_mode: value }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent position="popper" sideOffset={5}>
+                  <SelectItem value="monthly_generation">Geração Mensal</SelectItem>
+                  <SelectItem value="accumulated_balance">Crédito Acumulado</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-slate-500">
+                Geração Mensal: energia gerada é distribuída mensalmente. Crédito Acumulado: créditos acumulam ao longo do tempo.
+              </p>
+            </div>
+
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Grupo Tarifário *</Label>
@@ -560,32 +576,18 @@ export default function AdminPowerPlants() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label>Capacidade (kWp) *</Label>
-                <Input
-                  type="number"
-                  value={formData.capacity_kw}
-                  onChange={(e) => setFormData(prev => ({ ...prev, capacity_kw: e.target.value }))}
-                  placeholder="Ex: 5000"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Modo de Operação *</Label>
-              <Select value={formData.operation_mode || 'monthly_generation'} onValueChange={(value) => setFormData(prev => ({ ...prev, operation_mode: value }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent position="popper" sideOffset={5}>
-                  <SelectItem value="monthly_generation">Geração Mensal</SelectItem>
-                  <SelectItem value="accumulated_balance">Crédito Acumulado</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-slate-500">
-                Geração Mensal: energia gerada é distribuída mensalmente. Crédito Acumulado: créditos acumulam ao longo do tempo.
-              </p>
+              {formData.operation_mode === 'monthly_generation' && (
+                <div className="space-y-2">
+                  <Label>Capacidade (kWp) *</Label>
+                  <Input
+                    type="number"
+                    value={formData.capacity_kw}
+                    onChange={(e) => setFormData(prev => ({ ...prev, capacity_kw: e.target.value }))}
+                    placeholder="Ex: 5000"
+                    required
+                  />
+                </div>
+              )}
             </div>
 
             {formData.operation_mode === 'accumulated_balance' ? (

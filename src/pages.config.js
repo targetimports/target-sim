@@ -64,6 +64,7 @@ import ServiceOrders from './pages/ServiceOrders';
 import Subscribe from './pages/Subscribe';
 import SuperApp from './pages/SuperApp';
 import SupportCenter from './pages/SupportCenter';
+import SystemDocumentation from './pages/SystemDocumentation';
 import TaskAutomationRules from './pages/TaskAutomationRules';
 import TaskDashboard from './pages/TaskDashboard';
 import TaskManager from './pages/TaskManager';
@@ -74,7 +75,6 @@ import WeatherForecast from './pages/WeatherForecast';
 import WhatsAppCampaigns from './pages/WhatsAppCampaigns';
 import WhatsAppEvolution from './pages/WhatsAppEvolution';
 import WhatsAppManagement from './pages/WhatsAppManagement';
-import SystemDocumentation from './pages/SystemDocumentation';
 import __Layout from './Layout.jsx';
 
 
@@ -145,6 +145,7 @@ export const PAGES = {
     "Subscribe": Subscribe,
     "SuperApp": SuperApp,
     "SupportCenter": SupportCenter,
+    "SystemDocumentation": SystemDocumentation,
     "TaskAutomationRules": TaskAutomationRules,
     "TaskDashboard": TaskDashboard,
     "TaskManager": TaskManager,
@@ -155,7 +156,6 @@ export const PAGES = {
     "WhatsAppCampaigns": WhatsAppCampaigns,
     "WhatsAppEvolution": WhatsAppEvolution,
     "WhatsAppManagement": WhatsAppManagement,
-    "SystemDocumentation": SystemDocumentation,
 }
 
 export const pagesConfig = {
