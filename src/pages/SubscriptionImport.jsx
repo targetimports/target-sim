@@ -307,6 +307,7 @@ export default function SubscriptionImport() {
                 onClick={() => {
                   setResult(null);
                   setFile(null);
+                  setPastedData('');
                 }}
                 className="w-full bg-slate-900 hover:bg-slate-800"
               >
