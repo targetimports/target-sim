@@ -46,6 +46,7 @@ export default function AdminPowerPlants() {
     city: '',
     state: '',
     status: 'operational',
+    construction_phase: '',
     operation_mode: 'monthly_generation',
     start_date: '',
     image_url: ''
@@ -129,6 +130,7 @@ export default function AdminPowerPlants() {
       city: plant.city || '',
       state: plant.state || '',
       status: plant.status || 'operational',
+      construction_phase: plant.construction_phase || '',
       operation_mode: plant.operation_mode || 'monthly_generation',
       start_date: plant.start_date || '',
       image_url: plant.image_url || ''
@@ -147,17 +149,21 @@ export default function AdminPowerPlants() {
 
   const filteredPlants = activeTab === 'all' 
     ? powerPlants 
-    : activeTab === 'under_construction'
-    ? powerPlants.filter(p => p.status === 'under_construction')
+    : activeTab === 'construction_phase_1'
+    ? powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_1')
+    : activeTab === 'construction_phase_2'
+    ? powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_2')
     : powerPlants.filter(p => p.operation_mode === activeTab);
 
   const monthlyGenPlants = powerPlants.filter(p => p.operation_mode === 'monthly_generation' && p.status !== 'under_construction');
   const accumulatedPlants = powerPlants.filter(p => p.operation_mode === 'accumulated_balance' && p.status !== 'under_construction');
-  const constructionPlants = powerPlants.filter(p => p.status === 'under_construction');
+  const constructionPhase1 = powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_1');
+  const constructionPhase2 = powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_2');
 
   const monthlyGenCapacity = monthlyGenPlants.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
   const accumulatedCredits = accumulatedPlants.reduce((sum, p) => sum + (p.accumulated_credits_kwh || 0), 0);
-  const constructionCapacity = constructionPlants.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
+  const constructionPhase1Capacity = constructionPhase1.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
+  const constructionPhase2Capacity = constructionPhase2.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
 
 
 
@@ -207,7 +213,7 @@ export default function AdminPowerPlants() {
 
       <main className="container mx-auto px-4 py-8">
         {/* Stats */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <Card className="border-0 shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -254,8 +260,21 @@ export default function AdminPowerPlants() {
                   <Calendar className="w-6 h-6 text-yellow-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Em Construção</p>
-                  <p className="text-2xl font-bold">{(constructionCapacity / 1000).toFixed(1)} MWp</p>
+                  <p className="text-sm text-slate-500">Construção Fase 1</p>
+                  <p className="text-2xl font-bold">{(constructionPhase1Capacity / 1000).toFixed(1)} MWp</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500">Construção Fase 2</p>
+                  <p className="text-2xl font-bold">{(constructionPhase2Capacity / 1000).toFixed(1)} MWp</p>
                 </div>
               </div>
             </CardContent>
@@ -274,8 +293,11 @@ export default function AdminPowerPlants() {
             <TabsTrigger value="accumulated_balance" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
               💰 Crédito Acumulado ({powerPlants.filter(p => p.operation_mode === 'accumulated_balance').length})
             </TabsTrigger>
-            <TabsTrigger value="under_construction" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
-              🏗️ Em Construção ({powerPlants.filter(p => p.status === 'under_construction').length})
+            <TabsTrigger value="construction_phase_1" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
+              🏗️ Fase 1 ({powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_1').length})
+            </TabsTrigger>
+            <TabsTrigger value="construction_phase_2" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
+              🏗️ Fase 2 ({powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_2').length})
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -550,6 +572,20 @@ export default function AdminPowerPlants() {
                   </SelectContent>
                 </Select>
               </div>
+              {formData.status === 'under_construction' && (
+                <div className="space-y-2">
+                  <Label>Fase de Construção</Label>
+                  <Select value={formData.construction_phase || ''} onValueChange={(value) => setFormData(prev => ({ ...prev, construction_phase: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a fase" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" sideOffset={5}>
+                      <SelectItem value="phase_1">Fase 1</SelectItem>
+                      <SelectItem value="phase_2">Fase 2</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="space-y-2">
                 <Label>Data de início</Label>
                 <Input
