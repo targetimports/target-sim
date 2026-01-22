@@ -43,7 +43,8 @@ const menuCategories = {
       { name: 'Créditos Expirando', url: 'ExpiringCredits', icon: '⏰' },
       { name: 'Central Suporte', url: 'SupportCenter', icon: '🎧' },
       { name: 'Programa Fidelidade', url: 'LoyaltyProgram', icon: '⭐' },
-      { name: 'Grupos Consumidores', url: 'ConsumerGroups', icon: '👨‍👩‍👧‍👦' }
+      { name: 'Grupos Consumidores', url: 'ConsumerGroups', icon: '👨‍👩‍👧‍👦' },
+      { name: 'Unidades Consumidoras', url: 'ConsumerUnitsManager', icon: '🏠' }
     ]
   },
   'operations': {
