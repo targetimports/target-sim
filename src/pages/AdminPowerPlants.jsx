@@ -207,7 +207,7 @@ export default function AdminPowerPlants() {
 
       <main className="container mx-auto px-4 py-8">
         {/* Stats */}
-        <div className="grid sm:grid-cols-3 gap-6 mb-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="border-0 shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -228,8 +228,21 @@ export default function AdminPowerPlants() {
                   <Zap className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Capacidade total</p>
-                  <p className="text-2xl font-bold">{(totalCapacity / 1000).toFixed(1)} MWp</p>
+                  <p className="text-sm text-slate-500">Geração Mensal</p>
+                  <p className="text-2xl font-bold">{(monthlyGenCapacity / 1000).toFixed(1)} MWp</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                  <Zap className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500">Crédito Acumulado</p>
+                  <p className="text-2xl font-bold">{(accumulatedCredits / 1000).toFixed(0)}k kWh</p>
                 </div>
               </div>
             </CardContent>
@@ -241,8 +254,8 @@ export default function AdminPowerPlants() {
                   <Calendar className="w-6 h-6 text-yellow-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Em operação</p>
-                  <p className="text-2xl font-bold">{operationalPlants}</p>
+                  <p className="text-sm text-slate-500">Em Construção</p>
+                  <p className="text-2xl font-bold">{(constructionCapacity / 1000).toFixed(1)} MWp</p>
                 </div>
               </div>
             </CardContent>
