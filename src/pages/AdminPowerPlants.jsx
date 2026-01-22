@@ -335,7 +335,8 @@ export default function AdminPowerPlants() {
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Crédito Acumulado</p>
-                  <p className="text-2xl font-bold">{(accumulatedCredits / 1000).toFixed(0)}k kWh</p>
+                  <p className="text-2xl font-bold">{(totalAvailableBalance / 1000).toFixed(0)}k kWh</p>
+                  <p className="text-xs text-slate-400">saldo disponível</p>
                 </div>
               </div>
             </CardContent>
