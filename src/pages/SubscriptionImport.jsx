@@ -120,67 +120,109 @@ export default function SubscriptionImport() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Upload className="w-5 h-5" />
-                    Importar arquivo TSV/CSV
+                    Importar Clientes
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <p className="text-sm text-blue-800">
-                      <strong>Formato:</strong> Use TAB-separated values (TSV) ou CSV com os mesmos campos
+                      <strong>Formato:</strong> TAB-separated (colar diretamente do Excel/planilha)
                     </p>
                   </div>
 
-                  <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:border-slate-400 transition">
-                    <input
-                      type="file"
-                      accept=".csv,.tsv,.txt"
-                      onChange={handleFileChange}
-                      className="hidden"
-                      id="file-input"
-                    />
-                    <label htmlFor="file-input" className="cursor-pointer">
-                      <Upload className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-                      <p className="text-slate-900 font-medium">
-                        {file ? file.name : 'Clique para selecionar arquivo'}
-                      </p>
-                      <p className="text-sm text-slate-500">ou arraste aqui</p>
-                    </label>
-                  </div>
+                  <Tabs defaultValue="paste" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="paste">Colar Dados</TabsTrigger>
+                      <TabsTrigger value="file">Upload Arquivo</TabsTrigger>
+                    </TabsList>
 
-                  {error && (
-                    <Alert className="border-red-200 bg-red-50">
-                      <AlertCircle className="h-4 w-4 text-red-600" />
-                      <AlertDescription className="text-red-800">{error}</AlertDescription>
-                    </Alert>
-                  )}
-
-                  <div className="flex gap-3">
-                    <Button
-                      onClick={downloadTemplate}
-                      variant="outline"
-                      className="flex-1"
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      Download Template
-                    </Button>
-                    <Button
-                      onClick={handleImport}
-                      disabled={!file || loading}
-                      className="flex-1 bg-slate-900 hover:bg-slate-800"
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Importando...
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="w-4 h-4 mr-2" />
-                          Importar
-                        </>
+                    <TabsContent value="paste" className="space-y-4">
+                      <Textarea
+                        placeholder="Cole os dados aqui (copie direto do Excel com Tab entre as colunas)"
+                        value={pastedData}
+                        onChange={(e) => {
+                          setPastedData(e.target.value);
+                          setError(null);
+                        }}
+                        className="h-48 font-mono text-xs"
+                      />
+                      {error && (
+                        <Alert className="border-red-200 bg-red-50">
+                          <AlertCircle className="h-4 w-4 text-red-600" />
+                          <AlertDescription className="text-red-800">{error}</AlertDescription>
+                        </Alert>
                       )}
-                    </Button>
-                  </div>
+                      <Button
+                        onClick={() => handleImport('paste')}
+                        disabled={!pastedData.trim() || loading}
+                        className="w-full bg-slate-900 hover:bg-slate-800"
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Importando...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-4 h-4 mr-2" />
+                            Importar Dados
+                          </>
+                        )}
+                      </Button>
+                    </TabsContent>
+
+                    <TabsContent value="file" className="space-y-4">
+                      <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:border-slate-400 transition">
+                        <input
+                          type="file"
+                          accept=".csv,.tsv,.txt"
+                          onChange={handleFileChange}
+                          className="hidden"
+                          id="file-input"
+                        />
+                        <label htmlFor="file-input" className="cursor-pointer">
+                          <Upload className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+                          <p className="text-slate-900 font-medium">
+                            {file ? file.name : 'Clique para selecionar arquivo'}
+                          </p>
+                          <p className="text-sm text-slate-500">ou arraste aqui</p>
+                        </label>
+                      </div>
+                      {error && (
+                        <Alert className="border-red-200 bg-red-50">
+                          <AlertCircle className="h-4 w-4 text-red-600" />
+                          <AlertDescription className="text-red-800">{error}</AlertDescription>
+                        </Alert>
+                      )}
+                      <div className="flex gap-3">
+                        <Button
+                          onClick={downloadTemplate}
+                          variant="outline"
+                          className="flex-1"
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Download Template
+                        </Button>
+                        <Button
+                          onClick={() => handleImport('file')}
+                          disabled={!file || loading}
+                          className="flex-1 bg-slate-900 hover:bg-slate-800"
+                        >
+                          {loading ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Importando...
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="w-4 h-4 mr-2" />
+                              Importar
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
             </motion.div>
