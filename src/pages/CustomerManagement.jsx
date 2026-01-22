@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Users, Search, Download, Upload, Eye, ArrowLeft, Filter
+  Users, Search, Download, Upload, Eye, ArrowLeft, Filter, Plus, Pencil, Trash2
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from "@/utils";
 import { format } from 'date-fns';
@@ -17,6 +17,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import CustomerDetails from '../components/customers/CustomerDetails';
 import { toast } from 'sonner';
 
@@ -25,6 +37,25 @@ export default function CustomerManagement() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [customerToDelete, setCustomerToDelete] = useState(null);
+  const queryClient = useQueryClient();
+
+  const [formData, setFormData] = useState({
+    customer_name: '',
+    customer_email: '',
+    customer_phone: '',
+    customer_cpf_cnpj: '',
+    customer_type: 'residential',
+    address: '',
+    city: '',
+    state: '',
+    zip_code: '',
+    average_bill_value: '',
+    status: 'pending'
+  });
 
   const { data: subscriptions = [] } = useQuery({
     queryKey: ['subscriptions-all'],
@@ -92,6 +123,106 @@ export default function CustomerManagement() {
     setIsDetailsOpen(true);
   };
 
+  const createSubscription = useMutation({
+    mutationFn: (data) => base44.entities.Subscription.create({
+      ...data,
+      average_bill_value: parseFloat(data.average_bill_value) || 0
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['subscriptions-all']);
+      setIsEditDialogOpen(false);
+      resetForm();
+      toast.success('Cliente criado com sucesso!');
+    },
+    onError: () => {
+      toast.error('Erro ao criar cliente');
+    }
+  });
+
+  const updateSubscription = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Subscription.update(id, {
+      ...data,
+      average_bill_value: parseFloat(data.average_bill_value) || 0
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['subscriptions-all']);
+      setIsEditDialogOpen(false);
+      resetForm();
+      toast.success('Cliente atualizado com sucesso!');
+    },
+    onError: () => {
+      toast.error('Erro ao atualizar cliente');
+    }
+  });
+
+  const deleteSubscription = useMutation({
+    mutationFn: (id) => base44.entities.Subscription.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['subscriptions-all']);
+      setDeleteConfirmOpen(false);
+      setCustomerToDelete(null);
+      toast.success('Cliente excluído com sucesso!');
+    },
+    onError: () => {
+      toast.error('Erro ao excluir cliente');
+    }
+  });
+
+  const resetForm = () => {
+    setFormData({
+      customer_name: '',
+      customer_email: '',
+      customer_phone: '',
+      customer_cpf_cnpj: '',
+      customer_type: 'residential',
+      address: '',
+      city: '',
+      state: '',
+      zip_code: '',
+      average_bill_value: '',
+      status: 'pending'
+    });
+    setEditingCustomer(null);
+  };
+
+  const openEditDialog = (customer) => {
+    setEditingCustomer(customer);
+    setFormData({
+      customer_name: customer.customer_name || '',
+      customer_email: customer.customer_email || '',
+      customer_phone: customer.customer_phone || '',
+      customer_cpf_cnpj: customer.customer_cpf_cnpj || '',
+      customer_type: customer.customer_type || 'residential',
+      address: customer.address || '',
+      city: customer.city || '',
+      state: customer.state || '',
+      zip_code: customer.zip_code || '',
+      average_bill_value: customer.average_bill_value?.toString() || '',
+      status: customer.status || 'pending'
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (editingCustomer) {
+      updateSubscription.mutate({ id: editingCustomer.id, data: formData });
+    } else {
+      createSubscription.mutate(formData);
+    }
+  };
+
+  const handleDeleteClick = (customer) => {
+    setCustomerToDelete(customer);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (customerToDelete) {
+      deleteSubscription.mutate(customerToDelete.id);
+    }
+  };
+
   const stats = {
     total: subscriptions.length,
     active: subscriptions.filter(s => s.status === 'active').length,
@@ -137,8 +268,15 @@ export default function CustomerManagement() {
               </div>
             </div>
             <div className="flex gap-2">
+              <Button 
+                className="bg-white text-indigo-600 hover:bg-white/90"
+                onClick={() => { resetForm(); setIsEditDialogOpen(true); }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Cliente
+              </Button>
               <label htmlFor="import-csv">
-                <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" asChild>
+                <Button variant="ghost" className="text-white hover:bg-white/20" asChild>
                   <span>
                     <Upload className="w-4 h-4 mr-2" />
                     Importar
@@ -153,8 +291,8 @@ export default function CustomerManagement() {
                 onChange={handleImportCSV}
               />
               <Button 
-                variant="outline" 
-                className="border-white/30 text-white hover:bg-white/20"
+                variant="ghost" 
+                className="text-white hover:bg-white/20"
                 onClick={handleExportCSV}
               >
                 <Download className="w-4 h-4 mr-2" />
@@ -283,14 +421,29 @@ export default function CustomerManagement() {
                         R$ {sub.average_bill_value?.toFixed(2)}
                       </td>
                       <td className="py-4 px-4 text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openDetails(sub)}
-                        >
-                          <Eye className="w-4 h-4 mr-2" />
-                          Ver detalhes
-                        </Button>
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openDetails(sub)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openEditDialog(sub)}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteClick(sub)}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -322,6 +475,156 @@ export default function CustomerManagement() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Edit/Create Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
+        setIsEditDialogOpen(open);
+        if (!open) resetForm();
+      }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingCustomer ? 'Editar Cliente' : 'Novo Cliente'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Nome *</Label>
+                <Input
+                  value={formData.customer_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, customer_name: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Email *</Label>
+                <Input
+                  type="email"
+                  value={formData.customer_email}
+                  onChange={(e) => setFormData(prev => ({ ...prev, customer_email: e.target.value }))}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Telefone</Label>
+                <Input
+                  value={formData.customer_phone}
+                  onChange={(e) => setFormData(prev => ({ ...prev, customer_phone: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>CPF/CNPJ</Label>
+                <Input
+                  value={formData.customer_cpf_cnpj}
+                  onChange={(e) => setFormData(prev => ({ ...prev, customer_cpf_cnpj: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Tipo *</Label>
+                <Select value={formData.customer_type} onValueChange={(value) => setFormData(prev => ({ ...prev, customer_type: value }))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="residential">Residencial</SelectItem>
+                    <SelectItem value="commercial">Comercial</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Valor Conta Mensal</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.average_bill_value}
+                  onChange={(e) => setFormData(prev => ({ ...prev, average_bill_value: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Endereço</Label>
+              <Input
+                value={formData.address}
+                onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Cidade</Label>
+                <Input
+                  value={formData.city}
+                  onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Estado</Label>
+                <Input
+                  value={formData.state}
+                  onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
+                  maxLength={2}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>CEP</Label>
+                <Input
+                  value={formData.zip_code}
+                  onChange={(e) => setFormData(prev => ({ ...prev, zip_code: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">Pendente</SelectItem>
+                  <SelectItem value="analyzing">Em análise</SelectItem>
+                  <SelectItem value="active">Ativa</SelectItem>
+                  <SelectItem value="suspended">Suspensa</SelectItem>
+                  <SelectItem value="cancelled">Cancelada</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button type="button" variant="outline" className="flex-1" onClick={() => setIsEditDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-700">
+                {editingCustomer ? 'Salvar alterações' : 'Criar cliente'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tem certeza que deseja excluir este cliente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. O cliente <strong>{customerToDelete?.customer_name}</strong> será permanentemente removido do sistema.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setCustomerToDelete(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              Sim, excluir cliente
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
