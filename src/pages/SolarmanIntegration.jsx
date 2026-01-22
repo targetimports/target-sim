@@ -47,9 +47,7 @@ export default function SolarmanIntegration() {
   
   const [formData, setFormData] = useState({
     power_plant_id: '',
-    station_id: '',
-    app_id: '',
-    app_secret: ''
+    station_id: ''
   });
 
   const { data: integrations = [] } = useQuery({
@@ -63,17 +61,10 @@ export default function SolarmanIntegration() {
   });
 
   const testConnection = async () => {
-    if (!formData.app_id || !formData.app_secret) {
-      toast.error('Preencha App ID e App Secret');
-      return;
-    }
-
     setTestingConnection(true);
     try {
       const response = await base44.functions.invoke('solarmanAPI', {
-        action: 'test_connection',
-        appId: formData.app_id,
-        appSecret: formData.app_secret
+        action: 'test_connection'
       });
 
       if (response.data.success) {
@@ -119,8 +110,6 @@ export default function SolarmanIntegration() {
     try {
       const response = await base44.functions.invoke('solarmanAPI', {
         action: 'get_realtime_data',
-        appId: integration.app_id,
-        appSecret: integration.app_secret,
         stationId: integration.station_id,
         integrationId: integration.id
       });
@@ -180,24 +169,10 @@ export default function SolarmanIntegration() {
                     </Select>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>App ID *</Label>
-                      <Input
-                        value={formData.app_id}
-                        onChange={(e) => setFormData(prev => ({ ...prev, app_id: e.target.value }))}
-                        placeholder="App ID do Solarman"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>App Secret *</Label>
-                      <Input
-                        type="password"
-                        value={formData.app_secret}
-                        onChange={(e) => setFormData(prev => ({ ...prev, app_secret: e.target.value }))}
-                        placeholder="App Secret"
-                      />
-                    </div>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p className="text-sm text-blue-800">
+                      💡 As credenciais Solarman (App ID e Secret) são configuradas globalmente nas variáveis de ambiente do sistema.
+                    </p>
                   </div>
 
                   <Button 
@@ -245,7 +220,7 @@ export default function SolarmanIntegration() {
                       variant="outline" 
                       onClick={() => {
                         setShowAddDialog(false);
-                        setFormData({ power_plant_id: '', station_id: '', app_id: '', app_secret: '' });
+                        setFormData({ power_plant_id: '', station_id: '' });
                         setAvailableStations([]);
                       }}
                       className="flex-1"
@@ -254,7 +229,7 @@ export default function SolarmanIntegration() {
                     </Button>
                     <Button 
                       onClick={() => createIntegration.mutate(formData)}
-                      disabled={!formData.power_plant_id || !formData.station_id || !formData.app_id || !formData.app_secret}
+                      disabled={!formData.power_plant_id || !formData.station_id}
                       className="flex-1 bg-slate-900"
                     >
                       Criar Integração

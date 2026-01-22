@@ -2,7 +2,14 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 const SOLARMAN_API_URL = 'https://globalapi.solarmanpv.com';
 
-async function getSolarmanToken(appId, appSecret) {
+async function getSolarmanToken() {
+  const appId = Deno.env.get('SOLARMAN_APP_ID');
+  const appSecret = Deno.env.get('SOLARMAN_APP_SECRET');
+
+  if (!appId || !appSecret) {
+    throw new Error('Credenciais Solarman não configuradas. Configure SOLARMAN_APP_ID e SOLARMAN_APP_SECRET nas variáveis de ambiente.');
+  }
+
   const response = await fetch(`${SOLARMAN_API_URL}/account/v1.0/token`, {
     method: 'POST',
     headers: {
@@ -16,10 +23,16 @@ async function getSolarmanToken(appId, appSecret) {
   });
 
   if (!response.ok) {
-    throw new Error(`Erro ao obter token: ${response.statusText}`);
+    const errorData = await response.text();
+    throw new Error(`Erro ao obter token: ${response.statusText} - ${errorData}`);
   }
 
   const data = await response.json();
+  
+  if (!data.access_token) {
+    throw new Error('Token não retornado pela API');
+  }
+  
   return data.access_token;
 }
 
@@ -111,12 +124,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    const { action, appId, appSecret, stationId, integrationId } = await req.json();
+    const { action, stationId, integrationId } = await req.json();
 
-    let accessToken;
-    if (appId && appSecret) {
-      accessToken = await getSolarmanToken(appId, appSecret);
-    }
+    const accessToken = await getSolarmanToken();
 
     switch (action) {
       case 'test_connection':
