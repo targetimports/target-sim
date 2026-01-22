@@ -151,8 +151,13 @@ export default function AdminPowerPlants() {
     ? powerPlants.filter(p => p.status === 'under_construction')
     : powerPlants.filter(p => p.operation_mode === activeTab);
 
-  const totalCapacity = powerPlants.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
-  const operationalPlants = powerPlants.filter(p => p.status === 'operational').length;
+  const monthlyGenPlants = powerPlants.filter(p => p.operation_mode === 'monthly_generation');
+  const accumulatedPlants = powerPlants.filter(p => p.operation_mode === 'accumulated_balance');
+  const constructionPlants = powerPlants.filter(p => p.status === 'under_construction');
+
+  const monthlyGenCapacity = monthlyGenPlants.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
+  const accumulatedCredits = accumulatedPlants.reduce((sum, p) => sum + (p.accumulated_credits_kwh || 0), 0);
+  const constructionCapacity = constructionPlants.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
 
 
 
