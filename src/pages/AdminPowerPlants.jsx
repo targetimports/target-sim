@@ -232,14 +232,16 @@ export default function AdminPowerPlants() {
     : powerPlants.filter(p => p.operation_mode === activeTab && p.status !== 'under_construction');
 
   const monthlyGenPlants = powerPlants.filter(p => p.operation_mode === 'monthly_generation' && p.status === 'operational');
-  const accumulatedPlants = powerPlants.filter(p => p.operation_mode === 'accumulated_balance' && (p.status === 'compensando' || p.status === 'disponivel'));
+  const accumulatedPlantsDisponivel = powerPlants.filter(p => p.operation_mode === 'accumulated_balance' && p.status === 'disponivel');
+  const accumulatedPlantsCompensando = powerPlants.filter(p => p.operation_mode === 'accumulated_balance' && p.status === 'compensando');
   const constructionPhase1 = powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_1');
   const constructionPhase2 = powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_2');
   const leasingPlants = powerPlants.filter(p => p.leasing_active === true);
 
   const monthlyGenCapacity = monthlyGenPlants.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
   const monthlyGenKwh = monthlyGenPlants.reduce((sum, p) => sum + (p.monthly_generation_kwh || 0), 0);
-  const accumulatedCredits = accumulatedPlants.reduce((sum, p) => sum + (p.accumulated_credits_kwh || 0), 0);
+  const accumulatedCreditsDisponivel = accumulatedPlantsDisponivel.reduce((sum, p) => sum + (p.initial_balance_kwh || 0), 0);
+  const accumulatedCreditsCompensando = accumulatedPlantsCompensando.reduce((sum, p) => sum + (p.initial_balance_kwh || 0), 0);
   const constructionPhase1Capacity = constructionPhase1.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
   const constructionPhase1Kwh = constructionPhase1.reduce((sum, p) => sum + (p.monthly_generation_kwh || 0), 0);
   const constructionPhase2Capacity = constructionPhase2.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
@@ -329,14 +331,28 @@ export default function AdminPowerPlants() {
           <Card className="border-0 shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                  <Zap className="w-6 h-6 text-purple-600" />
+                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                  <Zap className="w-6 h-6 text-green-600" />
                 </div>
                 <div>
-                   <p className="text-sm text-slate-500">Crédito Acumulado</p>
-                   <p className="text-2xl font-bold">{(accumulatedCredits / 1000).toFixed(0)}k kWh</p>
-                   <p className="text-xs text-slate-400">saldo disponível</p>
-                 </div>
+                  <p className="text-sm text-slate-500">Crédito Disponível</p>
+                  <p className="text-2xl font-bold">{(accumulatedCreditsDisponivel / 1000).toFixed(0)}k kWh</p>
+                  <p className="text-xs text-slate-400">{accumulatedPlantsDisponivel.length} usinas</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                  <Zap className="w-6 h-6 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500">Crédito Compensando</p>
+                  <p className="text-2xl font-bold">{(accumulatedCreditsCompensando / 1000).toFixed(0)}k kWh</p>
+                  <p className="text-xs text-slate-400">{accumulatedPlantsCompensando.length} usinas</p>
+                </div>
               </div>
             </CardContent>
           </Card>
