@@ -57,9 +57,21 @@ export default function CustomerManagement() {
     status: 'pending'
   });
 
+  const [consumerUnits, setConsumerUnits] = useState([]);
+  const [newUnit, setNewUnit] = useState({
+    installation_code: '',
+    customer_code: '',
+    monthly_consumption_kwh: ''
+  });
+
   const { data: subscriptions = [] } = useQuery({
     queryKey: ['subscriptions-all'],
     queryFn: () => base44.entities.Subscription.list('-created_date', 500)
+  });
+
+  const { data: allConsumerUnits = [] } = useQuery({
+    queryKey: ['consumer-units'],
+    queryFn: () => base44.entities.ConsumerUnit.list()
   });
 
   const filteredSubscriptions = subscriptions.filter(sub => {
@@ -183,9 +195,11 @@ export default function CustomerManagement() {
       status: 'pending'
     });
     setEditingCustomer(null);
+    setConsumerUnits([]);
+    setNewUnit({ installation_code: '', customer_code: '', monthly_consumption_kwh: '' });
   };
 
-  const openEditDialog = (customer) => {
+  const openEditDialog = async (customer) => {
     setEditingCustomer(customer);
     setFormData({
       customer_name: customer.customer_name || '',
@@ -200,16 +214,70 @@ export default function CustomerManagement() {
       average_bill_value: customer.average_bill_value?.toString() || '',
       status: customer.status || 'pending'
     });
+    
+    // Carregar unidades consumidoras existentes
+    const units = allConsumerUnits.filter(u => u.subscription_id === customer.id);
+    setConsumerUnits(units);
+    
     setIsEditDialogOpen(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editingCustomer) {
-      updateSubscription.mutate({ id: editingCustomer.id, data: formData });
-    } else {
-      createSubscription.mutate(formData);
+    
+    try {
+      if (editingCustomer) {
+        await updateSubscription.mutateAsync({ id: editingCustomer.id, data: formData });
+        
+        // Salvar unidades consumidoras
+        for (const unit of consumerUnits) {
+          if (!unit.id) {
+            // Nova unidade
+            await base44.entities.ConsumerUnit.create({
+              ...unit,
+              subscription_id: editingCustomer.id,
+              customer_email: formData.customer_email,
+              monthly_consumption_kwh: parseFloat(unit.monthly_consumption_kwh) || 0
+            });
+          } else {
+            // Atualizar unidade existente
+            await base44.entities.ConsumerUnit.update(unit.id, {
+              ...unit,
+              monthly_consumption_kwh: parseFloat(unit.monthly_consumption_kwh) || 0
+            });
+          }
+        }
+      } else {
+        const newSubscription = await createSubscription.mutateAsync(formData);
+        
+        // Criar unidades consumidoras para novo cliente
+        for (const unit of consumerUnits) {
+          await base44.entities.ConsumerUnit.create({
+            ...unit,
+            subscription_id: newSubscription.id,
+            customer_email: formData.customer_email,
+            monthly_consumption_kwh: parseFloat(unit.monthly_consumption_kwh) || 0
+          });
+        }
+      }
+      
+      queryClient.invalidateQueries(['consumer-units']);
+    } catch (error) {
+      console.error('Erro ao salvar:', error);
     }
+  };
+
+  const addConsumerUnit = () => {
+    if (newUnit.installation_code && newUnit.customer_code) {
+      setConsumerUnits([...consumerUnits, { ...newUnit }]);
+      setNewUnit({ installation_code: '', customer_code: '', monthly_consumption_kwh: '' });
+    } else {
+      toast.error('Preencha os códigos obrigatórios');
+    }
+  };
+
+  const removeConsumerUnit = (index) => {
+    setConsumerUnits(consumerUnits.filter((_, i) => i !== index));
   };
 
   const handleDeleteClick = (customer) => {
@@ -594,6 +662,78 @@ export default function CustomerManagement() {
                   <SelectItem value="cancelled">Cancelada</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Unidades Consumidoras */}
+            <div className="border-t pt-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-semibold">Unidades Consumidoras</Label>
+                <Badge variant="outline">{consumerUnits.length} unidade(s)</Badge>
+              </div>
+
+              {/* Lista de unidades */}
+              {consumerUnits.length > 0 && (
+                <div className="space-y-2">
+                  {consumerUnits.map((unit, index) => (
+                    <div key={index} className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Instalação: {unit.installation_code}</p>
+                        <p className="text-xs text-slate-500">Cliente: {unit.customer_code} • Consumo: {unit.monthly_consumption_kwh} kWh/mês</p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeConsumerUnit(index)}
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Adicionar nova unidade */}
+              <div className="space-y-3 p-4 bg-blue-50 rounded-lg">
+                <p className="text-sm font-medium text-blue-900">Adicionar Unidade Consumidora</p>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Código Instalação *</Label>
+                    <Input
+                      placeholder="Ex: 12345678"
+                      value={newUnit.installation_code}
+                      onChange={(e) => setNewUnit(prev => ({ ...prev, installation_code: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Código Cliente *</Label>
+                    <Input
+                      placeholder="Ex: 87654321"
+                      value={newUnit.customer_code}
+                      onChange={(e) => setNewUnit(prev => ({ ...prev, customer_code: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Consumo (kWh/mês)</Label>
+                    <Input
+                      type="number"
+                      placeholder="Ex: 350"
+                      value={newUnit.monthly_consumption_kwh}
+                      onChange={(e) => setNewUnit(prev => ({ ...prev, monthly_consumption_kwh: e.target.value }))}
+                    />
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addConsumerUnit}
+                  className="w-full"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar Unidade
+                </Button>
+              </div>
             </div>
 
             <div className="flex gap-3 pt-4">
