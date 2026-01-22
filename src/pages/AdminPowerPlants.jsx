@@ -240,14 +240,18 @@ export default function AdminPowerPlants() {
     operational: 'bg-amber-100 text-amber-900',
     maintenance: 'bg-yellow-100 text-yellow-800',
     under_construction: 'bg-blue-100 text-blue-800',
-    inactive: 'bg-slate-100 text-slate-800'
+    inactive: 'bg-slate-100 text-slate-800',
+    compensando: 'bg-orange-100 text-orange-800',
+    disponivel: 'bg-green-100 text-green-800'
   };
 
   const statusLabels = {
     operational: 'Operacional',
     maintenance: 'Manutenção',
     under_construction: 'Em construção',
-    inactive: 'Inativa'
+    inactive: 'Inativa',
+    compensando: 'Compensando',
+    disponivel: 'Disponível'
   };
 
   return (
@@ -662,15 +666,24 @@ export default function AdminPowerPlants() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Status</Label>
-                <Select value={formData.status || 'operational'} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
+                <Select value={formData.status || (formData.operation_mode === 'accumulated_balance' ? 'disponivel' : 'operational')} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent position="popper" sideOffset={5}>
-                    <SelectItem value="operational">Operacional</SelectItem>
-                    <SelectItem value="maintenance">Manutenção</SelectItem>
-                    <SelectItem value="under_construction">Em construção</SelectItem>
-                    <SelectItem value="inactive">Inativa</SelectItem>
+                    {formData.operation_mode === 'accumulated_balance' ? (
+                      <>
+                        <SelectItem value="compensando">Compensando</SelectItem>
+                        <SelectItem value="disponivel">Disponível</SelectItem>
+                      </>
+                    ) : (
+                      <>
+                        <SelectItem value="operational">Operacional</SelectItem>
+                        <SelectItem value="maintenance">Manutenção</SelectItem>
+                        <SelectItem value="under_construction">Em construção</SelectItem>
+                        <SelectItem value="inactive">Inativa</SelectItem>
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               </div>

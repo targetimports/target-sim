@@ -61,6 +61,7 @@ import RateioManagement from './pages/RateioManagement';
 import RegulatoryReports from './pages/RegulatoryReports';
 import SalesPipeline from './pages/SalesPipeline';
 import ServiceOrders from './pages/ServiceOrders';
+import SolarmanIntegration from './pages/SolarmanIntegration';
 import Subscribe from './pages/Subscribe';
 import SuperApp from './pages/SuperApp';
 import SupportCenter from './pages/SupportCenter';
@@ -75,7 +76,6 @@ import WeatherForecast from './pages/WeatherForecast';
 import WhatsAppCampaigns from './pages/WhatsAppCampaigns';
 import WhatsAppEvolution from './pages/WhatsAppEvolution';
 import WhatsAppManagement from './pages/WhatsAppManagement';
-import SolarmanIntegration from './pages/SolarmanIntegration';
 import __Layout from './Layout.jsx';
 
 
@@ -143,6 +143,7 @@ export const PAGES = {
     "RegulatoryReports": RegulatoryReports,
     "SalesPipeline": SalesPipeline,
     "ServiceOrders": ServiceOrders,
+    "SolarmanIntegration": SolarmanIntegration,
     "Subscribe": Subscribe,
     "SuperApp": SuperApp,
     "SupportCenter": SupportCenter,
@@ -157,7 +158,6 @@ export const PAGES = {
     "WhatsAppCampaigns": WhatsAppCampaigns,
     "WhatsAppEvolution": WhatsAppEvolution,
     "WhatsAppManagement": WhatsAppManagement,
-    "SolarmanIntegration": SolarmanIntegration,
 }
 
 export const pagesConfig = {
