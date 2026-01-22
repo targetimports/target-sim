@@ -164,7 +164,9 @@ export default function AdminPowerPlants() {
   const monthlyGenKwh = monthlyGenPlants.reduce((sum, p) => sum + (p.monthly_generation_kwh || 0), 0);
   const accumulatedCredits = accumulatedPlants.reduce((sum, p) => sum + (p.accumulated_credits_kwh || 0), 0);
   const constructionPhase1Capacity = constructionPhase1.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
+  const constructionPhase1Kwh = constructionPhase1.reduce((sum, p) => sum + (p.monthly_generation_kwh || 0), 0);
   const constructionPhase2Capacity = constructionPhase2.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
+  const constructionPhase2Kwh = constructionPhase2.reduce((sum, p) => sum + (p.monthly_generation_kwh || 0), 0);
 
 
 
@@ -264,6 +266,7 @@ export default function AdminPowerPlants() {
                 <div>
                   <p className="text-sm text-slate-500">Construção Fase 1</p>
                   <p className="text-2xl font-bold">{(constructionPhase1Capacity / 1000).toFixed(1)} MWp</p>
+                  <p className="text-xs text-slate-400">{(constructionPhase1Kwh / 1000).toFixed(0)}k kWh/mês</p>
                 </div>
               </div>
             </CardContent>
@@ -277,6 +280,7 @@ export default function AdminPowerPlants() {
                 <div>
                   <p className="text-sm text-slate-500">Construção Fase 2</p>
                   <p className="text-2xl font-bold">{(constructionPhase2Capacity / 1000).toFixed(1)} MWp</p>
+                  <p className="text-xs text-slate-400">{(constructionPhase2Kwh / 1000).toFixed(0)}k kWh/mês</p>
                 </div>
               </div>
             </CardContent>
