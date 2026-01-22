@@ -43,9 +43,16 @@ export default function SubscriptionImport() {
     }
   };
 
-  const handleImport = async () => {
-    if (!file) {
+  const handleImport = async (source) => {
+    let text = '';
+    
+    if (source === 'file' && !file) {
       setError('Selecione um arquivo');
+      return;
+    }
+
+    if (source === 'paste' && !pastedData.trim()) {
+      setError('Cole os dados no campo de texto');
       return;
     }
 
@@ -53,7 +60,7 @@ export default function SubscriptionImport() {
       setLoading(true);
       setError(null);
       
-      const text = await file.text();
+      text = source === 'file' ? await file.text() : pastedData;
       const subscriptions = parseCSV(text);
 
       if (subscriptions.length === 0) {
