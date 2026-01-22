@@ -603,16 +603,29 @@ export default function AdminPowerPlants() {
             </div>
 
             {formData.operation_mode === 'accumulated_balance' ? (
-              <div className="space-y-2">
-                <Label>Créditos Acumulados (kWh) *</Label>
-                <Input
-                  type="number"
-                  value={formData.accumulated_credits_kwh}
-                  onChange={(e) => setFormData(prev => ({ ...prev, accumulated_credits_kwh: e.target.value }))}
-                  placeholder="Ex: 500000"
-                  required={formData.operation_mode === 'accumulated_balance'}
-                />
-                <p className="text-xs text-slate-500">Total de kWh de crédito disponível nesta usina</p>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Saldo Inicial (kWh) *</Label>
+                  <Input
+                    type="number"
+                    value={formData.initial_balance_kwh}
+                    onChange={(e) => setFormData(prev => ({ ...prev, initial_balance_kwh: e.target.value }))}
+                    placeholder="Ex: 500000"
+                    required={formData.operation_mode === 'accumulated_balance'}
+                  />
+                  <p className="text-xs text-slate-500">Saldo inicial em kWh da usina</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Saldo Disponível (kWh) *</Label>
+                  <Input
+                    type="number"
+                    value={formData.available_balance_kwh}
+                    onChange={(e) => setFormData(prev => ({ ...prev, available_balance_kwh: e.target.value }))}
+                    placeholder="Ex: 450000"
+                    required={formData.operation_mode === 'accumulated_balance'}
+                  />
+                  <p className="text-xs text-slate-500">Saldo disponível em kWh para utilização</p>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-4">
