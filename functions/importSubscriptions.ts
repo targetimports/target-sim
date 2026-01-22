@@ -26,44 +26,41 @@ Deno.serve(async (req) => {
       try {
         const sub = subscriptions[i];
         
-        // Buscar customer existente por CNPJ/CPF ou email
-        const existing = await base44.asServiceRole.entities.Subscription.filter({
-          $or: [
-            { customer_cpf_cnpj: sub.customer_cpf_cnpj },
-            { customer_email: sub.customer_email }
-          ]
-        });
+        // Buscar customer existente por email
+        const email = sub.email || sub.Email;
+        const existing = email ? await base44.asServiceRole.entities.Customer.filter({ email }) : [];
 
         const cleanedData = {
           gdash_id: sub.gdash_id || sub.GDASH_ID,
-          customer_name: sub.customer_name || sub['Nome/Razão Social'],
-          customer_email: sub.customer_email || sub.Email,
-          customer_phone: sub.customer_phone || sub.Telefone || '',
-          customer_cpf_cnpj: sub.customer_cpf_cnpj || sub['CNPJ/CPF'],
+          name: sub.name || sub['Nome/Razão Social'],
+          email: email,
+          phone: sub.phone || sub.Telefone || '',
+          cpf_cnpj: sub.cpf_cnpj || sub['CNPJ/CPF'],
           customer_number: sub.customer_number || sub['Número do Cliente'],
-          power_plant_name: sub.power_plant_name || sub.Usina || '',
-          business_type: sub.business_type || sub.Negócio || '',
-          status: sub.status || sub.Status || 'pending',
-          send_email: sub.send_email !== false && (sub['Enviar Email'] !== 'Não'),
-          invoice_unlock_password: sub.invoice_unlock_password || sub['Senha para desbloqueio de faturas'] || '',
+          customer_type: sub.customer_type || 'residential',
+          address: sub.address || sub['Endereço'] || '',
+          city: sub.city || sub['Cidade'] || '',
+          state: sub.state || sub['Estado'] || '',
+          zip_code: sub.zip_code || sub['CEP'] || '',
+          status: sub.status || sub.Status || 'active',
           notes: sub.notes || ''
         };
 
         if (existing.length > 0) {
           // Atualizar existente
-          await base44.asServiceRole.entities.Subscription.update(existing[0].id, cleanedData);
+          await base44.asServiceRole.entities.Customer.update(existing[0].id, cleanedData);
           results.updated.push({
             id: existing[0].id,
-            name: cleanedData.customer_name,
-            email: cleanedData.customer_email
+            name: cleanedData.name,
+            email: cleanedData.email
           });
         } else {
           // Criar novo
-          const created = await base44.asServiceRole.entities.Subscription.create(cleanedData);
+          const created = await base44.asServiceRole.entities.Customer.create(cleanedData);
           results.created.push({
             id: created.id,
-            name: cleanedData.customer_name,
-            email: cleanedData.customer_email
+            name: cleanedData.name,
+            email: cleanedData.email
           });
         }
       } catch (error) {
