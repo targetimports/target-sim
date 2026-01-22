@@ -73,6 +73,7 @@ export default function AdminPowerPlants() {
       monthly_generation_kwh: data.monthly_generation_kwh ? parseFloat(data.monthly_generation_kwh) : undefined,
       annual_generation_kwh: data.annual_generation_kwh ? parseFloat(data.annual_generation_kwh) : undefined,
       accumulated_credits_kwh: data.accumulated_credits_kwh ? parseFloat(data.accumulated_credits_kwh) : undefined,
+      reading_day: data.reading_day ? parseInt(data.reading_day) : undefined,
       leasing_monthly_value: data.leasing_monthly_value ? parseFloat(data.leasing_monthly_value) : undefined
     }),
     onSuccess: () => {
@@ -90,6 +91,7 @@ export default function AdminPowerPlants() {
       monthly_generation_kwh: data.monthly_generation_kwh ? parseFloat(data.monthly_generation_kwh) : undefined,
       annual_generation_kwh: data.annual_generation_kwh ? parseFloat(data.annual_generation_kwh) : undefined,
       accumulated_credits_kwh: data.accumulated_credits_kwh ? parseFloat(data.accumulated_credits_kwh) : undefined,
+      reading_day: data.reading_day ? parseInt(data.reading_day) : undefined,
       leasing_monthly_value: data.leasing_monthly_value ? parseFloat(data.leasing_monthly_value) : undefined
     }),
     onSuccess: () => {
