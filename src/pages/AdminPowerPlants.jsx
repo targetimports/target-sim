@@ -63,6 +63,8 @@ export default function AdminPowerPlants() {
     start_date: '',
     reading_day: '',
     image_url: '',
+    utility_portal_login: '',
+    utility_portal_password: '',
     leasing_active: false,
     leasing_client_email: '',
     leasing_client_name: '',
@@ -184,6 +186,8 @@ export default function AdminPowerPlants() {
       start_date: plant.start_date || '',
       reading_day: plant.reading_day?.toString() || '',
       image_url: plant.image_url || '',
+      utility_portal_login: plant.utility_portal_login || '',
+      utility_portal_password: plant.utility_portal_password || '',
       leasing_active: plant.leasing_active || false,
       leasing_client_email: plant.leasing_client_email || '',
       leasing_client_name: plant.leasing_client_name || '',
@@ -714,6 +718,29 @@ export default function AdminPowerPlants() {
                 onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
                 placeholder="https://..."
               />
+            </div>
+
+            <div className="border-t pt-6">
+              <h4 className="font-semibold mb-4 text-slate-900">🔐 Acesso ao Portal da Concessionária</h4>
+              <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-lg">
+                <div className="space-y-2">
+                  <Label>Login/Usuário</Label>
+                  <Input
+                    value={formData.utility_portal_login}
+                    onChange={(e) => setFormData(prev => ({ ...prev, utility_portal_login: e.target.value }))}
+                    placeholder="Usuário do portal"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Senha</Label>
+                  <Input
+                    type="password"
+                    value={formData.utility_portal_password}
+                    onChange={(e) => setFormData(prev => ({ ...prev, utility_portal_password: e.target.value }))}
+                    placeholder="Senha do portal"
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="border-t pt-6">
