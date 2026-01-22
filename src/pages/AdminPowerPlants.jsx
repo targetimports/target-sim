@@ -54,6 +54,8 @@ export default function AdminPowerPlants() {
     monthly_generation_kwh: '',
     annual_generation_kwh: '',
     accumulated_credits_kwh: '',
+    initial_balance_kwh: '',
+    available_balance_kwh: '',
     location: '',
     city: '',
     state: '',
