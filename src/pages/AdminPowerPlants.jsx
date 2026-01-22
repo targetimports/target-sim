@@ -183,6 +183,8 @@ export default function AdminPowerPlants() {
       monthly_generation_kwh: plant.monthly_generation_kwh?.toString() || '',
       annual_generation_kwh: plant.annual_generation_kwh?.toString() || '',
       accumulated_credits_kwh: plant.accumulated_credits_kwh?.toString() || '',
+      initial_balance_kwh: plant.initial_balance_kwh?.toString() || '',
+      available_balance_kwh: plant.available_balance_kwh?.toString() || '',
       location: plant.location || '',
       city: plant.city || '',
       state: plant.state || '',
