@@ -217,13 +217,11 @@ export default function AdminDashboard() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-slate-900 to-amber-600 rounded-xl flex items-center justify-center">
-                <Sun className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold">Target Sim - Admin</h1>
-                <p className="text-xs text-slate-400">Gestão de assinaturas</p>
-              </div>
+              <img 
+                src="https://targetsim.com.br/wp-content/uploads/2024/08/cropped-cropped-Text2-4.png" 
+                alt="Target Sim" 
+                className="h-10"
+              />
               <div className="ml-4 flex items-center gap-2">
                   <WhatsAppStatusIndicator />
                 </div>
@@ -248,7 +246,7 @@ export default function AdminDashboard() {
                   </div>
                 </SheetContent>
               </Sheet>
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => base44.auth.logout()}>
+              <Button variant="ghost" className="text-white hover:bg-white/20" onClick={() => base44.auth.logout()}>
                 Sair
               </Button>
             </div>
