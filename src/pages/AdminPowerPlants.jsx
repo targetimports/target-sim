@@ -458,9 +458,23 @@ export default function AdminPowerPlants() {
                       <span>{plant.capacity_kw?.toLocaleString()} kWp</span>
                     </div>
                     {plant.operation_mode === 'accumulated_balance' && plant.accumulated_credits_kwh ? (
-                      <div className="flex items-center gap-2 text-sm font-semibold text-amber-700">
-                        <Zap className="w-4 h-4" />
-                        <span>{plant.accumulated_credits_kwh?.toLocaleString()} kWh acumulados</span>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-amber-700">
+                          <Zap className="w-4 h-4" />
+                          <span>{plant.accumulated_credits_kwh?.toLocaleString()} kWh acumulados</span>
+                        </div>
+                        {plant.initial_balance_kwh && (
+                          <div className="flex items-center gap-2 text-sm text-slate-600">
+                            <Zap className="w-4 h-4" />
+                            <span>Saldo Inicial: {plant.initial_balance_kwh?.toLocaleString()} kWh</span>
+                          </div>
+                        )}
+                        {plant.available_balance_kwh && (
+                          <div className="flex items-center gap-2 text-sm text-slate-600">
+                            <Zap className="w-4 h-4" />
+                            <span>Saldo Disponível: {plant.available_balance_kwh?.toLocaleString()} kWh</span>
+                          </div>
+                        )}
                       </div>
                     ) : plant.monthly_generation_kwh ? (
                       <div className="flex items-center gap-2 text-sm font-semibold text-amber-700">
