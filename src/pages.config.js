@@ -20,6 +20,7 @@ import ChargeConfigurations from './pages/ChargeConfigurations';
 import Chatbot from './pages/Chatbot';
 import ChurnPrediction from './pages/ChurnPrediction';
 import ConsumerGroups from './pages/ConsumerGroups';
+import ConsumerUnitsManager from './pages/ConsumerUnitsManager';
 import ConsumptionMonitor from './pages/ConsumptionMonitor';
 import ContractManagement from './pages/ContractManagement';
 import CreditAdjustments from './pages/CreditAdjustments';
@@ -76,7 +77,7 @@ import WeatherForecast from './pages/WeatherForecast';
 import WhatsAppCampaigns from './pages/WhatsAppCampaigns';
 import WhatsAppEvolution from './pages/WhatsAppEvolution';
 import WhatsAppManagement from './pages/WhatsAppManagement';
-import ConsumerUnitsManager from './pages/ConsumerUnitsManager';
+import SubscriptionImport from './pages/SubscriptionImport';
 import __Layout from './Layout.jsx';
 
 
@@ -103,6 +104,7 @@ export const PAGES = {
     "Chatbot": Chatbot,
     "ChurnPrediction": ChurnPrediction,
     "ConsumerGroups": ConsumerGroups,
+    "ConsumerUnitsManager": ConsumerUnitsManager,
     "ConsumptionMonitor": ConsumptionMonitor,
     "ContractManagement": ContractManagement,
     "CreditAdjustments": CreditAdjustments,
@@ -159,7 +161,7 @@ export const PAGES = {
     "WhatsAppCampaigns": WhatsAppCampaigns,
     "WhatsAppEvolution": WhatsAppEvolution,
     "WhatsAppManagement": WhatsAppManagement,
-    "ConsumerUnitsManager": ConsumerUnitsManager,
+    "SubscriptionImport": SubscriptionImport,
 }
 
 export const pagesConfig = {
