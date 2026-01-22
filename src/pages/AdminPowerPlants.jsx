@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
-  Sun, Plus, Pencil, Trash2, ArrowLeft, MapPin, Zap, Calendar
+  Sun, Plus, Pencil, Trash2, ArrowLeft, MapPin, Zap, Calendar, DollarSign
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -49,7 +49,14 @@ export default function AdminPowerPlants() {
     construction_phase: '',
     operation_mode: 'monthly_generation',
     start_date: '',
-    image_url: ''
+    image_url: '',
+    leasing_active: false,
+    leasing_client_email: '',
+    leasing_client_name: '',
+    leasing_monthly_value: '',
+    leasing_contract_start: '',
+    leasing_contract_end: '',
+    leasing_notes: ''
   });
 
   const { data: powerPlants = [] } = useQuery({
@@ -64,7 +71,8 @@ export default function AdminPowerPlants() {
       capacity_kw: parseFloat(data.capacity_kw),
       monthly_generation_kwh: data.monthly_generation_kwh ? parseFloat(data.monthly_generation_kwh) : undefined,
       annual_generation_kwh: data.annual_generation_kwh ? parseFloat(data.annual_generation_kwh) : undefined,
-      accumulated_credits_kwh: data.accumulated_credits_kwh ? parseFloat(data.accumulated_credits_kwh) : undefined
+      accumulated_credits_kwh: data.accumulated_credits_kwh ? parseFloat(data.accumulated_credits_kwh) : undefined,
+      leasing_monthly_value: data.leasing_monthly_value ? parseFloat(data.leasing_monthly_value) : undefined
     }),
     onSuccess: () => {
       queryClient.invalidateQueries(['powerplants']);
@@ -80,7 +88,8 @@ export default function AdminPowerPlants() {
       capacity_kw: parseFloat(data.capacity_kw),
       monthly_generation_kwh: data.monthly_generation_kwh ? parseFloat(data.monthly_generation_kwh) : undefined,
       annual_generation_kwh: data.annual_generation_kwh ? parseFloat(data.annual_generation_kwh) : undefined,
-      accumulated_credits_kwh: data.accumulated_credits_kwh ? parseFloat(data.accumulated_credits_kwh) : undefined
+      accumulated_credits_kwh: data.accumulated_credits_kwh ? parseFloat(data.accumulated_credits_kwh) : undefined,
+      leasing_monthly_value: data.leasing_monthly_value ? parseFloat(data.leasing_monthly_value) : undefined
     }),
     onSuccess: () => {
       queryClient.invalidateQueries(['powerplants']);
@@ -110,7 +119,14 @@ export default function AdminPowerPlants() {
       status: 'operational',
       operation_mode: 'monthly_generation',
       start_date: '',
-      image_url: ''
+      image_url: '',
+      leasing_active: false,
+      leasing_client_email: '',
+      leasing_client_name: '',
+      leasing_monthly_value: '',
+      leasing_contract_start: '',
+      leasing_contract_end: '',
+      leasing_notes: ''
     });
     setEditingPlant(null);
   };
@@ -133,7 +149,14 @@ export default function AdminPowerPlants() {
       construction_phase: plant.construction_phase || '',
       operation_mode: plant.operation_mode || 'monthly_generation',
       start_date: plant.start_date || '',
-      image_url: plant.image_url || ''
+      image_url: plant.image_url || '',
+      leasing_active: plant.leasing_active || false,
+      leasing_client_email: plant.leasing_client_email || '',
+      leasing_client_name: plant.leasing_client_name || '',
+      leasing_monthly_value: plant.leasing_monthly_value?.toString() || '',
+      leasing_contract_start: plant.leasing_contract_start || '',
+      leasing_contract_end: plant.leasing_contract_end || '',
+      leasing_notes: plant.leasing_notes || ''
     });
     setIsDialogOpen(true);
   };
@@ -149,6 +172,8 @@ export default function AdminPowerPlants() {
 
   const filteredPlants = activeTab === 'all' 
     ? powerPlants 
+    : activeTab === 'leasing'
+    ? powerPlants.filter(p => p.leasing_active === true)
     : activeTab === 'construction_phase_1'
     ? powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_1')
     : activeTab === 'construction_phase_2'
@@ -159,6 +184,7 @@ export default function AdminPowerPlants() {
   const accumulatedPlants = powerPlants.filter(p => p.operation_mode === 'accumulated_balance' && p.status !== 'under_construction');
   const constructionPhase1 = powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_1');
   const constructionPhase2 = powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_2');
+  const leasingPlants = powerPlants.filter(p => p.leasing_active === true);
 
   const monthlyGenCapacity = monthlyGenPlants.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
   const monthlyGenKwh = monthlyGenPlants.reduce((sum, p) => sum + (p.monthly_generation_kwh || 0), 0);
@@ -167,6 +193,7 @@ export default function AdminPowerPlants() {
   const constructionPhase1Kwh = constructionPhase1.reduce((sum, p) => sum + (p.monthly_generation_kwh || 0), 0);
   const constructionPhase2Capacity = constructionPhase2.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
   const constructionPhase2Kwh = constructionPhase2.reduce((sum, p) => sum + (p.monthly_generation_kwh || 0), 0);
+  const leasingRevenue = leasingPlants.reduce((sum, p) => sum + (p.leasing_monthly_value || 0), 0);
 
 
 
@@ -216,7 +243,7 @@ export default function AdminPowerPlants() {
 
       <main className="container mx-auto px-4 py-8">
         {/* Stats */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
           <Card className="border-0 shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -285,6 +312,20 @@ export default function AdminPowerPlants() {
               </div>
             </CardContent>
           </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                  <DollarSign className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500">Leasing</p>
+                  <p className="text-2xl font-bold">{leasingPlants.length}</p>
+                  <p className="text-xs text-slate-400">R$ {leasingRevenue.toFixed(0)}/mês</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Tabs por modo de geração */}
@@ -304,6 +345,9 @@ export default function AdminPowerPlants() {
             </TabsTrigger>
             <TabsTrigger value="construction_phase_2" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
               🏗️ Construção Fase 2 ({powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_2').length})
+            </TabsTrigger>
+            <TabsTrigger value="leasing" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
+              💰 Leasing ({powerPlants.filter(p => p.leasing_active === true).length})
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -371,6 +415,12 @@ export default function AdminPowerPlants() {
                         <span>Desde {format(new Date(plant.start_date), 'MM/yyyy')}</span>
                       </div>
                     )}
+                    {plant.leasing_active && (
+                      <div className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
+                        <DollarSign className="w-4 h-4" />
+                        <span>R$ {plant.leasing_monthly_value?.toLocaleString()}/mês - {plant.leasing_client_name}</span>
+                      </div>
+                    )}
                     <div className="flex gap-2 flex-wrap">
                       <Badge className={statusColors[plant.status]}>
                         {statusLabels[plant.status]}
@@ -386,6 +436,11 @@ export default function AdminPowerPlants() {
                       {plant.gd_type && (
                         <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
                           {plant.gd_type}
+                        </Badge>
+                      )}
+                      {plant.leasing_active && (
+                        <Badge className="text-xs bg-emerald-100 text-emerald-800">
+                          Leasing
                         </Badge>
                       )}
                     </div>
@@ -609,6 +664,83 @@ export default function AdminPowerPlants() {
                 onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
                 placeholder="https://..."
               />
+            </div>
+
+            <div className="border-t pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <input
+                  type="checkbox"
+                  id="leasing_active"
+                  checked={formData.leasing_active}
+                  onChange={(e) => setFormData(prev => ({ ...prev, leasing_active: e.target.checked }))}
+                  className="w-4 h-4"
+                />
+                <Label htmlFor="leasing_active" className="cursor-pointer">Esta usina está em Leasing</Label>
+              </div>
+
+              {formData.leasing_active && (
+                <div className="space-y-4 bg-emerald-50 p-4 rounded-lg">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Nome do Cliente *</Label>
+                      <Input
+                        value={formData.leasing_client_name}
+                        onChange={(e) => setFormData(prev => ({ ...prev, leasing_client_name: e.target.value }))}
+                        placeholder="Nome do cliente"
+                        required={formData.leasing_active}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Email do Cliente</Label>
+                      <Input
+                        type="email"
+                        value={formData.leasing_client_email}
+                        onChange={(e) => setFormData(prev => ({ ...prev, leasing_client_email: e.target.value }))}
+                        placeholder="cliente@email.com"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Valor Mensal (R$) *</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={formData.leasing_monthly_value}
+                      onChange={(e) => setFormData(prev => ({ ...prev, leasing_monthly_value: e.target.value }))}
+                      placeholder="Ex: 5000.00"
+                      required={formData.leasing_active}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Início do Contrato *</Label>
+                      <Input
+                        type="date"
+                        value={formData.leasing_contract_start}
+                        onChange={(e) => setFormData(prev => ({ ...prev, leasing_contract_start: e.target.value }))}
+                        required={formData.leasing_active}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Fim do Contrato *</Label>
+                      <Input
+                        type="date"
+                        value={formData.leasing_contract_end}
+                        onChange={(e) => setFormData(prev => ({ ...prev, leasing_contract_end: e.target.value }))}
+                        required={formData.leasing_active}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Observações</Label>
+                    <Input
+                      value={formData.leasing_notes}
+                      onChange={(e) => setFormData(prev => ({ ...prev, leasing_notes: e.target.value }))}
+                      placeholder="Observações sobre o contrato"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3">
