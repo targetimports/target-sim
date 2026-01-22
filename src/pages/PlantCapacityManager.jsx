@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Zap, AlertTriangle, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Zap, AlertTriangle, CheckCircle, ArrowLeft, Construction } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -25,7 +25,11 @@ export default function PlantCapacityManager() {
     queryFn: () => base44.entities.EnergyAllocation.list('-created_date', 500)
   });
 
-  const plantsWithCapacity = powerPlants.map(plant => {
+  // Separar usinas operacionais das em construção
+  const operationalPlants = powerPlants.filter(p => p.status !== 'under_construction');
+  const constructionPlants = powerPlants.filter(p => p.status === 'under_construction');
+
+  const plantsWithCapacity = operationalPlants.map(plant => {
     const totalCapacity = plant.monthly_generation_kwh || 0;
     const plantAllocations = allocations.filter(a => a.power_plant_id === plant.id);
     const allocated = plantAllocations.reduce((sum, a) => sum + (a.allocated_kwh || 0), 0);
@@ -118,6 +122,52 @@ export default function PlantCapacityManager() {
           </Card>
         </div>
 
+        {/* Usinas em Construção */}
+        {constructionPlants.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <Construction className="w-5 h-5" />
+              Usinas em Construção ({constructionPlants.length})
+            </h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {constructionPlants.map((plant) => (
+                <Card key={plant.id} className="border-2 border-dashed border-yellow-300 bg-yellow-50/50">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="font-semibold text-slate-900">{plant.name}</h3>
+                        <p className="text-xs text-slate-500">{plant.city}/{plant.state}</p>
+                      </div>
+                      <Badge className="bg-yellow-100 text-yellow-800">
+                        {plant.construction_phase === 'phase_1' ? 'Fase 1' : 'Fase 2'}
+                      </Badge>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-slate-600">Capacidade:</span>
+                        <span className="font-medium">{plant.capacity_kw?.toLocaleString()} kWp</span>
+                      </div>
+                      {plant.monthly_generation_kwh && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-600">Geração prevista:</span>
+                          <span className="font-medium">{plant.monthly_generation_kwh?.toLocaleString()} kWh</span>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-yellow-700 mt-3 italic">
+                      Não disponível para alocação
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Usinas Operacionais */}
+        <h2 className="text-lg font-semibold text-slate-900 mb-4">
+          Usinas Operacionais ({plantsWithCapacity.length})
+        </h2>
         <div className="space-y-6">
           {plantsWithCapacity.map((plant) => (
             <Card key={plant.id} className="border border-slate-200">
