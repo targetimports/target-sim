@@ -74,8 +74,9 @@ export default function SubscriptionImport() {
 
       setResult(response.data);
       setFile(null);
+      setPastedData('');
     } catch (err) {
-      setError(err.message || 'Erro ao importar arquivo');
+      setError(err.message || 'Erro ao importar dados');
     } finally {
       setLoading(false);
     }
