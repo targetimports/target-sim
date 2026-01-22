@@ -240,8 +240,8 @@ export default function AdminPowerPlants() {
 
   const monthlyGenCapacity = monthlyGenPlants.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
   const monthlyGenKwh = monthlyGenPlants.reduce((sum, p) => sum + (p.monthly_generation_kwh || 0), 0);
-  const accumulatedCreditsDisponivel = accumulatedPlantsDisponivel.reduce((sum, p) => sum + (p.initial_balance_kwh || 0), 0);
-  const accumulatedCreditsCompensando = accumulatedPlantsCompensando.reduce((sum, p) => sum + (p.initial_balance_kwh || 0), 0);
+  const accumulatedCreditsDisponivel = accumulatedPlantsDisponivel.reduce((sum, p) => sum + (p.available_balance_kwh || 0), 0);
+  const accumulatedCreditsCompensando = accumulatedPlantsCompensando.reduce((sum, p) => sum + (p.available_balance_kwh || 0), 0);
   const constructionPhase1Capacity = constructionPhase1.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
   const constructionPhase1Kwh = constructionPhase1.reduce((sum, p) => sum + (p.monthly_generation_kwh || 0), 0);
   const constructionPhase2Capacity = constructionPhase2.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
