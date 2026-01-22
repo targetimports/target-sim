@@ -49,6 +49,7 @@ export default function AdminPowerPlants() {
     construction_phase: '',
     operation_mode: 'monthly_generation',
     start_date: '',
+    reading_day: '',
     image_url: '',
     leasing_active: false,
     leasing_client_email: '',
@@ -149,6 +150,7 @@ export default function AdminPowerPlants() {
       construction_phase: plant.construction_phase || '',
       operation_mode: plant.operation_mode || 'monthly_generation',
       start_date: plant.start_date || '',
+      reading_day: plant.reading_day?.toString() || '',
       image_url: plant.image_url || '',
       leasing_active: plant.leasing_active || false,
       leasing_client_email: plant.leasing_client_email || '',
@@ -656,6 +658,21 @@ export default function AdminPowerPlants() {
                 />
               </div>
             </div>
+
+            {formData.status === 'operational' && (
+              <div className="space-y-2">
+                <Label>Dia da Leitura da Concessionária</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="31"
+                  value={formData.reading_day}
+                  onChange={(e) => setFormData(prev => ({ ...prev, reading_day: e.target.value }))}
+                  placeholder="Ex: 15 (dia do mês)"
+                />
+                <p className="text-xs text-slate-500">Dia do mês em que a concessionária realiza a leitura (1 a 31)</p>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label>URL da imagem</Label>
