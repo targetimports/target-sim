@@ -388,8 +388,11 @@ export default function AdminPowerPlants() {
             <TabsTrigger value="monthly_generation" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
               ⚡ Geração Mensal ({monthlyGenPlants.length})
             </TabsTrigger>
-            <TabsTrigger value="accumulated_balance" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
-              💰 Crédito Acumulado ({accumulatedPlants.length})
+            <TabsTrigger value="accumulated_disponivel" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
+              💰 Crédito Disponível ({powerPlants.filter(p => p.operation_mode === 'accumulated_balance' && p.status === 'disponivel').length})
+            </TabsTrigger>
+            <TabsTrigger value="accumulated_compensando" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
+              💰 Crédito Compensando ({powerPlants.filter(p => p.operation_mode === 'accumulated_balance' && p.status === 'compensando').length})
             </TabsTrigger>
             <TabsTrigger value="construction_phase_1" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
               🏗️ Construção Fase 1 ({powerPlants.filter(p => p.status === 'under_construction' && p.construction_phase === 'phase_1').length})
