@@ -254,6 +254,9 @@ export default function AdminPowerPlants() {
             <TabsTrigger value="accumulated_balance" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
               💰 Crédito Acumulado ({powerPlants.filter(p => p.operation_mode === 'accumulated_balance').length})
             </TabsTrigger>
+            <TabsTrigger value="under_construction" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
+              🏗️ Em Construção ({powerPlants.filter(p => p.status === 'under_construction').length})
+            </TabsTrigger>
           </TabsList>
         </Tabs>
 
