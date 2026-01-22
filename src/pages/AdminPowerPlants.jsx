@@ -147,6 +147,8 @@ export default function AdminPowerPlants() {
 
   const filteredPlants = activeTab === 'all' 
     ? powerPlants 
+    : activeTab === 'under_construction'
+    ? powerPlants.filter(p => p.status === 'under_construction')
     : powerPlants.filter(p => p.operation_mode === activeTab);
 
   const totalCapacity = powerPlants.reduce((sum, p) => sum + (p.capacity_kw || 0), 0);
