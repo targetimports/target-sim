@@ -150,7 +150,6 @@ const menuCategories = {
     title: '💼 Faturamento & Gestão',
     color: 'border-emerald-500 bg-emerald-50',
     items: [
-      { name: 'Faturamento Automático', url: 'AutomaticBilling', icon: '💳' },
       { name: 'Modelos de Fatura', url: 'InvoiceTemplateEditor', icon: '📝' },
       { name: 'Contas Pagar/Receber', url: 'AccountsManagement', icon: '📋' },
       { name: 'Processador OCR', url: 'UtilityBillProcessor', icon: '🤖' },
