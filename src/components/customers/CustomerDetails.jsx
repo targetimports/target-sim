@@ -3,10 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   User, Mail, Phone, MapPin, CreditCard, FileText, 
-  MessageSquare, Calendar, AlertCircle, TrendingUp, Plus
+  MessageSquare, Calendar, AlertCircle, Building2, Zap,
+  Download, Upload, Send, Bell, CheckCircle, Clock, Hash
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -22,14 +24,20 @@ import {
 
 export default function CustomerDetails({ subscription, onClose }) {
   const queryClient = useQueryClient();
-  const [newNote, setNewNote] = useState('');
-  const [noteType, setNoteType] = useState('general');
-  const [isImportant, setIsImportant] = useState(false);
+  const [newComment, setNewComment] = useState('');
+  const [activeTab, setActiveTab] = useState('all');
 
   // Buscar dados relacionados
+  const { data: consumerUnits = [] } = useQuery({
+    queryKey: ['customer-units', subscription.email],
+    queryFn: () => base44.entities.ConsumerUnit.filter({ 
+      customer_email: subscription.email 
+    })
+  });
+
   const { data: invoices = [] } = useQuery({
     queryKey: ['customer-invoices', subscription.email],
-    queryFn: () => base44.entities.MonthlyInvoice.filter({ 
+    queryFn: () => base44.entities.UtilityBill.filter({ 
       customer_email: subscription.email 
     })
   });
@@ -41,13 +49,6 @@ export default function CustomerDetails({ subscription, onClose }) {
     })
   });
 
-  const { data: creditBalance = [] } = useQuery({
-    queryKey: ['customer-credits', subscription.email],
-    queryFn: () => base44.entities.CreditBalance.filter({ 
-      customer_email: subscription.email 
-    })
-  });
-
   const { data: tickets = [] } = useQuery({
     queryKey: ['customer-tickets', subscription.email],
     queryFn: () => base44.entities.SupportTicket.filter({ 
@@ -55,301 +56,341 @@ export default function CustomerDetails({ subscription, onClose }) {
     })
   });
 
-  // Mutation para criar nota
-  const createNoteMutation = useMutation({
+  const { data: documents = [] } = useQuery({
+    queryKey: ['customer-documents', subscription.email],
+    queryFn: () => base44.entities.Document.filter({ 
+      customer_email: subscription.email 
+    })
+  });
+
+  // Mutation para criar comentário
+  const createCommentMutation = useMutation({
     mutationFn: (noteData) => base44.entities.CustomerNote.create(noteData),
     onSuccess: () => {
       queryClient.invalidateQueries(['customer-notes']);
-      setNewNote('');
-      setNoteType('general');
-      setIsImportant(false);
-      toast.success('Nota adicionada com sucesso!');
+      setNewComment('');
+      toast.success('Comentário adicionado!');
     }
   });
 
-  const handleAddNote = () => {
-    if (!newNote.trim()) {
-      toast.error('Digite uma nota');
-      return;
-    }
+  const handleAddComment = () => {
+    if (!newComment.trim()) return;
 
-    createNoteMutation.mutate({
+    createCommentMutation.mutate({
       customer_email: subscription.email,
       customer_id: subscription.id,
-      note: newNote,
-      note_type: noteType,
-      is_important: isImportant
+      note: newComment,
+      note_type: 'general',
+      is_important: false
     });
   };
 
-  const noteTypeColors = {
-    general: 'bg-slate-100 text-slate-800',
-    billing: 'bg-green-100 text-green-800',
-    technical: 'bg-blue-100 text-blue-800',
-    support: 'bg-purple-100 text-purple-800',
-    commercial: 'bg-amber-100 text-amber-800'
-  };
-
-  const noteTypeLabels = {
-    general: 'Geral',
-    billing: 'Financeiro',
-    technical: 'Técnico',
-    support: 'Suporte',
-    commercial: 'Comercial'
-  };
-
-  const totalCredits = creditBalance.reduce((sum, c) => sum + (c.balance_kwh || 0), 0);
-  const totalInvoiced = invoices.reduce((sum, inv) => sum + (inv.final_amount || 0), 0);
+  // Combinar todas as atividades
+  const activities = [
+    ...notes.map(n => ({ ...n, type: 'note', date: n.created_date })),
+    ...tickets.map(t => ({ ...t, type: 'ticket', date: t.created_date })),
+    ...invoices.map(i => ({ ...i, type: 'invoice', date: i.created_date }))
+  ].sort((a, b) => new Date(b.date) - new Date(a.date));
 
   return (
-    <div className="space-y-6">
-      {/* Customer Info */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <User className="w-5 h-5 text-slate-500" />
-                <div>
-                  <p className="text-sm text-slate-500">Nome</p>
-                  <p className="font-semibold">{subscription.name}</p>
-                </div>
+    <div className="grid grid-cols-12 gap-6 h-[calc(100vh-200px)]">
+      {/* Left Sidebar - Customer Info */}
+      <div className="col-span-3 space-y-4 overflow-y-auto">
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-slate-800 rounded-lg flex items-center justify-center text-white text-2xl font-bold mx-auto mb-3">
+                {subscription.name?.charAt(0)}
               </div>
-              <div className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-slate-500" />
-                <div>
-                  <p className="text-sm text-slate-500">Email</p>
-                  <p className="font-semibold">{subscription.email}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-slate-500" />
-                <div>
-                  <p className="text-sm text-slate-500">Telefone</p>
-                  <p className="font-semibold">{subscription.phone}</p>
-                </div>
-              </div>
+              <h2 className="font-bold text-lg">{subscription.name}</h2>
+              <p className="text-sm text-slate-500">
+                Criado em {format(new Date(subscription.created_date), 'dd \'de\' MMMM, yyyy')}
+              </p>
             </div>
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <MapPin className="w-5 h-5 text-slate-500" />
-                <div>
-                  <p className="text-sm text-slate-500">Endereço</p>
-                  <p className="font-semibold">{subscription.address}</p>
-                  <p className="text-sm text-slate-600">{subscription.city}/{subscription.state}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <CreditCard className="w-5 h-5 text-slate-500" />
-                <div>
-                  <p className="text-sm text-slate-500">CPF/CNPJ</p>
-                  <p className="font-semibold">{subscription.cpf_cnpj}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Calendar className="w-5 h-5 text-slate-500" />
-                <div>
-                  <p className="text-sm text-slate-500">Cliente desde</p>
-                  <p className="font-semibold">
-                    {format(new Date(subscription.created_date), 'dd/MM/yyyy')}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Quick Stats */}
-          <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">{totalCredits.toFixed(0)}</p>
-              <p className="text-sm text-slate-500">kWh Créditos</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-blue-600">R$ {totalInvoiced.toFixed(2)}</p>
-              <p className="text-sm text-slate-500">Total Faturado</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-purple-600">{tickets.length}</p>
-              <p className="text-sm text-slate-500">Chamados</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Tabs */}
-      <Tabs defaultValue="notes" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="notes">
-            <MessageSquare className="w-4 h-4 mr-2" />
-            Notas ({notes.length})
-          </TabsTrigger>
-          <TabsTrigger value="invoices">
-            <FileText className="w-4 h-4 mr-2" />
-            Faturas ({invoices.length})
-          </TabsTrigger>
-          <TabsTrigger value="tickets">
-            <AlertCircle className="w-4 h-4 mr-2" />
-            Chamados ({tickets.length})
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Notes Tab */}
-        <TabsContent value="notes" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Adicionar Nota</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-2">
-                <Select value={noteType} onValueChange={setNoteType}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="general">Geral</SelectItem>
-                    <SelectItem value="billing">Financeiro</SelectItem>
-                    <SelectItem value="technical">Técnico</SelectItem>
-                    <SelectItem value="support">Suporte</SelectItem>
-                    <SelectItem value="commercial">Comercial</SelectItem>
-                  </SelectContent>
-                </Select>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={isImportant}
-                    onChange={(e) => setIsImportant(e.target.checked)}
-                    className="w-4 h-4"
-                  />
-                  <span className="text-sm">Importante</span>
-                </label>
+            <div className="space-y-4 text-sm">
+              <div>
+                <p className="text-slate-500 mb-1">Nome</p>
+                <p className="font-medium">{subscription.name}</p>
               </div>
-              <Textarea
-                placeholder="Digite sua nota aqui..."
-                value={newNote}
-                onChange={(e) => setNewNote(e.target.value)}
-                rows={3}
-              />
-              <Button 
-                onClick={handleAddNote}
-                disabled={createNoteMutation.isPending}
-                className="w-full"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                {createNoteMutation.isPending ? 'Salvando...' : 'Adicionar Nota'}
+
+              <div>
+                <p className="text-slate-500 mb-1">Email</p>
+                <p className="font-medium flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  {subscription.email || '-'}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-slate-500 mb-1">Whatsapp do Cliente</p>
+                <p className="font-medium flex items-center gap-2">
+                  <Phone className="w-4 h-4" />
+                  {subscription.phone || '-'}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-slate-500 mb-1">Concessionária</p>
+                <p className="font-medium">-</p>
+              </div>
+
+              <div>
+                <p className="text-slate-500 mb-1">Documento [CPFCNPJ]</p>
+                <p className="font-medium">{subscription.cpf_cnpj || '-'}</p>
+              </div>
+
+              <div>
+                <p className="text-slate-500 mb-1">Telefone</p>
+                <p className="font-medium">{subscription.phone || '-'}</p>
+              </div>
+
+              <div>
+                <p className="text-slate-500 mb-1">Responsável</p>
+                <p className="font-medium">-</p>
+              </div>
+
+              <div>
+                <p className="text-slate-500 mb-1">Compartilhado com</p>
+                <p className="font-medium">-</p>
+              </div>
+
+              <Button variant="outline" size="sm" className="w-full">
+                + Criar campo personalizado
               </Button>
+
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <p className="text-xs text-amber-800">
+                  <AlertCircle className="w-4 h-4 inline mr-1" />
+                  Não há um usuário vinculado a este cliente
+                </p>
+                <p className="text-xs text-slate-600 mt-1">
+                  Com um conta, um cliente pode acessar o GDASII e acompanhar sua economia e produção de energia.
+                </p>
+                <Button variant="link" size="sm" className="text-xs p-0 h-auto mt-2">
+                  + Cria um usuário para este cliente
+                </Button>
+              </div>
+
+              <Button variant="outline" size="sm" className="w-full text-red-600">
+                Excluir cliente
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Center - Activity Timeline */}
+      <div className="col-span-6 space-y-4 overflow-y-auto">
+        {/* Comment Box */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex gap-2">
+              <Textarea
+                placeholder="Adicione um comentário. Use @ para deixar uma nota para um membro da equipe."
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                rows={2}
+                className="flex-1"
+              />
+              <div className="flex flex-col gap-2">
+                <Button size="icon" variant="outline">
+                  <Upload className="w-4 h-4" />
+                </Button>
+                <Button size="icon" variant="outline">
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="flex items-center justify-between mt-3">
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" className="w-4 h-4" />
+                Este cliente possui 0 atividade(s) em aberto
+              </label>
+              <Button onClick={handleAddComment} disabled={createCommentMutation.isPending}>
+                Adicionar comentário
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Installment Info */}
+        {consumerUnits.length > 0 && (
+          <Card className="border-green-200 bg-green-50">
+            <CardContent className="p-4">
+              <div className="grid grid-cols-3 gap-4 text-sm">
+                <div>
+                  <p className="text-slate-500">Mês de referência</p>
+                  <p className="font-semibold">JAN/2026</p>
+                </div>
+                <div>
+                  <p className="text-slate-500">Instalação</p>
+                  <p className="font-semibold">{consumerUnits[0]?.unit_number}</p>
+                </div>
+                <div>
+                  <p className="text-slate-500">Data de vencimento</p>
+                  <p className="font-semibold">20/02/2026</p>
+                </div>
+              </div>
+              <Button className="mt-3 w-full bg-green-600">Aguardando pagamento</Button>
             </CardContent>
           </Card>
+        )}
 
-          {/* Notes List */}
-          <div className="space-y-3">
-            {notes.map((note) => (
-              <Card key={note.id} className={note.is_important ? 'border-amber-300 bg-amber-50' : ''}>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex gap-2">
-                      <Badge className={noteTypeColors[note.note_type]}>
-                        {noteTypeLabels[note.note_type]}
-                      </Badge>
-                      {note.is_important && (
-                        <Badge className="bg-amber-500 text-white">
-                          ⭐ Importante
-                        </Badge>
-                      )}
+        {/* Activity Tabs */}
+        <Card>
+          <CardHeader className="border-b">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="w-full justify-start">
+                <TabsTrigger value="all">Tudo</TabsTrigger>
+                <TabsTrigger value="notes">Notas</TabsTrigger>
+                <TabsTrigger value="emails">Emails</TabsTrigger>
+                <TabsTrigger value="attachments">Anexos</TabsTrigger>
+                <TabsTrigger value="activities">Atividades</TabsTrigger>
+                <TabsTrigger value="messages">Mensagens</TabsTrigger>
+                <TabsTrigger value="billing">Envio de cobranças</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="divide-y max-h-[500px] overflow-y-auto">
+              {activities.map((activity, idx) => (
+                <div key={idx} className="p-4 hover:bg-slate-50">
+                  <div className="flex gap-3">
+                    <div className="w-2 h-2 bg-slate-400 rounded-full mt-2" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">
+                        {activity.type === 'note' && activity.note}
+                        {activity.type === 'ticket' && `${activity.subject} - ${activity.description}`}
+                        {activity.type === 'invoice' && `Fatura ${activity.reference_month}`}
+                      </p>
+                      <p className="text-xs text-slate-500 mt-1">
+                        {format(new Date(activity.date), 'dd \'de\' MMMM \'de\' yyyy \'às\' HH:mm')}
+                      </p>
                     </div>
-                    <span className="text-xs text-slate-500">
-                      {format(new Date(note.created_date), 'dd/MM/yyyy HH:mm')}
-                    </span>
                   </div>
-                  <p className="text-sm text-slate-700 whitespace-pre-wrap">{note.note}</p>
-                  <p className="text-xs text-slate-500 mt-2">Por: {note.created_by}</p>
-                </CardContent>
-              </Card>
+                </div>
+              ))}
+              {activities.length === 0 && (
+                <div className="p-8 text-center text-slate-500">
+                  Nenhuma atividade registrada
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Right Sidebar - Units & Invoices */}
+      <div className="col-span-3 space-y-4 overflow-y-auto">
+        {/* Usina */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm flex items-center justify-between">
+              <span>🏭 Usina</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm font-medium">-</p>
+            <p className="text-xs text-slate-500">Potência: - kWp</p>
+            <Button variant="outline" size="sm" className="w-full mt-3">
+              + Vincular negócio
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Negócios */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm">📋 Negócios (0)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button variant="outline" size="sm" className="w-full">
+              + Vincular negócio
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Produtos e serviços */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm">🛍️ Produtos e serviços (0)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button variant="outline" size="sm" className="w-full">
+              + Vincular produto
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Unidades consumidoras */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm flex items-center justify-between">
+              <span>⚡ Unidades consumidoras ({consumerUnits.length})</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {consumerUnits.slice(0, 3).map((unit) => (
+              <div key={unit.id} className="p-2 border rounded-lg">
+                <p className="text-sm font-medium">{unit.unit_name || unit.unit_number}</p>
+                <p className="text-xs text-slate-500">100%</p>
+              </div>
             ))}
-            {notes.length === 0 && (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <MessageSquare className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                  <p className="text-slate-500">Nenhuma nota registrada</p>
-                </CardContent>
-              </Card>
+            {consumerUnits.length === 0 && (
+              <p className="text-sm text-slate-500">Nenhuma unidade</p>
             )}
-          </div>
-        </TabsContent>
+            <Button variant="outline" size="sm" className="w-full">
+              Ver lista de unidades consumidoras
+            </Button>
+          </CardContent>
+        </Card>
 
-        {/* Invoices Tab */}
-        <TabsContent value="invoices" className="space-y-3">
-          {invoices.map((invoice) => (
-            <Card key={invoice.id}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold">{invoice.month_reference}</p>
-                    <p className="text-sm text-slate-500">
-                      {invoice.energy_allocated_kwh} kWh • {invoice.discount_percentage}% desconto
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-green-600">
-                      R$ {invoice.final_amount?.toFixed(2)}
-                    </p>
-                    <Badge className={
-                      invoice.status === 'paid' ? 'bg-green-100 text-green-800' :
-                      invoice.status === 'overdue' ? 'bg-red-100 text-red-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }>
-                      {invoice.status === 'paid' ? 'Pago' :
-                       invoice.status === 'overdue' ? 'Vencido' : 'Pendente'}
-                    </Badge>
-                  </div>
+        {/* Últimas faturas */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm">🧾 Últimas faturas</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Button variant="outline" className="w-full justify-start bg-green-50 text-green-700 border-green-200">
+              ✓ Todas as faturas da conta corrente foram capturadas
+            </Button>
+            {invoices.slice(0, 3).map((invoice) => (
+              <div key={invoice.id} className="p-2 border rounded-lg flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Mês de referência: {invoice.reference_month}</p>
+                  <p className="text-xs text-slate-500">Status: {invoice.status}</p>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-          {invoices.length === 0 && (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                <p className="text-slate-500">Nenhuma fatura registrada</p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
+                <Button size="icon" variant="ghost">
+                  <Download className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
+            <Button variant="outline" size="sm" className="w-full">
+              <Bell className="w-4 h-4 mr-2" />
+              Configurar fatura automática de faturas
+            </Button>
+          </CardContent>
+        </Card>
 
-        {/* Tickets Tab */}
-        <TabsContent value="tickets" className="space-y-3">
-          {tickets.map((ticket) => (
-            <Card key={ticket.id}>
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <p className="font-semibold">{ticket.subject}</p>
-                    <p className="text-sm text-slate-500">{ticket.category}</p>
-                  </div>
-                  <Badge className={
-                    ticket.status === 'resolved' ? 'bg-green-100 text-green-800' :
-                    ticket.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }>
-                    {ticket.status}
-                  </Badge>
-                </div>
-                <p className="text-sm text-slate-600">{ticket.description}</p>
-                <p className="text-xs text-slate-500 mt-2">
-                  {format(new Date(ticket.created_date), 'dd/MM/yyyy HH:mm')}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-          {tickets.length === 0 && (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <AlertCircle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                <p className="text-slate-500">Nenhum chamado registrado</p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-      </Tabs>
+        {/* Tabs Bottom */}
+        <Tabs defaultValue="attachments" className="w-full">
+          <TabsList className="w-full">
+            <TabsTrigger value="attachments" className="flex-1">Anexos</TabsTrigger>
+            <TabsTrigger value="documents" className="flex-1">Documentos</TabsTrigger>
+            <TabsTrigger value="contracts" className="flex-1">Contratos</TabsTrigger>
+          </TabsList>
+          <TabsContent value="attachments" className="text-center py-8 text-sm text-slate-500">
+            Nenhum anexo
+          </TabsContent>
+          <TabsContent value="documents" className="text-center py-8 text-sm text-slate-500">
+            Nenhum documento
+          </TabsContent>
+          <TabsContent value="contracts" className="text-center py-8 text-sm text-slate-500">
+            Nenhum contrato
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
