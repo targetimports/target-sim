@@ -64,7 +64,6 @@ const menuCategories = {
       { name: 'Monitoramento Usinas', url: 'PlantMonitoring', icon: '📡' },
       { name: 'Performance Usinas', url: 'PlantPerformanceDashboard', icon: '📈' },
       { name: 'Manutenções', url: 'MaintenanceManagement', icon: '🔧' },
-      { name: 'Contratos Proprietários', url: 'OwnerContracts', icon: '📄' },
       { name: 'Contratos Usinas', url: 'AdminPowerPlantContracts', icon: '📋' },
       { name: 'Monitor Consumo', url: 'ConsumptionMonitor', icon: '📊' },
       { name: 'Ordens Serviço', url: 'AdminServiceOrders', icon: '🔨' }
