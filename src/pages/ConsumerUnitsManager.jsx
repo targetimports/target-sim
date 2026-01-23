@@ -36,6 +36,7 @@ export default function ConsumerUnitsManager() {
     subscription_id: '',
     customer_email: '',
     unit_name: '',
+    unit_number: '',
     unit_type: 'commercial',
     installation_code: '',
     customer_code: '',
@@ -44,7 +45,6 @@ export default function ConsumerUnitsManager() {
     city: '',
     state: '',
     zip_code: '',
-    installation_number: '',
     distributor: '',
     meter_number: '',
     consumption_limit_kwh: '',
@@ -123,6 +123,7 @@ export default function ConsumerUnitsManager() {
       subscription_id: '',
       customer_email: '',
       unit_name: '',
+      unit_number: '',
       unit_type: 'commercial',
       installation_code: '',
       customer_code: '',
@@ -131,7 +132,6 @@ export default function ConsumerUnitsManager() {
       city: '',
       state: '',
       zip_code: '',
-      installation_number: '',
       distributor: '',
       meter_number: '',
       consumption_limit_kwh: '',
@@ -148,6 +148,7 @@ export default function ConsumerUnitsManager() {
       subscription_id: unit.subscription_id || '',
       customer_email: unit.customer_email || '',
       unit_name: unit.unit_name || '',
+      unit_number: unit.unit_number || '',
       unit_type: unit.unit_type || 'commercial',
       installation_code: unit.installation_code || '',
       customer_code: unit.customer_code || '',
@@ -156,7 +157,6 @@ export default function ConsumerUnitsManager() {
       city: unit.city || '',
       state: unit.state || '',
       zip_code: unit.zip_code || '',
-      installation_number: unit.installation_number || '',
       distributor: unit.distributor || '',
       meter_number: unit.meter_number || '',
       consumption_limit_kwh: unit.consumption_limit_kwh?.toString() || '',
@@ -190,7 +190,7 @@ export default function ConsumerUnitsManager() {
   const filteredUnits = units.filter(unit => 
     unit.unit_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     unit.customer_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    unit.installation_number?.includes(searchTerm)
+    unit.unit_number?.includes(searchTerm)
   );
 
   const totalConsumption = filteredUnits.reduce((sum, u) => sum + (u.monthly_consumption_kwh || 0), 0);
@@ -242,7 +242,6 @@ export default function ConsumerUnitsManager() {
           grace_period_discount: values[19] ? parseFloat(values[19]) : undefined,
           total_savings: values[20] ? parseFloat(values[20]) : undefined,
           projected_savings_12months: values[21] ? parseFloat(values[21]) : undefined,
-          installation_number: values[4]?.trim() || '',
           monthly_consumption_kwh: values[13] ? parseFloat(values[13]) : undefined,
           status: 'active'
         };
@@ -392,7 +391,7 @@ export default function ConsumerUnitsManager() {
                       <div className="font-medium text-slate-900">{unit.customer_email}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <code className="text-sm bg-slate-100 px-2 py-1 rounded">{unit.installation_number}</code>
+                      <code className="text-sm bg-slate-100 px-2 py-1 rounded">{unit.unit_number}</code>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600">{unit.distributor}</td>
                     <td className="px-6 py-4">
@@ -474,8 +473,8 @@ export default function ConsumerUnitsManager() {
               <div className="space-y-2">
                 <Label>Número UC *</Label>
                 <Input
-                  value={formData.installation_number}
-                  onChange={(e) => setFormData(prev => ({ ...prev, installation_number: e.target.value }))}
+                  value={formData.unit_number}
+                  onChange={(e) => setFormData(prev => ({ ...prev, unit_number: e.target.value }))}
                   placeholder="Ex: 1234567"
                   required
                 />
