@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { 
   Plus, Edit, Trash2, ArrowLeft, Zap, Building2, Search, FileText, Download, ChevronDown, ChevronUp, ArrowUpDown, Maximize2, Minimize2
 } from 'lucide-react';
+import HistoricalChartsSection from '../components/uc/HistoricalChartsSection';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
