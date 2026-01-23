@@ -41,8 +41,6 @@ import { toast } from 'sonner';
 export default function CustomerManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -159,8 +157,7 @@ export default function CustomerManagement() {
   };
 
   const openDetails = (subscription) => {
-    setSelectedCustomer(subscription);
-    setIsDetailsOpen(true);
+    window.location.href = createPageUrl(`CustomerDetails?email=${encodeURIComponent(subscription.email)}`);
   };
 
   const createSubscription = useMutation({
@@ -611,20 +608,7 @@ export default function CustomerManagement() {
         </Card>
       </main>
 
-      {/* Customer Details Dialog */}
-      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Detalhes do Cliente</DialogTitle>
-          </DialogHeader>
-          {selectedCustomer && (
-            <CustomerDetails 
-              subscription={selectedCustomer} 
-              onClose={() => setIsDetailsOpen(false)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+
 
       {/* Edit/Create Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
