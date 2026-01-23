@@ -41,6 +41,7 @@ const menuCategories = {
       { name: 'CRM Dashboard', url: 'CRMDashboard', icon: '📊' },
       { name: 'CRM Integrações', url: 'CRMIntegrations', icon: '🔗' },
       { name: 'Gestão Clientes', url: 'CustomerManagement', icon: '👥' },
+      { name: 'Gestão Assinaturas', url: 'SubscriptionManager', icon: '📋' },
       { name: 'Onboarding/Migração', url: 'OnboardingManager', icon: '📋' },
       { name: 'Ajustes de Crédito', url: 'CreditAdjustments', icon: '⚖️' },
       { name: 'Créditos Expirando', url: 'ExpiringCredits', icon: '⏰' },
