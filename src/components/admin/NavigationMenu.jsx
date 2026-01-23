@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, GripVertical } from 'lucide-react';
 import { Card } from "@/components/ui/card";
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { base44 } from '@/api/base44Client';
 
 const menuCategories = {
   'energy': {
