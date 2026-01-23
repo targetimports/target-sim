@@ -107,12 +107,14 @@ export default function AdminPowerPlantContracts() {
   const getSubscriptionName = (id) => subscriptions.find(s => s.id === id)?.customer_name || 'N/A';
   const getPlantBalance = (plantId) => balances.find(b => b.power_plant_id === plantId);
 
-  const plantStats = plants.map(plant => {
-    const plantContracts = contracts.filter(c => c.power_plant_id === plant.id && c.status === 'active');
-    const totalAllocation = plantContracts.reduce((sum, c) => sum + (c.allocation_percentage || 0), 0);
-    const balance = getPlantBalance(plant.id);
-    return { ...plant, contractCount: plantContracts.length, totalAllocation, balance };
-  });
+  const plantStats = plants
+    .filter(p => p.status === 'operational')
+    .map(plant => {
+      const plantContracts = contracts.filter(c => c.power_plant_id === plant.id && c.status === 'active');
+      const totalAllocation = plantContracts.reduce((sum, c) => sum + (c.allocation_percentage || 0), 0);
+      const balance = getPlantBalance(plant.id);
+      return { ...plant, contractCount: plantContracts.length, totalAllocation, balance };
+    });
 
   return (
     <div className="min-h-screen bg-slate-50">
