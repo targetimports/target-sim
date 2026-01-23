@@ -4,8 +4,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Settings } from 'lucide-react';
+import { menuCategories } from '../admin/NavigationMenu';
 
-export default function QuickAccessCustomizer({ availableItems, visibleItems, onSave }) {
+export default function QuickAccessCustomizer({ visibleItems, onSave }) {
+  // Gerar todos os itens disponíveis do menu
+  const allAvailableItems = Object.values(menuCategories)
+    .flatMap(category => 
+      category.items.map(item => ({
+        id: item.url,
+        title: `${item.icon} ${item.name}`,
+        description: category.title
+      }))
+    );
   const [isOpen, setIsOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState(visibleItems);
 
@@ -39,7 +49,7 @@ export default function QuickAccessCustomizer({ availableItems, visibleItems, on
             <DialogTitle>Personalizar Acesso Rápido</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 max-h-96 overflow-y-auto">
-            {availableItems.map((item) => (
+            {allAvailableItems.map((item) => (
               <div key={item.id} className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded">
                 <Checkbox
                   id={item.id}

@@ -56,30 +56,6 @@ export default function AdminDashboard() {
     { id: 'top', title: 'Top Clientes', description: 'Maiores contas' }
   ];
 
-  // Quick access items disponíveis
-  const availableQuickAccess = [
-    { id: 'rateio', title: '⚡ Rateio de Energia', description: 'Alocar energia para clientes' },
-    { id: 'billing', title: '💳 Faturamento', description: 'Gerar faturas mensais' },
-    { id: 'performance', title: '📊 Performance', description: 'Dashboard de utilização' },
-    { id: 'credits', title: '💰 Saldo Créditos', description: 'Ver créditos clientes' },
-    { id: 'reconciliation', title: '🔄 Reconciliação', description: 'Verificar geração real' },
-    { id: 'expiring', title: '⏰ Expirações', description: 'Créditos expirando' },
-    { id: 'onboarding', title: '📋 Onboarding', description: 'Novos clientes' },
-    { id: 'tasks', title: '📊 Tarefas', description: 'Dashboard de tarefas' },
-    { id: 'crm', title: '🔗 CRM', description: 'Integrações CRM' },
-    { id: 'ai', title: '🧠 IA Insights', description: 'Análises preditivas' },
-    { id: 'customers', title: '👥 Clientes', description: 'Gestão de clientes' },
-    { id: 'plants', title: '🏭 Usinas', description: 'Gerenciar usinas' },
-    { id: 'analytics', title: '📈 Analytics', description: 'Relatórios e métricas' },
-    { id: 'financial', title: '💵 Financeiro', description: 'Dashboard financeiro' },
-    { id: 'support', title: '🎧 Suporte', description: 'Central de suporte' },
-    { id: 'documents', title: '📁 Documentos', description: 'Gerenciar documentos' },
-    { id: 'automation', title: '⚡ Automações', description: 'Gestão de automações' },
-    { id: 'whatsapp', title: '💬 WhatsApp', description: 'Gestão WhatsApp' },
-    { id: 'sales', title: '🎯 Vendas', description: 'Funil de vendas' },
-    { id: 'reports', title: '📋 Relatórios', description: 'Relatórios avançados' }
-  ];
-
   // Buscar preferências do usuário
   const { data: user } = useQuery({
     queryKey: ['current-user'],
@@ -96,7 +72,10 @@ export default function AdminDashboard() {
   });
 
   const [visibleWidgets, setVisibleWidgets] = useState(['trends', 'revenue', 'distribution', 'activity', 'top']);
-  const [visibleQuickAccess, setVisibleQuickAccess] = useState(['rateio', 'billing', 'performance', 'credits', 'reconciliation']);
+  const [visibleQuickAccess, setVisibleQuickAccess] = useState([
+    'EnergyFlowDashboard', 'RateioManagement', 'AutomaticBilling', 
+    'PerformanceDashboard', 'CreditBalanceManager'
+  ]);
 
   React.useEffect(() => {
     if (preferences && preferences.length > 0 && preferences[0]) {
@@ -290,7 +269,6 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-slate-900">⚡ Acesso Rápido</h2>
             <QuickAccessCustomizer
-              availableItems={availableQuickAccess}
               visibleItems={visibleQuickAccess}
               onSave={saveQuickAccessPreferences}
             />
