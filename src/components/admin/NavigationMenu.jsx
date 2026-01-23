@@ -161,6 +161,28 @@ const menuCategories = {
 
 export default function NavigationMenu({ onNavigate }) {
   const [expandedCategories, setExpandedCategories] = useState({});
+  const [menuOrder, setMenuOrder] = useState(Object.keys(menuCategories));
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const loadPreferences = async () => {
+      const currentUser = await base44.auth.me();
+      setUser(currentUser);
+      
+      if (currentUser?.email) {
+        const prefs = await base44.entities.DashboardPreference.filter({ 
+          user_email: currentUser.email,
+          dashboard_type: 'admin'
+        });
+        
+        if (prefs && prefs.length > 0 && prefs[0].menu_order) {
+          setMenuOrder(prefs[0].menu_order);
+        }
+      }
+    };
+    
+    loadPreferences();
+  }, []);
 
   const toggleCategory = (category) => {
     setExpandedCategories(prev => ({
@@ -169,39 +191,100 @@ export default function NavigationMenu({ onNavigate }) {
     }));
   };
 
+  const handleDragEnd = async (result) => {
+    const { source, destination } = result;
+    
+    if (!destination) return;
+    if (source.index === destination.index) return;
+
+    const newOrder = Array.from(menuOrder);
+    const [moved] = newOrder.splice(source.index, 1);
+    newOrder.splice(destination.index, 0, moved);
+    
+    setMenuOrder(newOrder);
+    
+    // Salvar preferências
+    if (user?.email) {
+      const prefs = await base44.entities.DashboardPreference.filter({ 
+        user_email: user.email,
+        dashboard_type: 'admin'
+      });
+      
+      if (prefs && prefs.length > 0) {
+        await base44.entities.DashboardPreference.update(prefs[0].id, { menu_order: newOrder });
+      } else {
+        await base44.entities.DashboardPreference.create({
+          user_email: user.email,
+          dashboard_type: 'admin',
+          menu_order: newOrder
+        });
+      }
+    }
+  };
+
   return (
-    <div className="space-y-2">
-      {Object.entries(menuCategories).map(([key, category]) => (
-        <Card key={key} className={`overflow-hidden ${category.color} border-l-4`}>
-          <button
-            onClick={() => toggleCategory(key)}
-            className="w-full p-3 flex items-center justify-between hover:bg-white/50 transition-colors"
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <Droppable droppableId="menu-categories">
+        {(provided, snapshot) => (
+          <div 
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+            className="space-y-2"
           >
-            <span className="font-semibold text-sm">{category.title}</span>
-            {expandedCategories[key] ? (
-              <ChevronDown className="w-4 h-4" />
-            ) : (
-              <ChevronRight className="w-4 h-4" />
-            )}
-          </button>
-          
-          {expandedCategories[key] && (
-            <div className="bg-white/60 border-t">
-              {category.items.map((item) => (
-                <Link
-                  key={item.url}
-                  to={createPageUrl(item.url)}
-                  onClick={onNavigate}
-                  className="block px-4 py-2 text-sm hover:bg-white/80 transition-colors"
-                >
-                  {item.icon} {item.name}
-                </Link>
-              ))}
-            </div>
-          )}
-        </Card>
-      ))}
-    </div>
+            {menuOrder.map((key, index) => {
+              const category = menuCategories[key];
+              if (!category) return null;
+              
+              return (
+                <Draggable key={key} draggableId={key} index={index}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      className={snapshot.isDragging ? 'opacity-50' : ''}
+                    >
+                      <Card className={`overflow-hidden ${category.color} border-l-4`}>
+                        <button
+                          {...provided.dragHandleProps}
+                          onClick={() => toggleCategory(key)}
+                          className="w-full p-3 flex items-center justify-between hover:bg-white/50 transition-colors cursor-move"
+                        >
+                          <div className="flex items-center gap-2 flex-1">
+                            <GripVertical className="w-4 h-4 text-slate-400" />
+                            <span className="font-semibold text-sm">{category.title}</span>
+                          </div>
+                          {expandedCategories[key] ? (
+                            <ChevronDown className="w-4 h-4" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4" />
+                          )}
+                        </button>
+                        
+                        {expandedCategories[key] && (
+                          <div className="bg-white/60 border-t">
+                            {category.items.map((item) => (
+                              <Link
+                                key={item.url}
+                                to={createPageUrl(item.url)}
+                                onClick={onNavigate}
+                                className="block px-4 py-2 text-sm hover:bg-white/80 transition-colors"
+                              >
+                                {item.icon} {item.name}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </Card>
+                    </div>
+                  )}
+                </Draggable>
+              );
+            })}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
   );
 }
 
