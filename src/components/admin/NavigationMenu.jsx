@@ -222,15 +222,38 @@ export default function NavigationMenu({ onNavigate }) {
     }
   };
 
+  const saveOrder = async () => {
+    if (user?.email) {
+      const prefs = await base44.entities.DashboardPreference.filter({ 
+        user_email: user.email,
+        dashboard_type: 'admin'
+      });
+      
+      if (prefs && prefs.length > 0) {
+        await base44.entities.DashboardPreference.update(prefs[0].id, { menu_order: menuOrder });
+      } else {
+        await base44.entities.DashboardPreference.create({
+          user_email: user.email,
+          dashboard_type: 'admin',
+          menu_order: menuOrder
+        });
+      }
+    }
+  };
+
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <Droppable droppableId="menu-categories">
-        {(provided, snapshot) => (
-          <div 
-            {...provided.droppableProps}
-            ref={provided.innerRef}
-            className="space-y-2"
-          >
+    <>
+      <Button onClick={saveOrder} className="w-full mb-2 bg-amber-500 hover:bg-amber-600">
+        💾 Salvar Ordem dos Menus
+      </Button>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="menu-categories">
+          {(provided, snapshot) => (
+            <div 
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+              className="space-y-2"
+            >
             {menuOrder.map((key, index) => {
               const category = menuCategories[key];
               if (!category) return null;
