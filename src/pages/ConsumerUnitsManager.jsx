@@ -408,6 +408,11 @@ export default function ConsumerUnitsManager() {
           </Card>
         </div>
 
+        {/* Historical Charts */}
+        <div className="mb-8">
+          <HistoricalChartsSection units={filteredUnits} />
+        </div>
+
         {/* Search & Filters */}
         <Card className="mb-6 border-0 shadow-sm">
           <CardContent className="p-4">
