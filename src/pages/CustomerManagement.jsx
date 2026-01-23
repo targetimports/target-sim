@@ -44,17 +44,16 @@ export default function CustomerManagement() {
   const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
-    customer_name: '',
-    customer_email: '',
-    customer_phone: '',
-    customer_cpf_cnpj: '',
+    name: '',
+    email: '',
+    phone: '',
+    cpf_cnpj: '',
     customer_type: 'residential',
     address: '',
     city: '',
     state: '',
     zip_code: '',
-    average_bill_value: '',
-    status: 'pending'
+    status: 'active'
   });
 
   const [consumerUnits, setConsumerUnits] = useState([]);
@@ -65,8 +64,8 @@ export default function CustomerManagement() {
   });
 
   const { data: subscriptions = [] } = useQuery({
-    queryKey: ['subscriptions-all'],
-    queryFn: () => base44.entities.Subscription.list('-created_date', 500)
+    queryKey: ['customers-all'],
+    queryFn: () => base44.entities.Customer.list('-created_date', 500)
   });
 
   const { data: allConsumerUnits = [] } = useQuery({
@@ -76,24 +75,23 @@ export default function CustomerManagement() {
 
   const filteredSubscriptions = subscriptions.filter(sub => {
     const matchesSearch = 
-      sub.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sub.customer_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sub.customer_cpf_cnpj?.includes(searchTerm);
+      sub.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      sub.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      sub.cpf_cnpj?.includes(searchTerm);
     const matchesStatus = statusFilter === 'all' || sub.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const handleExportCSV = () => {
-    const headers = ['Nome', 'Email', 'Telefone', 'CPF/CNPJ', 'Status', 'Cidade', 'UF', 'Valor Conta', 'Data Cadastro'];
+    const headers = ['Nome', 'Email', 'Telefone', 'CPF/CNPJ', 'Status', 'Cidade', 'UF', 'Data Cadastro'];
     const rows = filteredSubscriptions.map(sub => [
-      sub.customer_name,
-      sub.customer_email,
-      sub.customer_phone,
-      sub.customer_cpf_cnpj,
+      sub.name,
+      sub.email,
+      sub.phone,
+      sub.cpf_cnpj,
       sub.status,
       sub.city,
       sub.state,
-      sub.average_bill_value,
       format(new Date(sub.created_date), 'dd/MM/yyyy')
     ]);
 
@@ -136,12 +134,9 @@ export default function CustomerManagement() {
   };
 
   const createSubscription = useMutation({
-    mutationFn: (data) => base44.entities.Subscription.create({
-      ...data,
-      average_bill_value: parseFloat(data.average_bill_value) || 0
-    }),
+    mutationFn: (data) => base44.entities.Customer.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['subscriptions-all']);
+      queryClient.invalidateQueries(['customers-all']);
       setIsEditDialogOpen(false);
       resetForm();
       toast.success('Cliente criado com sucesso!');
@@ -152,12 +147,9 @@ export default function CustomerManagement() {
   });
 
   const updateSubscription = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Subscription.update(id, {
-      ...data,
-      average_bill_value: parseFloat(data.average_bill_value) || 0
-    }),
+    mutationFn: ({ id, data }) => base44.entities.Customer.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['subscriptions-all']);
+      queryClient.invalidateQueries(['customers-all']);
       setIsEditDialogOpen(false);
       resetForm();
       toast.success('Cliente atualizado com sucesso!');
@@ -168,9 +160,9 @@ export default function CustomerManagement() {
   });
 
   const deleteSubscription = useMutation({
-    mutationFn: (id) => base44.entities.Subscription.delete(id),
+    mutationFn: (id) => base44.entities.Customer.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries(['subscriptions-all']);
+      queryClient.invalidateQueries(['customers-all']);
       setDeleteConfirmOpen(false);
       setCustomerToDelete(null);
       toast.success('Cliente excluído com sucesso!');
@@ -182,17 +174,16 @@ export default function CustomerManagement() {
 
   const resetForm = () => {
     setFormData({
-      customer_name: '',
-      customer_email: '',
-      customer_phone: '',
-      customer_cpf_cnpj: '',
+      name: '',
+      email: '',
+      phone: '',
+      cpf_cnpj: '',
       customer_type: 'residential',
       address: '',
       city: '',
       state: '',
       zip_code: '',
-      average_bill_value: '',
-      status: 'pending'
+      status: 'active'
     });
     setEditingCustomer(null);
     setConsumerUnits([]);
@@ -202,17 +193,16 @@ export default function CustomerManagement() {
   const openEditDialog = async (customer) => {
     setEditingCustomer(customer);
     setFormData({
-      customer_name: customer.customer_name || '',
-      customer_email: customer.customer_email || '',
-      customer_phone: customer.customer_phone || '',
-      customer_cpf_cnpj: customer.customer_cpf_cnpj || '',
+      name: customer.name || '',
+      email: customer.email || '',
+      phone: customer.phone || '',
+      cpf_cnpj: customer.cpf_cnpj || '',
       customer_type: customer.customer_type || 'residential',
       address: customer.address || '',
       city: customer.city || '',
       state: customer.state || '',
       zip_code: customer.zip_code || '',
-      average_bill_value: customer.average_bill_value?.toString() || '',
-      status: customer.status || 'pending'
+      status: customer.status || 'active'
     });
     
     // Carregar unidades consumidoras existentes
@@ -235,8 +225,8 @@ export default function CustomerManagement() {
             // Nova unidade
             await base44.entities.ConsumerUnit.create({
               ...unit,
-              subscription_id: editingCustomer.id,
-              customer_email: formData.customer_email,
+              customer_id: editingCustomer.id,
+              customer_email: formData.email,
               monthly_consumption_kwh: parseFloat(unit.monthly_consumption_kwh) || 0
             });
           } else {
@@ -254,8 +244,8 @@ export default function CustomerManagement() {
         for (const unit of consumerUnits) {
           await base44.entities.ConsumerUnit.create({
             ...unit,
-            subscription_id: newSubscription.id,
-            customer_email: formData.customer_email,
+            customer_id: newSubscription.id,
+            customer_email: formData.email,
             monthly_consumption_kwh: parseFloat(unit.monthly_consumption_kwh) || 0
           });
         }
@@ -294,25 +284,21 @@ export default function CustomerManagement() {
   const stats = {
     total: subscriptions.length,
     active: subscriptions.filter(s => s.status === 'active').length,
-    pending: subscriptions.filter(s => s.status === 'pending' || s.status === 'analyzing').length,
+    inactive: subscriptions.filter(s => s.status === 'inactive' || s.status === 'suspended').length,
     residential: subscriptions.filter(s => s.customer_type === 'residential').length,
     commercial: subscriptions.filter(s => s.customer_type === 'commercial').length
   };
 
   const statusColors = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    analyzing: 'bg-blue-100 text-blue-800',
     active: 'bg-green-100 text-green-800',
-    suspended: 'bg-red-100 text-red-800',
-    cancelled: 'bg-slate-100 text-slate-800'
+    inactive: 'bg-slate-100 text-slate-800',
+    suspended: 'bg-red-100 text-red-800'
   };
 
   const statusLabels = {
-    pending: 'Pendente',
-    analyzing: 'Em análise',
-    active: 'Ativa',
-    suspended: 'Suspensa',
-    cancelled: 'Cancelada'
+    active: 'Ativo',
+    inactive: 'Inativo',
+    suspended: 'Suspenso'
   };
 
   return (
@@ -388,8 +374,8 @@ export default function CustomerManagement() {
           </Card>
           <Card>
             <CardContent className="p-4">
-              <p className="text-sm text-slate-500">Pendentes</p>
-              <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
+              <p className="text-sm text-slate-500">Inativos</p>
+              <p className="text-2xl font-bold text-red-600">{stats.inactive}</p>
             </CardContent>
           </Card>
           <Card>
@@ -427,11 +413,9 @@ export default function CustomerManagement() {
                   className="px-4 py-2 border border-slate-200 rounded-lg text-sm"
                 >
                   <option value="all">Todos os status</option>
-                  <option value="active">Ativa</option>
-                  <option value="pending">Pendente</option>
-                  <option value="analyzing">Em análise</option>
-                  <option value="suspended">Suspensa</option>
-                  <option value="cancelled">Cancelada</option>
+                  <option value="active">Ativo</option>
+                  <option value="inactive">Inativo</option>
+                  <option value="suspended">Suspenso</option>
                 </select>
               </div>
             </div>
@@ -462,14 +446,14 @@ export default function CustomerManagement() {
                     <tr key={sub.id} className="border-b border-slate-100 hover:bg-slate-50">
                       <td className="py-4 px-4">
                         <div>
-                          <p className="font-medium text-slate-900">{sub.customer_name}</p>
-                          <p className="text-xs text-slate-500">{sub.customer_cpf_cnpj}</p>
+                          <p className="font-medium text-slate-900">{sub.name}</p>
+                          <p className="text-xs text-slate-500">{sub.cpf_cnpj}</p>
                         </div>
                       </td>
                       <td className="py-4 px-4">
                         <div className="text-sm">
-                          <p className="text-slate-700">{sub.customer_email}</p>
-                          <p className="text-slate-500">{sub.customer_phone}</p>
+                          <p className="text-slate-700">{sub.email}</p>
+                          <p className="text-slate-500">{sub.phone}</p>
                         </div>
                       </td>
                       <td className="py-4 px-4">
@@ -481,12 +465,12 @@ export default function CustomerManagement() {
                         {sub.city}/{sub.state}
                       </td>
                       <td className="py-4 px-4">
-                        <Badge className={statusColors[sub.status]}>
-                          {statusLabels[sub.status]}
+                        <Badge className={statusColors[sub.status] || 'bg-slate-100 text-slate-800'}>
+                          {statusLabels[sub.status] || sub.status}
                         </Badge>
                       </td>
                       <td className="py-4 px-4 font-medium">
-                        R$ {sub.average_bill_value?.toFixed(2)}
+                        -
                       </td>
                       <td className="py-4 px-4 text-right">
                         <div className="flex justify-end gap-1">
@@ -558,8 +542,8 @@ export default function CustomerManagement() {
               <div className="space-y-2">
                 <Label>Nome *</Label>
                 <Input
-                  value={formData.customer_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, customer_name: e.target.value }))}
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   required
                 />
               </div>
@@ -567,8 +551,8 @@ export default function CustomerManagement() {
                 <Label>Email *</Label>
                 <Input
                   type="email"
-                  value={formData.customer_email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, customer_email: e.target.value }))}
+                  value={formData.email}
+                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   required
                 />
               </div>
@@ -578,41 +562,34 @@ export default function CustomerManagement() {
               <div className="space-y-2">
                 <Label>Telefone</Label>
                 <Input
-                  value={formData.customer_phone}
-                  onChange={(e) => setFormData(prev => ({ ...prev, customer_phone: e.target.value }))}
+                  value={formData.phone}
+                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                 />
               </div>
               <div className="space-y-2">
                 <Label>CPF/CNPJ</Label>
                 <Input
-                  value={formData.customer_cpf_cnpj}
-                  onChange={(e) => setFormData(prev => ({ ...prev, customer_cpf_cnpj: e.target.value }))}
+                  value={formData.cpf_cnpj}
+                  onChange={(e) => setFormData(prev => ({ ...prev, cpf_cnpj: e.target.value }))}
                 />
               </div>
             </div>
 
+            <div className="space-y-2">
+              <Label>Tipo *</Label>
+              <Select value={formData.customer_type} onValueChange={(value) => setFormData(prev => ({ ...prev, customer_type: value }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="residential">Residencial</SelectItem>
+                  <SelectItem value="commercial">Comercial</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Tipo *</Label>
-                <Select value={formData.customer_type} onValueChange={(value) => setFormData(prev => ({ ...prev, customer_type: value }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="residential">Residencial</SelectItem>
-                    <SelectItem value="commercial">Comercial</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Valor Conta Mensal</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={formData.average_bill_value}
-                  onChange={(e) => setFormData(prev => ({ ...prev, average_bill_value: e.target.value }))}
-                />
-              </div>
+
             </div>
 
             <div className="space-y-2">
@@ -655,11 +632,9 @@ export default function CustomerManagement() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pending">Pendente</SelectItem>
-                  <SelectItem value="analyzing">Em análise</SelectItem>
-                  <SelectItem value="active">Ativa</SelectItem>
-                  <SelectItem value="suspended">Suspensa</SelectItem>
-                  <SelectItem value="cancelled">Cancelada</SelectItem>
+                  <SelectItem value="active">Ativo</SelectItem>
+                  <SelectItem value="inactive">Inativo</SelectItem>
+                  <SelectItem value="suspended">Suspenso</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -754,7 +729,7 @@ export default function CustomerManagement() {
           <AlertDialogHeader>
             <AlertDialogTitle>Tem certeza que deseja excluir este cliente?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita. O cliente <strong>{customerToDelete?.customer_name}</strong> será permanentemente removido do sistema.
+              Esta ação não pode ser desfeita. O cliente <strong>{customerToDelete?.name}</strong> será permanentemente removido do sistema.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
