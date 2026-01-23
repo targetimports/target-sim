@@ -81,6 +81,7 @@ import WhatsAppManagement from './pages/WhatsAppManagement';
 import PowerPlantUnitsManager from './pages/PowerPlantUnitsManager';
 import EnergyFlowDashboard from './pages/EnergyFlowDashboard';
 import MonthlyUsageReport from './pages/MonthlyUsageReport';
+import CustomerDetails from './pages/CustomerDetails';
 import __Layout from './Layout.jsx';
 
 
@@ -168,6 +169,7 @@ export const PAGES = {
     "PowerPlantUnitsManager": PowerPlantUnitsManager,
     "EnergyFlowDashboard": EnergyFlowDashboard,
     "MonthlyUsageReport": MonthlyUsageReport,
+    "CustomerDetails": CustomerDetails,
 }
 
 export const pagesConfig = {

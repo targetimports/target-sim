@@ -35,7 +35,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import CustomerDetails from '../components/customers/CustomerDetails';
+
 import { toast } from 'sonner';
 
 export default function CustomerManagement() {
