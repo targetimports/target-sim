@@ -165,20 +165,26 @@ export default function SubscriptionManager() {
   };
 
   const getAvailablePlants = () => {
-    return powerPlants.map(plant => {
-      const allocated = powerPlantContracts
-        .filter(c => c.power_plant_id === plant.id && c.status === 'active')
-        .reduce((sum, c) => sum + (c.monthly_allocation_kwh || 0), 0);
-      
-      const available = (plant.monthly_generation_kwh || 0) - allocated;
-      
-      return {
-        ...plant,
-        allocated,
-        available,
-        availablePercentage: plant.monthly_generation_kwh ? (available / plant.monthly_generation_kwh * 100) : 0
-      };
-    }).filter(plant => plant.available > 0);
+    return powerPlants
+      .filter(plant => 
+        plant.status === 'operational' || 
+        plant.status === 'compensando' || 
+        plant.status === 'disponivel'
+      )
+      .map(plant => {
+        const allocated = powerPlantContracts
+          .filter(c => c.power_plant_id === plant.id && c.status === 'active')
+          .reduce((sum, c) => sum + (c.monthly_allocation_kwh || 0), 0);
+        
+        const available = (plant.monthly_generation_kwh || 0) - allocated;
+        
+        return {
+          ...plant,
+          allocated,
+          available,
+          availablePercentage: plant.monthly_generation_kwh ? (available / plant.monthly_generation_kwh * 100) : 0
+        };
+      }).filter(plant => plant.available > 0);
   };
 
   const toggleUnitSelection = (unitId) => {
