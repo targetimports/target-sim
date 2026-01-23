@@ -64,6 +64,7 @@ import SalesPipeline from './pages/SalesPipeline';
 import ServiceOrders from './pages/ServiceOrders';
 import SolarmanIntegration from './pages/SolarmanIntegration';
 import Subscribe from './pages/Subscribe';
+import SubscriptionImport from './pages/SubscriptionImport';
 import SuperApp from './pages/SuperApp';
 import SupportCenter from './pages/SupportCenter';
 import SystemDocumentation from './pages/SystemDocumentation';
@@ -77,7 +78,9 @@ import WeatherForecast from './pages/WeatherForecast';
 import WhatsAppCampaigns from './pages/WhatsAppCampaigns';
 import WhatsAppEvolution from './pages/WhatsAppEvolution';
 import WhatsAppManagement from './pages/WhatsAppManagement';
-import SubscriptionImport from './pages/SubscriptionImport';
+import PowerPlantUnitsManager from './pages/PowerPlantUnitsManager';
+import EnergyFlowDashboard from './pages/EnergyFlowDashboard';
+import MonthlyUsageReport from './pages/MonthlyUsageReport';
 import __Layout from './Layout.jsx';
 
 
@@ -148,6 +151,7 @@ export const PAGES = {
     "ServiceOrders": ServiceOrders,
     "SolarmanIntegration": SolarmanIntegration,
     "Subscribe": Subscribe,
+    "SubscriptionImport": SubscriptionImport,
     "SuperApp": SuperApp,
     "SupportCenter": SupportCenter,
     "SystemDocumentation": SystemDocumentation,
@@ -161,7 +165,9 @@ export const PAGES = {
     "WhatsAppCampaigns": WhatsAppCampaigns,
     "WhatsAppEvolution": WhatsAppEvolution,
     "WhatsAppManagement": WhatsAppManagement,
-    "SubscriptionImport": SubscriptionImport,
+    "PowerPlantUnitsManager": PowerPlantUnitsManager,
+    "EnergyFlowDashboard": EnergyFlowDashboard,
+    "MonthlyUsageReport": MonthlyUsageReport,
 }
 
 export const pagesConfig = {
