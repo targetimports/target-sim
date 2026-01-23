@@ -63,6 +63,11 @@ export default function ConsumerUnitsManager() {
     queryFn: () => base44.entities.Subscription.list()
   });
 
+  const { data: customers = [] } = useQuery({
+    queryKey: ['customers'],
+    queryFn: () => base44.entities.Customer.list()
+  });
+
   const createUnit = useMutation({
     mutationFn: (data) => base44.entities.ConsumerUnit.create({
       ...data,
@@ -209,8 +214,8 @@ export default function ConsumerUnitsManager() {
         const customerName = values[2]?.trim() || '';
         
         // Buscar cliente existente pelo nome
-        const matchingCustomer = subscriptions.find(sub => 
-          sub.name?.toLowerCase() === customerName.toLowerCase()
+        const matchingCustomer = customers.find(cust => 
+          cust.name?.toLowerCase() === customerName.toLowerCase()
         );
 
         const unit = {

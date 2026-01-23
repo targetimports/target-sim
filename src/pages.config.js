@@ -28,6 +28,7 @@ import CreditBalanceManager from './pages/CreditBalanceManager';
 import CreditMarketplace from './pages/CreditMarketplace';
 import CreditSystem from './pages/CreditSystem';
 import CustomerDashboard from './pages/CustomerDashboard';
+import CustomerDetails from './pages/CustomerDetails';
 import CustomerManagement from './pages/CustomerManagement';
 import CustomerPortal from './pages/CustomerPortal';
 import DeficitCompensation from './pages/DeficitCompensation';
@@ -36,6 +37,7 @@ import DocumentManager from './pages/DocumentManager';
 import DocumentsDashboard from './pages/DocumentsDashboard';
 import EnergyAllocationManager from './pages/EnergyAllocationManager';
 import EnergyCreditsMarket from './pages/EnergyCreditsMarket';
+import EnergyFlowDashboard from './pages/EnergyFlowDashboard';
 import EnergyPurchaseManagement from './pages/EnergyPurchaseManagement';
 import ExpiringCredits from './pages/ExpiringCredits';
 import FinancialDashboard from './pages/FinancialDashboard';
@@ -46,6 +48,7 @@ import LeadAutomation from './pages/LeadAutomation';
 import LoyaltyProgram from './pages/LoyaltyProgram';
 import MaintenanceManagement from './pages/MaintenanceManagement';
 import MonthlyReconciliation from './pages/MonthlyReconciliation';
+import MonthlyUsageReport from './pages/MonthlyUsageReport';
 import NotificationCenter from './pages/NotificationCenter';
 import NotificationManager from './pages/NotificationManager';
 import OnboardingManager from './pages/OnboardingManager';
@@ -57,6 +60,7 @@ import PlantMonitoring from './pages/PlantMonitoring';
 import PlantOwnerContracts from './pages/PlantOwnerContracts';
 import PlantPerformanceDashboard from './pages/PlantPerformanceDashboard';
 import PowerPlantManager from './pages/PowerPlantManager';
+import PowerPlantUnitsManager from './pages/PowerPlantUnitsManager';
 import ProsumerDashboard from './pages/ProsumerDashboard';
 import RateioManagement from './pages/RateioManagement';
 import RegulatoryReports from './pages/RegulatoryReports';
@@ -78,10 +82,6 @@ import WeatherForecast from './pages/WeatherForecast';
 import WhatsAppCampaigns from './pages/WhatsAppCampaigns';
 import WhatsAppEvolution from './pages/WhatsAppEvolution';
 import WhatsAppManagement from './pages/WhatsAppManagement';
-import PowerPlantUnitsManager from './pages/PowerPlantUnitsManager';
-import EnergyFlowDashboard from './pages/EnergyFlowDashboard';
-import MonthlyUsageReport from './pages/MonthlyUsageReport';
-import CustomerDetails from './pages/CustomerDetails';
 import __Layout from './Layout.jsx';
 
 
@@ -116,6 +116,7 @@ export const PAGES = {
     "CreditMarketplace": CreditMarketplace,
     "CreditSystem": CreditSystem,
     "CustomerDashboard": CustomerDashboard,
+    "CustomerDetails": CustomerDetails,
     "CustomerManagement": CustomerManagement,
     "CustomerPortal": CustomerPortal,
     "DeficitCompensation": DeficitCompensation,
@@ -124,6 +125,7 @@ export const PAGES = {
     "DocumentsDashboard": DocumentsDashboard,
     "EnergyAllocationManager": EnergyAllocationManager,
     "EnergyCreditsMarket": EnergyCreditsMarket,
+    "EnergyFlowDashboard": EnergyFlowDashboard,
     "EnergyPurchaseManagement": EnergyPurchaseManagement,
     "ExpiringCredits": ExpiringCredits,
     "FinancialDashboard": FinancialDashboard,
@@ -134,6 +136,7 @@ export const PAGES = {
     "LoyaltyProgram": LoyaltyProgram,
     "MaintenanceManagement": MaintenanceManagement,
     "MonthlyReconciliation": MonthlyReconciliation,
+    "MonthlyUsageReport": MonthlyUsageReport,
     "NotificationCenter": NotificationCenter,
     "NotificationManager": NotificationManager,
     "OnboardingManager": OnboardingManager,
@@ -145,6 +148,7 @@ export const PAGES = {
     "PlantOwnerContracts": PlantOwnerContracts,
     "PlantPerformanceDashboard": PlantPerformanceDashboard,
     "PowerPlantManager": PowerPlantManager,
+    "PowerPlantUnitsManager": PowerPlantUnitsManager,
     "ProsumerDashboard": ProsumerDashboard,
     "RateioManagement": RateioManagement,
     "RegulatoryReports": RegulatoryReports,
@@ -166,10 +170,6 @@ export const PAGES = {
     "WhatsAppCampaigns": WhatsAppCampaigns,
     "WhatsAppEvolution": WhatsAppEvolution,
     "WhatsAppManagement": WhatsAppManagement,
-    "PowerPlantUnitsManager": PowerPlantUnitsManager,
-    "EnergyFlowDashboard": EnergyFlowDashboard,
-    "MonthlyUsageReport": MonthlyUsageReport,
-    "CustomerDetails": CustomerDetails,
 }
 
 export const pagesConfig = {
