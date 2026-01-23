@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
-  Plus, Edit, Trash2, ArrowLeft, FileText, Search, Users, TrendingUp, DollarSign, AlertCircle
+  Plus, Edit, Trash2, ArrowLeft, FileText, Search, Users, TrendingUp, DollarSign, AlertCircle, CheckCircle, Factory
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -29,21 +29,11 @@ export default function SubscriptionManager() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [subscriptionToDelete, setSubscriptionToDelete] = useState(null);
+  const [selectedCustomerId, setSelectedCustomerId] = useState(null);
+  const [selectedUnits, setSelectedUnits] = useState([]);
   const [formData, setFormData] = useState({
-    customer_name: '',
-    customer_email: '',
-    customer_phone: '',
-    customer_cpf_cnpj: '',
-    customer_type: 'residential',
-    address: '',
-    city: '',
-    state: '',
-    zip_code: '',
-    distributor: '',
-    installation_number: '',
-    average_bill_value: '',
-    power_plant_name: '',
-    business_type: '',
+    customer_id: '',
+    power_plant_id: '',
     status: 'pending',
     discount_percentage: '',
     notes: '',
@@ -61,14 +51,60 @@ export default function SubscriptionManager() {
     queryFn: () => base44.entities.PowerPlant.list()
   });
 
+  const { data: customers = [] } = useQuery({
+    queryKey: ['customers'],
+    queryFn: () => base44.entities.Customer.list()
+  });
+
+  const { data: consumerUnits = [] } = useQuery({
+    queryKey: ['consumer-units', selectedCustomerId],
+    queryFn: () => base44.entities.ConsumerUnit.filter({ customer_email: customers.find(c => c.id === selectedCustomerId)?.email }),
+    enabled: !!selectedCustomerId
+  });
+
+  const { data: powerPlantContracts = [] } = useQuery({
+    queryKey: ['power-plant-contracts'],
+    queryFn: () => base44.entities.PowerPlantContract.list()
+  });
+
   const createSubscription = useMutation({
-    mutationFn: (data) => base44.entities.Subscription.create({
-      ...data,
-      average_bill_value: data.average_bill_value ? parseFloat(data.average_bill_value) : undefined,
-      discount_percentage: data.discount_percentage ? parseFloat(data.discount_percentage) : undefined
-    }),
+    mutationFn: async (data) => {
+      const customer = customers.find(c => c.id === data.customer_id);
+      const powerPlant = powerPlants.find(p => p.id === data.power_plant_id);
+      
+      const subscription = await base44.entities.Subscription.create({
+        customer_number: customer.customer_number,
+        customer_name: customer.name,
+        customer_email: customer.email,
+        customer_phone: customer.phone,
+        customer_cpf_cnpj: customer.cpf_cnpj,
+        customer_type: customer.customer_type,
+        address: customer.address,
+        city: customer.city,
+        state: customer.state,
+        zip_code: customer.zip_code,
+        power_plant_id: powerPlant.id,
+        power_plant_name: powerPlant.name,
+        status: data.status,
+        discount_percentage: data.discount_percentage ? parseFloat(data.discount_percentage) : undefined,
+        notes: data.notes,
+        contract_start_date: data.contract_start_date,
+        contract_end_date: data.contract_end_date
+      });
+
+      // Vincular unidades consumidoras selecionadas
+      for (const unitId of selectedUnits) {
+        await base44.entities.ConsumerUnit.update(unitId, { 
+          subscription_id: subscription.id,
+          power_plant_name: powerPlant.name
+        });
+      }
+
+      return subscription;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['subscriptions']);
+      queryClient.invalidateQueries(['consumer-units']);
       setIsDialogOpen(false);
       resetForm();
       toast.success('Assinatura criada com sucesso!');
@@ -77,9 +113,11 @@ export default function SubscriptionManager() {
 
   const updateSubscription = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Subscription.update(id, {
-      ...data,
-      average_bill_value: data.average_bill_value ? parseFloat(data.average_bill_value) : undefined,
-      discount_percentage: data.discount_percentage ? parseFloat(data.discount_percentage) : undefined
+      status: data.status,
+      discount_percentage: data.discount_percentage ? parseFloat(data.discount_percentage) : undefined,
+      notes: data.notes,
+      contract_start_date: data.contract_start_date,
+      contract_end_date: data.contract_end_date
     }),
     onSuccess: () => {
       queryClient.invalidateQueries(['subscriptions']);
@@ -101,46 +139,22 @@ export default function SubscriptionManager() {
 
   const resetForm = () => {
     setFormData({
-      customer_name: '',
-      customer_email: '',
-      customer_phone: '',
-      customer_cpf_cnpj: '',
-      customer_type: 'residential',
-      address: '',
-      city: '',
-      state: '',
-      zip_code: '',
-      distributor: '',
-      installation_number: '',
-      average_bill_value: '',
-      power_plant_name: '',
-      business_type: '',
+      customer_id: '',
+      power_plant_id: '',
       status: 'pending',
       discount_percentage: '',
       notes: '',
       contract_start_date: '',
       contract_end_date: ''
     });
+    setSelectedCustomerId(null);
+    setSelectedUnits([]);
     setEditingSubscription(null);
   };
 
   const openEditDialog = (subscription) => {
     setEditingSubscription(subscription);
     setFormData({
-      customer_name: subscription.customer_name || '',
-      customer_email: subscription.customer_email || '',
-      customer_phone: subscription.customer_phone || '',
-      customer_cpf_cnpj: subscription.customer_cpf_cnpj || '',
-      customer_type: subscription.customer_type || 'residential',
-      address: subscription.address || '',
-      city: subscription.city || '',
-      state: subscription.state || '',
-      zip_code: subscription.zip_code || '',
-      distributor: subscription.distributor || '',
-      installation_number: subscription.installation_number || '',
-      average_bill_value: subscription.average_bill_value?.toString() || '',
-      power_plant_name: subscription.power_plant_name || '',
-      business_type: subscription.business_type || '',
       status: subscription.status || 'pending',
       discount_percentage: subscription.discount_percentage?.toString() || '',
       notes: subscription.notes || '',
@@ -148,6 +162,31 @@ export default function SubscriptionManager() {
       contract_end_date: subscription.contract_end_date || ''
     });
     setIsDialogOpen(true);
+  };
+
+  const getAvailablePlants = () => {
+    return powerPlants.map(plant => {
+      const allocated = powerPlantContracts
+        .filter(c => c.power_plant_id === plant.id && c.status === 'active')
+        .reduce((sum, c) => sum + (c.monthly_allocation_kwh || 0), 0);
+      
+      const available = (plant.monthly_generation_kwh || 0) - allocated;
+      
+      return {
+        ...plant,
+        allocated,
+        available,
+        availablePercentage: plant.monthly_generation_kwh ? (available / plant.monthly_generation_kwh * 100) : 0
+      };
+    }).filter(plant => plant.available > 0);
+  };
+
+  const toggleUnitSelection = (unitId) => {
+    setSelectedUnits(prev => 
+      prev.includes(unitId) 
+        ? prev.filter(id => id !== unitId)
+        : [...prev, unitId]
+    );
   };
 
   const handleSubmit = (e) => {
@@ -415,148 +454,176 @@ export default function SubscriptionManager() {
             <DialogTitle>{editingSubscription ? 'Editar Assinatura' : 'Nova Assinatura'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-slate-900 border-b pb-2">Dados do Cliente</h3>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Nome do Cliente *</Label>
-                  <Input
-                    value={formData.customer_name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, customer_name: e.target.value }))}
-                    placeholder="Nome completo"
-                    required
-                  />
+            {!editingSubscription && (
+              <>
+                <div className="space-y-4">
+                  <h3 className="text-sm font-semibold text-slate-900 border-b pb-2">1. Selecionar Cliente</h3>
+                  
+                  <div className="space-y-2">
+                    <Label>Cliente *</Label>
+                    <Select 
+                      value={formData.customer_id} 
+                      onValueChange={(v) => {
+                        setFormData(prev => ({ ...prev, customer_id: v }));
+                        setSelectedCustomerId(v);
+                        setSelectedUnits([]);
+                      }}
+                      required
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o cliente" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {customers.map(customer => (
+                          <SelectItem key={customer.id} value={customer.id}>
+                            {customer.name} - {customer.email}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {selectedCustomerId && (
+                    <Card className="bg-blue-50 border-blue-200">
+                      <CardContent className="p-4">
+                        <div className="text-sm">
+                          <p className="font-semibold text-blue-900">
+                            {customers.find(c => c.id === selectedCustomerId)?.name}
+                          </p>
+                          <p className="text-blue-700">
+                            {customers.find(c => c.id === selectedCustomerId)?.email}
+                          </p>
+                          <p className="text-blue-600">
+                            {customers.find(c => c.id === selectedCustomerId)?.phone}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Email *</Label>
-                  <Input
-                    type="email"
-                    value={formData.customer_email}
-                    onChange={(e) => setFormData(prev => ({ ...prev, customer_email: e.target.value }))}
-                    placeholder="email@exemplo.com"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>Telefone *</Label>
-                  <Input
-                    value={formData.customer_phone}
-                    onChange={(e) => setFormData(prev => ({ ...prev, customer_phone: e.target.value }))}
-                    placeholder="(00) 00000-0000"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>CPF/CNPJ</Label>
-                  <Input
-                    value={formData.customer_cpf_cnpj}
-                    onChange={(e) => setFormData(prev => ({ ...prev, customer_cpf_cnpj: e.target.value }))}
-                    placeholder="000.000.000-00"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Tipo de Cliente</Label>
-                  <Select value={formData.customer_type} onValueChange={(v) => setFormData(prev => ({ ...prev, customer_type: v }))}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="residential">Residencial</SelectItem>
-                      <SelectItem value="commercial">Comercial</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-slate-900 border-b pb-2">Endereço</h3>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2 col-span-2">
-                  <Label>Endereço</Label>
-                  <Input
-                    value={formData.address}
-                    onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                    placeholder="Rua, número, complemento"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Cidade</Label>
-                  <Input
-                    value={formData.city}
-                    onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                    placeholder="Cidade"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Estado</Label>
-                  <Input
-                    value={formData.state}
-                    onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
-                    placeholder="UF"
-                    maxLength={2}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-slate-900 border-b pb-2">Informações da Assinatura</h3>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Concessionária</Label>
-                  <Input
-                    value={formData.distributor}
-                    onChange={(e) => setFormData(prev => ({ ...prev, distributor: e.target.value }))}
-                    placeholder="Nome da concessionária"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Número da Instalação</Label>
-                  <Input
-                    value={formData.installation_number}
-                    onChange={(e) => setFormData(prev => ({ ...prev, installation_number: e.target.value }))}
-                    placeholder="Número"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Valor Médio da Conta (R$)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.average_bill_value}
-                    onChange={(e) => setFormData(prev => ({ ...prev, average_bill_value: e.target.value }))}
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Usina</Label>
-                  <Select value={formData.power_plant_name} onValueChange={(v) => setFormData(prev => ({ ...prev, power_plant_name: v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a usina" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {powerPlants.map(plant => (
-                        <SelectItem key={plant.id} value={plant.name}>{plant.name}</SelectItem>
+                {selectedCustomerId && consumerUnits.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-semibold text-slate-900 border-b pb-2">2. Selecionar Unidades Consumidoras</h3>
+                    
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                      {consumerUnits.map(unit => (
+                        <Card 
+                          key={unit.id}
+                          className={`cursor-pointer transition-all ${
+                            selectedUnits.includes(unit.id) 
+                              ? 'border-blue-500 bg-blue-50' 
+                              : 'hover:bg-slate-50'
+                          }`}
+                          onClick={() => toggleUnitSelection(unit.id)}
+                        >
+                          <CardContent className="p-3">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                                selectedUnits.includes(unit.id) 
+                                  ? 'bg-blue-600 border-blue-600' 
+                                  : 'border-slate-300'
+                              }`}>
+                                {selectedUnits.includes(unit.id) && (
+                                  <CheckCircle className="w-4 h-4 text-white" />
+                                )}
+                              </div>
+                              <div className="flex-1">
+                                <p className="font-medium text-sm">{unit.unit_name || unit.unit_number}</p>
+                                <p className="text-xs text-slate-600">
+                                  {unit.unit_number} - {unit.distributor}
+                                </p>
+                              </div>
+                              {unit.monthly_consumption_kwh && (
+                                <Badge variant="outline">
+                                  {unit.monthly_consumption_kwh} kWh/mês
+                                </Badge>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
                       ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                    </div>
 
+                    <p className="text-sm text-slate-600">
+                      {selectedUnits.length} unidade{selectedUnits.length !== 1 ? 's' : ''} selecionada{selectedUnits.length !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                )}
+
+                {selectedCustomerId && consumerUnits.length === 0 && (
+                  <Card className="bg-yellow-50 border-yellow-200">
+                    <CardContent className="p-4 text-center">
+                      <AlertCircle className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+                      <p className="text-sm text-yellow-800">
+                        Este cliente não possui unidades consumidoras cadastradas.
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {selectedUnits.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-semibold text-slate-900 border-b pb-2">3. Selecionar Usina com Capacidade Disponível</h3>
+                    
+                    <div className="space-y-2">
+                      <Label>Usina *</Label>
+                      <Select 
+                        value={formData.power_plant_id} 
+                        onValueChange={(v) => setFormData(prev => ({ ...prev, power_plant_id: v }))}
+                        required
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a usina" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getAvailablePlants().map(plant => (
+                            <SelectItem key={plant.id} value={plant.id}>
+                              <div className="flex items-center gap-2">
+                                <Factory className="w-4 h-4" />
+                                <span>{plant.name}</span>
+                                <Badge variant="outline" className="ml-2">
+                                  {Math.round(plant.available)} kWh disponível
+                                </Badge>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {formData.power_plant_id && (
+                      <Card className="bg-green-50 border-green-200">
+                        <CardContent className="p-4">
+                          {(() => {
+                            const plant = getAvailablePlants().find(p => p.id === formData.power_plant_id);
+                            return plant ? (
+                              <div className="text-sm">
+                                <p className="font-semibold text-green-900">{plant.name}</p>
+                                <p className="text-green-700">
+                                  Capacidade Disponível: {Math.round(plant.available)} kWh/mês 
+                                  ({Math.round(plant.availablePercentage)}%)
+                                </p>
+                                <p className="text-green-600">
+                                  Total: {plant.monthly_generation_kwh} kWh/mês
+                                </p>
+                              </div>
+                            ) : null;
+                          })()}
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-slate-900 border-b pb-2">
+                {editingSubscription ? 'Editar Informações' : '4. Configurações da Assinatura'}
+              </h3>
+              
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Desconto (%)</Label>
                   <Input
