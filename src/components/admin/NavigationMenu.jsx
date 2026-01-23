@@ -133,6 +133,27 @@ const menuCategories = {
       { name: 'Central Notificações', url: 'NotificationCenter', icon: '🔔' },
       { name: 'IA Inovações', url: 'AIInnovations', icon: '🤖' }
     ]
+  },
+  'owners': {
+    title: '👨‍💼 Usineiros',
+    color: 'border-orange-500 bg-orange-50',
+    items: [
+      { name: 'Contratos Proprietários', url: 'OwnerContracts', icon: '📄' },
+      { name: 'Pagamentos a Usineiros', url: 'OwnerPayments', icon: '💳' },
+      { name: 'Histórico Pagamentos', url: 'TransactionHistory', icon: '📊' },
+      { name: 'Gestão Proprietários', url: 'PlantOwnerContracts', icon: '👨‍🌾' }
+    ]
+  },
+  'billing': {
+    title: '💼 Faturamento & Gestão',
+    color: 'border-emerald-500 bg-emerald-50',
+    items: [
+      { name: 'Faturamento Automático', url: 'AutomaticBilling', icon: '💳' },
+      { name: 'Modelos de Fatura', url: 'InvoiceTemplateEditor', icon: '📝' },
+      { name: 'Contas Pagar/Receber', url: 'AccountsManagement', icon: '📋' },
+      { name: 'Processador OCR', url: 'UtilityBillProcessor', icon: '🤖' },
+      { name: 'Contas de Luz', url: 'UtilityBillManager', icon: '📄' }
+    ]
   }
 };
 
