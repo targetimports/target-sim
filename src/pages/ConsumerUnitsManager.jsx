@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
-  Plus, Edit, Trash2, ArrowLeft, Zap, Building2, Search
+  Plus, Edit, Trash2, ArrowLeft, Zap, Building2, Search, FileText, Download
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -15,6 +15,8 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from "@/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from 'sonner';
 
 const DISTRIBUTORS = ['neoenergiabahia', 'coelba', 'cemig', 'enel', 'cpfl'];
 const UNIT_TYPES = ['residential', 'commercial', 'industrial'];
@@ -28,6 +30,8 @@ export default function ConsumerUnitsManager() {
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [unitToDelete, setUnitToDelete] = useState(null);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [pastedData, setPastedData] = useState('');
   const [formData, setFormData] = useState({
     subscription_id: '',
     customer_email: '',
@@ -91,6 +95,21 @@ export default function ConsumerUnitsManager() {
       queryClient.invalidateQueries(['consumer-units']);
       setDeleteConfirmOpen(false);
       setUnitToDelete(null);
+    }
+  });
+
+  const bulkCreateUnits = useMutation({
+    mutationFn: async (units) => {
+      return await base44.entities.ConsumerUnit.bulkCreate(units);
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(['consumer-units']);
+      toast.success(`${data.length} unidades importadas com sucesso!`);
+      setImportDialogOpen(false);
+      setPastedData('');
+    },
+    onError: () => {
+      toast.error('Erro ao importar unidades');
     }
   });
 
@@ -172,6 +191,65 @@ export default function ConsumerUnitsManager() {
   const totalConsumption = filteredUnits.reduce((sum, u) => sum + (u.monthly_consumption_kwh || 0), 0);
   const activeUnits = filteredUnits.filter(u => u.status === 'active').length;
 
+  const handlePasteImport = () => {
+    try {
+      const lines = pastedData.trim().split('\n');
+      if (lines.length < 2) {
+        toast.error('Cole pelo menos o cabeçalho e uma linha de dados');
+        return;
+      }
+
+      const headers = lines[0].split('\t');
+      const unitsToCreate = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split('\t');
+        if (values.length < 3) continue;
+
+        const unit = {
+          subscription_id: values[0]?.trim() || '',
+          customer_id: values[1]?.trim() || '',
+          customer_name: values[2]?.trim() || '',
+          customer_email: values[2]?.trim() ? `${values[2].trim().replace(/\s+/g, '').toLowerCase()}@temp.com` : '',
+          power_plant_name: values[3]?.trim() || '',
+          unit_number: values[4]?.trim() || '',
+          new_unit_number: values[5]?.trim() || '',
+          unit_name: values[6]?.trim() || '',
+          distributor: values[7]?.trim() || '',
+          generator_unit: values[8]?.trim() || '',
+          compensation_percentage: values[9] ? parseFloat(values[9]) : undefined,
+          connection_type: values[10]?.trim() || '',
+          tariff_mode: values[11]?.trim() || '',
+          subclass: values[12]?.trim() || '',
+          average_consumption_kwh: values[13] ? parseFloat(values[13]) : undefined,
+          balance_kwh: values[14] ? parseFloat(values[14]) : undefined,
+          discount_percentage: values[15] ? parseFloat(values[15]) : undefined,
+          grace_period_months: values[16] ? parseInt(values[16]) : undefined,
+          contract_end_date: values[17]?.trim() || '',
+          contract_start_date: values[18]?.trim() || '',
+          grace_period_discount: values[19] ? parseFloat(values[19]) : undefined,
+          total_savings: values[20] ? parseFloat(values[20]) : undefined,
+          projected_savings_12months: values[21] ? parseFloat(values[21]) : undefined,
+          installation_number: values[4]?.trim() || '',
+          monthly_consumption_kwh: values[13] ? parseFloat(values[13]) : undefined,
+          status: 'active'
+        };
+
+        unitsToCreate.push(unit);
+      }
+
+      if (unitsToCreate.length === 0) {
+        toast.error('Nenhuma unidade válida encontrada nos dados colados');
+        return;
+      }
+
+      bulkCreateUnits.mutate(unitsToCreate);
+    } catch (error) {
+      console.error('Erro ao processar dados:', error);
+      toast.error('Erro ao processar dados colados');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-100">
       <header className="bg-slate-900 text-white">
@@ -193,10 +271,16 @@ export default function ConsumerUnitsManager() {
                 </div>
               </div>
             </div>
-            <Button onClick={() => { resetForm(); setIsDialogOpen(true); }} className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="w-4 h-4 mr-2" />
-              Nova UC
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={() => setImportDialogOpen(true)} variant="outline" className="text-white border-white/20 hover:bg-white/10">
+                <FileText className="w-4 h-4 mr-2" />
+                Importar Dados
+              </Button>
+              <Button onClick={() => { resetForm(); setIsDialogOpen(true); }} className="bg-blue-600 hover:bg-blue-700">
+                <Plus className="w-4 h-4 mr-2" />
+                Nova UC
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -538,6 +622,68 @@ export default function ConsumerUnitsManager() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Dialog */}
+      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Importar Unidades Consumidoras</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="font-semibold text-blue-900 mb-2">📋 Como importar:</h3>
+              <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+                <li>Copie os dados de uma planilha (Excel, Google Sheets, etc.)</li>
+                <li>Cole no campo abaixo (incluindo o cabeçalho)</li>
+                <li>Clique em "Importar" para processar</li>
+              </ol>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Cole aqui os dados da planilha (Ctrl+V)</Label>
+              <Textarea
+                value={pastedData}
+                onChange={(e) => setPastedData(e.target.value)}
+                placeholder="ID da UC	ID do cliente	Nome do cliente	Nome da usina	Número UC	Novo Número UC	Nome	Concessionária	Unidade Geradora	Percentual de compensação	Tipo de conexão	Modalidade Tarifária	Subclasse	Média de consumo	Saldo	Percentual de desconto	Carência em meses	Data de fim do contrato	Data de inicio do contrato	Desconto na carência	Economia total	Economia prevista em 12 meses"
+                rows={12}
+                className="font-mono text-xs"
+              />
+            </div>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+              <p className="text-sm text-slate-600">
+                <strong>Colunas esperadas:</strong> ID da UC, ID do cliente, Nome do cliente, Nome da usina, Número UC, 
+                Novo Número UC, Nome, Concessionária, Unidade Geradora, % compensação, Tipo de conexão, 
+                Modalidade Tarifária, Subclasse, Média consumo, Saldo, % desconto, Carência (meses), 
+                Data fim contrato, Data início contrato, Desconto carência, Economia total, Economia 12 meses
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="flex-1" 
+                onClick={() => {
+                  setImportDialogOpen(false);
+                  setPastedData('');
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                type="button" 
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                onClick={handlePasteImport}
+                disabled={!pastedData.trim() || bulkCreateUnits.isPending}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                {bulkCreateUnits.isPending ? 'Importando...' : 'Importar Dados'}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
