@@ -7,7 +7,7 @@ import {
   Settings, DollarSign, BarChart3, Calendar, Wrench, Shield, 
   Database, Plug, Bot, Sun, MapPin, Home, ChevronRight
 } from 'lucide-react';
-import { motion } from 'framer-motion";
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from './utils';
 
