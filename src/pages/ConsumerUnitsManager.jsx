@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
-  Plus, Edit, Trash2, ArrowLeft, Zap, Building2, Search, FileText, Download
+  Plus, Edit, Trash2, ArrowLeft, Zap, Building2, Search, FileText, Download, ChevronDown, ChevronUp, ArrowUpDown, Maximize2, Minimize2
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -32,6 +32,10 @@ export default function ConsumerUnitsManager() {
   const [unitToDelete, setUnitToDelete] = useState(null);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [pastedData, setPastedData] = useState('');
+  const [groupBy, setGroupBy] = useState('none'); // none, distributor, status
+  const [compactView, setCompactView] = useState(true);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [expandedGroups, setExpandedGroups] = useState({});
   const [formData, setFormData] = useState({
     subscription_id: '',
     customer_email: '',
@@ -193,6 +197,62 @@ export default function ConsumerUnitsManager() {
     unit.unit_number?.includes(searchTerm)
   );
 
+  // Sorting
+  const sortedUnits = React.useMemo(() => {
+    if (!sortConfig.key) return filteredUnits;
+    
+    return [...filteredUnits].sort((a, b) => {
+      const aVal = a[sortConfig.key];
+      const bVal = b[sortConfig.key];
+      
+      if (aVal === bVal) return 0;
+      if (aVal == null) return 1;
+      if (bVal == null) return -1;
+      
+      const comparison = aVal < bVal ? -1 : 1;
+      return sortConfig.direction === 'asc' ? comparison : -comparison;
+    });
+  }, [filteredUnits, sortConfig]);
+
+  // Grouping
+  const groupedUnits = React.useMemo(() => {
+    if (groupBy === 'none') return { 'all': sortedUnits };
+    
+    const groups = {};
+    sortedUnits.forEach(unit => {
+      const key = groupBy === 'distributor' 
+        ? (unit.distributor || 'Sem concessionária')
+        : (unit.status || 'inactive');
+      
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(unit);
+    });
+    
+    return groups;
+  }, [sortedUnits, groupBy]);
+
+  const handleSort = (key) => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  const toggleGroup = (groupKey) => {
+    setExpandedGroups(prev => ({
+      ...prev,
+      [groupKey]: !prev[groupKey]
+    }));
+  };
+
+  React.useEffect(() => {
+    const allGroups = Object.keys(groupedUnits).reduce((acc, key) => {
+      acc[key] = true;
+      return acc;
+    }, {});
+    setExpandedGroups(allGroups);
+  }, [groupBy]);
+
   const totalConsumption = filteredUnits.reduce((sum, u) => sum + (u.monthly_consumption_kwh || 0), 0);
   const activeUnits = filteredUnits.filter(u => u.status === 'active').length;
 
@@ -347,18 +407,44 @@ export default function ConsumerUnitsManager() {
           </Card>
         </div>
 
-        {/* Search */}
-        <div className="mb-6 flex gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              placeholder="Pesquisar por nome, email ou número da UC..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
+        {/* Search & Filters */}
+        <Card className="mb-6 border-0 shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  placeholder="Pesquisar por nome, email ou número da UC..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <Select value={groupBy} onValueChange={setGroupBy}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Agrupar por" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sem agrupamento</SelectItem>
+                    <SelectItem value="distributor">Por Concessionária</SelectItem>
+                    <SelectItem value="status">Por Status</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Button
+                  variant="outline"
+                  onClick={() => setCompactView(!compactView)}
+                  className="whitespace-nowrap"
+                >
+                  {compactView ? <Maximize2 className="w-4 h-4 mr-2" /> : <Minimize2 className="w-4 h-4 mr-2" />}
+                  {compactView ? 'Expandir' : 'Compactar'}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Table */}
         <Card className="border-0 shadow-sm overflow-hidden">
@@ -366,57 +452,139 @@ export default function ConsumerUnitsManager() {
             <table className="w-full">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Nome</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Cliente</th>
+                  <th 
+                    className="px-6 py-4 text-left text-sm font-semibold text-slate-900 cursor-pointer hover:bg-slate-100"
+                    onClick={() => handleSort('unit_name')}
+                  >
+                    <div className="flex items-center gap-2">
+                      Nome
+                      <ArrowUpDown className="w-3 h-3" />
+                    </div>
+                  </th>
+                  <th 
+                    className="px-6 py-4 text-left text-sm font-semibold text-slate-900 cursor-pointer hover:bg-slate-100"
+                    onClick={() => handleSort('customer_email')}
+                  >
+                    <div className="flex items-center gap-2">
+                      Cliente
+                      <ArrowUpDown className="w-3 h-3" />
+                    </div>
+                  </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Número UC</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Concessionária</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Consumo Mensal</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Status</th>
+                  {!compactView && (
+                    <>
+                      <th 
+                        className="px-6 py-4 text-left text-sm font-semibold text-slate-900 cursor-pointer hover:bg-slate-100"
+                        onClick={() => handleSort('distributor')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Concessionária
+                          <ArrowUpDown className="w-3 h-3" />
+                        </div>
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Cidade</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Tipo</th>
+                    </>
+                  )}
+                  <th 
+                    className="px-6 py-4 text-left text-sm font-semibold text-slate-900 cursor-pointer hover:bg-slate-100"
+                    onClick={() => handleSort('monthly_consumption_kwh')}
+                  >
+                    <div className="flex items-center gap-2">
+                      Consumo
+                      <ArrowUpDown className="w-3 h-3" />
+                    </div>
+                  </th>
+                  <th 
+                    className="px-6 py-4 text-left text-sm font-semibold text-slate-900 cursor-pointer hover:bg-slate-100"
+                    onClick={() => handleSort('status')}
+                  >
+                    <div className="flex items-center gap-2">
+                      Status
+                      <ArrowUpDown className="w-3 h-3" />
+                    </div>
+                  </th>
                   <th className="px-6 py-4 text-right text-sm font-semibold text-slate-900">Ações</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredUnits.map((unit) => (
-                  <motion.tr
-                    key={unit.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="border-b border-slate-200 hover:bg-slate-50 transition-colors"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-slate-900">{unit.unit_name}</div>
-                      <div className="text-xs text-slate-500">{unit.address}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-slate-900">{unit.customer_email}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <code className="text-sm bg-slate-100 px-2 py-1 rounded">{unit.unit_number}</code>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{unit.distributor}</td>
-                    <td className="px-6 py-4">
-                      <div className="font-semibold text-slate-900">{(unit.monthly_consumption_kwh || 0).toLocaleString()} kWh</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Badge className={
-                        unit.status === 'active' ? 'bg-green-100 text-green-800' :
-                        unit.status === 'suspended' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-slate-100 text-slate-800'
-                      }>
-                        {unit.status === 'active' ? 'Ativa' : unit.status === 'suspended' ? 'Suspensa' : 'Inativa'}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => openEditDialog(unit)}>
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(unit)}>
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </td>
-                  </motion.tr>
+                {Object.entries(groupedUnits).map(([groupKey, groupUnits]) => (
+                  <React.Fragment key={groupKey}>
+                    {groupBy !== 'none' && (
+                      <tr className="bg-slate-100 border-b border-slate-200">
+                        <td colSpan={compactView ? 5 : 8} className="px-6 py-3">
+                          <button
+                            onClick={() => toggleGroup(groupKey)}
+                            className="flex items-center gap-2 font-semibold text-slate-900 hover:text-blue-600 transition-colors"
+                          >
+                            {expandedGroups[groupKey] ? (
+                              <ChevronDown className="w-4 h-4" />
+                            ) : (
+                              <ChevronUp className="w-4 h-4" />
+                            )}
+                            {groupBy === 'distributor' ? groupKey : 
+                             groupKey === 'active' ? '✅ Ativas' : 
+                             groupKey === 'suspended' ? '⚠️ Suspensas' : '❌ Inativas'}
+                            <Badge variant="outline" className="ml-2">{groupUnits.length}</Badge>
+                          </button>
+                        </td>
+                      </tr>
+                    )}
+                    
+                    {(groupBy === 'none' || expandedGroups[groupKey]) && groupUnits.map((unit) => (
+                      <motion.tr
+                        key={unit.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="border-b border-slate-200 hover:bg-slate-50 transition-colors"
+                      >
+                        <td className="px-6 py-4">
+                          <div className="font-medium text-slate-900">{unit.unit_name}</div>
+                          {compactView && <div className="text-xs text-slate-500">{unit.distributor}</div>}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="font-medium text-slate-900">{unit.customer_name || unit.customer_email}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <code className="text-sm bg-slate-100 px-2 py-1 rounded">{unit.unit_number}</code>
+                        </td>
+                        {!compactView && (
+                          <>
+                            <td className="px-6 py-4 text-sm text-slate-600">{unit.distributor}</td>
+                            <td className="px-6 py-4 text-sm text-slate-600">{unit.city}</td>
+                            <td className="px-6 py-4">
+                              <Badge variant="outline" className="text-xs">
+                                {unit.unit_type === 'residential' ? '🏠 Residencial' : 
+                                 unit.unit_type === 'commercial' ? '🏢 Comercial' : '🏭 Industrial'}
+                              </Badge>
+                            </td>
+                          </>
+                        )}
+                        <td className="px-6 py-4">
+                          <div className="font-semibold text-slate-900">{(unit.monthly_consumption_kwh || 0).toLocaleString()} kWh</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <Badge className={
+                            unit.status === 'active' ? 'bg-green-100 text-green-800' :
+                            unit.status === 'suspended' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-slate-100 text-slate-800'
+                          }>
+                            {unit.status === 'active' ? 'Ativa' : unit.status === 'suspended' ? 'Suspensa' : 'Inativa'}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button variant="ghost" size="icon" onClick={() => openEditDialog(unit)}>
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(unit)}>
+                              <Trash2 className="w-4 h-4 text-red-500" />
+                            </Button>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>
