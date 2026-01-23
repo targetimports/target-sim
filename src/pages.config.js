@@ -84,6 +84,7 @@ import WhatsAppEvolution from './pages/WhatsAppEvolution';
 import WhatsAppManagement from './pages/WhatsAppManagement';
 import SubscriptionManager from './pages/SubscriptionManager';
 import SystemMap from './pages/SystemMap';
+import PowerPlantDashboard from './pages/PowerPlantDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -174,6 +175,7 @@ export const PAGES = {
     "WhatsAppManagement": WhatsAppManagement,
     "SubscriptionManager": SubscriptionManager,
     "SystemMap": SystemMap,
+    "PowerPlantDashboard": PowerPlantDashboard,
 }
 
 export const pagesConfig = {
