@@ -206,15 +206,22 @@ export default function ConsumerUnitsManager() {
         const values = lines[i].split('\t');
         if (values.length < 3) continue;
 
+        const customerName = values[2]?.trim() || '';
+        
+        // Buscar cliente existente pelo nome
+        const matchingCustomer = subscriptions.find(sub => 
+          sub.name?.toLowerCase() === customerName.toLowerCase()
+        );
+
         const unit = {
-          subscription_id: values[0]?.trim() || '',
-          customer_id: values[1]?.trim() || '',
-          customer_name: values[2]?.trim() || '',
-          customer_email: values[2]?.trim() ? `${values[2].trim().replace(/\s+/g, '').toLowerCase()}@temp.com` : '',
+          subscription_id: matchingCustomer?.id || values[0]?.trim() || '',
+          customer_id: matchingCustomer?.id || values[1]?.trim() || '',
+          customer_name: customerName,
+          customer_email: matchingCustomer?.email || '',
           power_plant_name: values[3]?.trim() || '',
           unit_number: values[4]?.trim() || '',
           new_unit_number: values[5]?.trim() || '',
-          unit_name: values[6]?.trim() || '',
+          unit_name: values[6]?.trim() || `UC ${values[4]?.trim()}`,
           distributor: values[7]?.trim() || '',
           generator_unit: values[8]?.trim() || '',
           compensation_percentage: values[9] ? parseFloat(values[9]) : undefined,
@@ -241,6 +248,11 @@ export default function ConsumerUnitsManager() {
       if (unitsToCreate.length === 0) {
         toast.error('Nenhuma unidade válida encontrada nos dados colados');
         return;
+      }
+
+      const unitsWithoutCustomer = unitsToCreate.filter(u => !u.customer_email);
+      if (unitsWithoutCustomer.length > 0) {
+        toast.warning(`${unitsWithoutCustomer.length} UCs sem cliente vinculado serão importadas sem vinculação`);
       }
 
       bulkCreateUnits.mutate(unitsToCreate);
