@@ -83,6 +83,7 @@ import WhatsAppCampaigns from './pages/WhatsAppCampaigns';
 import WhatsAppEvolution from './pages/WhatsAppEvolution';
 import WhatsAppManagement from './pages/WhatsAppManagement';
 import SubscriptionManager from './pages/SubscriptionManager';
+import SystemMap from './pages/SystemMap';
 import __Layout from './Layout.jsx';
 
 
@@ -172,6 +173,7 @@ export const PAGES = {
     "WhatsAppEvolution": WhatsAppEvolution,
     "WhatsAppManagement": WhatsAppManagement,
     "SubscriptionManager": SubscriptionManager,
+    "SystemMap": SystemMap,
 }
 
 export const pagesConfig = {
