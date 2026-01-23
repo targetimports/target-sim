@@ -10,6 +10,9 @@ const menuCategories = {
     title: '⚡ Gestão de Energia',
     color: 'border-amber-500 bg-amber-50',
     items: [
+      { name: 'Dashboard Fluxo Energético', url: 'EnergyFlowDashboard', icon: '🔄' },
+      { name: 'Vincular Unidades → Usinas', url: 'PowerPlantUnitsManager', icon: '🔗' },
+      { name: 'Relatório Uso Mensal', url: 'MonthlyUsageReport', icon: '📊' },
       { name: 'Gestão Rateio Lei 14.300', url: 'RateioManagement', icon: '⚖️' },
       { name: 'Rateio de Energia', url: 'EnergyAllocationManager', icon: '⚡' },
       { name: 'Saldo de Créditos', url: 'CreditBalanceManager', icon: '💰' },
