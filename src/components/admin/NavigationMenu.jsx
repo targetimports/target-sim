@@ -308,6 +308,7 @@ export default function NavigationMenu({ onNavigate }) {
         )}
       </Droppable>
     </DragDropContext>
+    </>
   );
 }
 
