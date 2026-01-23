@@ -28,30 +28,30 @@ export default function CustomerDetails({ subscription, onClose }) {
 
   // Buscar dados relacionados
   const { data: invoices = [] } = useQuery({
-    queryKey: ['customer-invoices', subscription.customer_email],
+    queryKey: ['customer-invoices', subscription.email],
     queryFn: () => base44.entities.MonthlyInvoice.filter({ 
-      customer_email: subscription.customer_email 
+      customer_email: subscription.email 
     })
   });
 
   const { data: notes = [] } = useQuery({
-    queryKey: ['customer-notes', subscription.customer_email],
+    queryKey: ['customer-notes', subscription.email],
     queryFn: () => base44.entities.CustomerNote.filter({ 
-      customer_email: subscription.customer_email 
+      customer_email: subscription.email 
     })
   });
 
   const { data: creditBalance = [] } = useQuery({
-    queryKey: ['customer-credits', subscription.customer_email],
+    queryKey: ['customer-credits', subscription.email],
     queryFn: () => base44.entities.CreditBalance.filter({ 
-      customer_email: subscription.customer_email 
+      customer_email: subscription.email 
     })
   });
 
   const { data: tickets = [] } = useQuery({
-    queryKey: ['customer-tickets', subscription.customer_email],
+    queryKey: ['customer-tickets', subscription.email],
     queryFn: () => base44.entities.SupportTicket.filter({ 
-      customer_email: subscription.customer_email 
+      customer_email: subscription.email 
     })
   });
 
@@ -74,8 +74,8 @@ export default function CustomerDetails({ subscription, onClose }) {
     }
 
     createNoteMutation.mutate({
-      customer_email: subscription.customer_email,
-      subscription_id: subscription.id,
+      customer_email: subscription.email,
+      customer_id: subscription.id,
       note: newNote,
       note_type: noteType,
       is_important: isImportant
@@ -112,21 +112,21 @@ export default function CustomerDetails({ subscription, onClose }) {
                 <User className="w-5 h-5 text-slate-500" />
                 <div>
                   <p className="text-sm text-slate-500">Nome</p>
-                  <p className="font-semibold">{subscription.customer_name}</p>
+                  <p className="font-semibold">{subscription.name}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-slate-500" />
                 <div>
                   <p className="text-sm text-slate-500">Email</p>
-                  <p className="font-semibold">{subscription.customer_email}</p>
+                  <p className="font-semibold">{subscription.email}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-slate-500" />
                 <div>
                   <p className="text-sm text-slate-500">Telefone</p>
-                  <p className="font-semibold">{subscription.customer_phone}</p>
+                  <p className="font-semibold">{subscription.phone}</p>
                 </div>
               </div>
             </div>
@@ -143,7 +143,7 @@ export default function CustomerDetails({ subscription, onClose }) {
                 <CreditCard className="w-5 h-5 text-slate-500" />
                 <div>
                   <p className="text-sm text-slate-500">CPF/CNPJ</p>
-                  <p className="font-semibold">{subscription.customer_cpf_cnpj}</p>
+                  <p className="font-semibold">{subscription.cpf_cnpj}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">

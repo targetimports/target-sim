@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Users, Search, Download, Upload, Eye, ArrowLeft, Filter, Plus, Pencil, Trash2
+  Users, Search, Download, Upload, Eye, ArrowLeft, Filter, Plus, Pencil, Trash2, Settings
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -27,6 +27,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import CustomerDetails from '../components/customers/CustomerDetails';
@@ -41,7 +47,31 @@ export default function CustomerManagement() {
   const [editingCustomer, setEditingCustomer] = useState(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [customerToDelete, setCustomerToDelete] = useState(null);
+  const [columnSelectorOpen, setColumnSelectorOpen] = useState(false);
   const queryClient = useQueryClient();
+
+  const [visibleColumns, setVisibleColumns] = useState([
+    'name', 'contact', 'type', 'location', 'status'
+  ]);
+
+  const allColumns = [
+    { id: 'name', label: 'Cliente' },
+    { id: 'contact', label: 'Contato' },
+    { id: 'type', label: 'Tipo' },
+    { id: 'location', label: 'Localização' },
+    { id: 'status', label: 'Status' },
+    { id: 'gdash_id', label: 'GDASH ID' },
+    { id: 'customer_number', label: 'Nº Cliente' },
+    { id: 'created_date', label: 'Data Cadastro' }
+  ];
+
+  const toggleColumn = (columnId) => {
+    setVisibleColumns(prev =>
+      prev.includes(columnId)
+        ? prev.filter(id => id !== columnId)
+        : [...prev, columnId]
+    );
+  };
 
   const [formData, setFormData] = useState({
     name: '',
@@ -417,6 +447,34 @@ export default function CustomerManagement() {
                   <option value="inactive">Inativo</option>
                   <option value="suspended">Suspenso</option>
                 </select>
+                <Popover open={columnSelectorOpen} onOpenChange={setColumnSelectorOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Settings className="w-4 h-4 mr-2" />
+                      Colunas
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56">
+                    <div className="space-y-2">
+                      <p className="font-semibold text-sm mb-3">Exibir Colunas</p>
+                      {allColumns.map((col) => (
+                        <div key={col.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={col.id}
+                            checked={visibleColumns.includes(col.id)}
+                            onCheckedChange={() => toggleColumn(col.id)}
+                          />
+                          <label
+                            htmlFor={col.id}
+                            className="text-sm cursor-pointer flex-1"
+                          >
+                            {col.label}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           </CardContent>
@@ -432,46 +490,86 @@ export default function CustomerManagement() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-slate-200">
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Cliente</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Contato</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Tipo</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Localização</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Status</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Valor Conta</th>
+                    {visibleColumns.includes('name') && (
+                      <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Cliente</th>
+                    )}
+                    {visibleColumns.includes('contact') && (
+                      <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Contato</th>
+                    )}
+                    {visibleColumns.includes('type') && (
+                      <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Tipo</th>
+                    )}
+                    {visibleColumns.includes('location') && (
+                      <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Localização</th>
+                    )}
+                    {visibleColumns.includes('status') && (
+                      <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Status</th>
+                    )}
+                    {visibleColumns.includes('gdash_id') && (
+                      <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">GDASH ID</th>
+                    )}
+                    {visibleColumns.includes('customer_number') && (
+                      <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Nº Cliente</th>
+                    )}
+                    {visibleColumns.includes('created_date') && (
+                      <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Data Cadastro</th>
+                    )}
                     <th className="text-right py-3 px-4 text-sm font-medium text-slate-500">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredSubscriptions.map((sub) => (
                     <tr key={sub.id} className="border-b border-slate-100 hover:bg-slate-50">
-                      <td className="py-4 px-4">
-                        <div>
-                          <p className="font-medium text-slate-900">{sub.name}</p>
-                          <p className="text-xs text-slate-500">{sub.cpf_cnpj}</p>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="text-sm">
-                          <p className="text-slate-700">{sub.email}</p>
-                          <p className="text-slate-500">{sub.phone}</p>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <Badge variant="outline">
-                          {sub.customer_type === 'commercial' ? '🏢 PJ' : '🏠 PF'}
-                        </Badge>
-                      </td>
-                      <td className="py-4 px-4 text-sm text-slate-600">
-                        {sub.city}/{sub.state}
-                      </td>
-                      <td className="py-4 px-4">
-                        <Badge className={statusColors[sub.status] || 'bg-slate-100 text-slate-800'}>
-                          {statusLabels[sub.status] || sub.status}
-                        </Badge>
-                      </td>
-                      <td className="py-4 px-4 font-medium">
-                        -
-                      </td>
+                      {visibleColumns.includes('name') && (
+                        <td className="py-4 px-4">
+                          <div>
+                            <p className="font-medium text-slate-900">{sub.name}</p>
+                            <p className="text-xs text-slate-500">{sub.cpf_cnpj}</p>
+                          </div>
+                        </td>
+                      )}
+                      {visibleColumns.includes('contact') && (
+                        <td className="py-4 px-4">
+                          <div className="text-sm">
+                            <p className="text-slate-700">{sub.email}</p>
+                            <p className="text-slate-500">{sub.phone}</p>
+                          </div>
+                        </td>
+                      )}
+                      {visibleColumns.includes('type') && (
+                        <td className="py-4 px-4">
+                          <Badge variant="outline">
+                            {sub.customer_type === 'commercial' ? '🏢 PJ' : '🏠 PF'}
+                          </Badge>
+                        </td>
+                      )}
+                      {visibleColumns.includes('location') && (
+                        <td className="py-4 px-4 text-sm text-slate-600">
+                          {sub.city}/{sub.state}
+                        </td>
+                      )}
+                      {visibleColumns.includes('status') && (
+                        <td className="py-4 px-4">
+                          <Badge className={statusColors[sub.status] || 'bg-slate-100 text-slate-800'}>
+                            {statusLabels[sub.status] || sub.status}
+                          </Badge>
+                        </td>
+                      )}
+                      {visibleColumns.includes('gdash_id') && (
+                        <td className="py-4 px-4 text-sm text-slate-600">
+                          {sub.gdash_id || '-'}
+                        </td>
+                      )}
+                      {visibleColumns.includes('customer_number') && (
+                        <td className="py-4 px-4 text-sm text-slate-600">
+                          {sub.customer_number || '-'}
+                        </td>
+                      )}
+                      {visibleColumns.includes('created_date') && (
+                        <td className="py-4 px-4 text-sm text-slate-600">
+                          {format(new Date(sub.created_date), 'dd/MM/yyyy')}
+                        </td>
+                      )}
                       <td className="py-4 px-4 text-right">
                         <div className="flex justify-end gap-1">
                           <Button
