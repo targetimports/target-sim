@@ -69,9 +69,11 @@ import ServiceOrders from './pages/ServiceOrders';
 import SolarmanIntegration from './pages/SolarmanIntegration';
 import Subscribe from './pages/Subscribe';
 import SubscriptionImport from './pages/SubscriptionImport';
+import SubscriptionManager from './pages/SubscriptionManager';
 import SuperApp from './pages/SuperApp';
 import SupportCenter from './pages/SupportCenter';
 import SystemDocumentation from './pages/SystemDocumentation';
+import SystemMap from './pages/SystemMap';
 import TaskAutomationRules from './pages/TaskAutomationRules';
 import TaskDashboard from './pages/TaskDashboard';
 import TaskManager from './pages/TaskManager';
@@ -82,9 +84,8 @@ import WeatherForecast from './pages/WeatherForecast';
 import WhatsAppCampaigns from './pages/WhatsAppCampaigns';
 import WhatsAppEvolution from './pages/WhatsAppEvolution';
 import WhatsAppManagement from './pages/WhatsAppManagement';
-import SubscriptionManager from './pages/SubscriptionManager';
-import SystemMap from './pages/SystemMap';
 import PowerPlantDashboard from './pages/PowerPlantDashboard';
+import MonthlyGenerationManager from './pages/MonthlyGenerationManager';
 import __Layout from './Layout.jsx';
 
 
@@ -160,9 +161,11 @@ export const PAGES = {
     "SolarmanIntegration": SolarmanIntegration,
     "Subscribe": Subscribe,
     "SubscriptionImport": SubscriptionImport,
+    "SubscriptionManager": SubscriptionManager,
     "SuperApp": SuperApp,
     "SupportCenter": SupportCenter,
     "SystemDocumentation": SystemDocumentation,
+    "SystemMap": SystemMap,
     "TaskAutomationRules": TaskAutomationRules,
     "TaskDashboard": TaskDashboard,
     "TaskManager": TaskManager,
@@ -173,9 +176,8 @@ export const PAGES = {
     "WhatsAppCampaigns": WhatsAppCampaigns,
     "WhatsAppEvolution": WhatsAppEvolution,
     "WhatsAppManagement": WhatsAppManagement,
-    "SubscriptionManager": SubscriptionManager,
-    "SystemMap": SystemMap,
     "PowerPlantDashboard": PowerPlantDashboard,
+    "MonthlyGenerationManager": MonthlyGenerationManager,
 }
 
 export const pagesConfig = {
