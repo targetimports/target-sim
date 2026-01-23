@@ -254,7 +254,7 @@ export default function NavigationMenu({ onNavigate }) {
               ref={provided.innerRef}
               className="space-y-2"
             >
-            {menuOrder.map((key, index) => {
+              {menuOrder.map((key, index) => {
               const category = menuCategories[key];
               if (!category) return null;
               
