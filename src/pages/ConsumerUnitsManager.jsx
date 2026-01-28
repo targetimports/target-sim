@@ -616,7 +616,10 @@ export default function ConsumerUnitsManager() {
       {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={(open) => {
         setIsDialogOpen(open);
-        if (!open) resetForm();
+        if (!open) {
+          resetForm();
+          setCustomerSearch('');
+        }
       }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
