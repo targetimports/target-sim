@@ -38,6 +38,8 @@ export default function ConsumerUnitsManager() {
   const [compactView, setCompactView] = useState(true);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [expandedGroups, setExpandedGroups] = useState({});
+  const [customerSearch, setCustomerSearch] = useState('');
+  const [openCustomerPopover, setOpenCustomerPopover] = useState(false);
   const [formData, setFormData] = useState({
     subscription_id: '',
     customer_email: '',
