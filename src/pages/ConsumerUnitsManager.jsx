@@ -692,34 +692,19 @@ export default function ConsumerUnitsManager() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label>Número UC *</Label>
-                <Input
-                  value={formData.unit_number}
-                  onChange={(e) => setFormData(prev => ({ ...prev, unit_number: e.target.value }))}
-                  placeholder="Ex: 1234567"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Código da Instalação</Label>
-                <Input
-                  value={formData.installation_code}
-                  onChange={(e) => setFormData(prev => ({ ...prev, installation_code: e.target.value }))}
-                  placeholder="Código"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Código do Cliente</Label>
-                <Input
-                  value={formData.customer_code}
-                  onChange={(e) => setFormData(prev => ({ ...prev, customer_code: e.target.value }))}
-                  placeholder="Código"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label>Código de Instalação (UC) *</Label>
+              <Input
+                value={formData.installation_code}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  installation_code: e.target.value,
+                  unit_number: e.target.value,
+                  customer_code: e.target.value
+                }))}
+                placeholder="Ex: 1234567"
+                required
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
