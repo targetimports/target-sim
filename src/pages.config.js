@@ -1,3 +1,52 @@
+/**
+ * pages.config.js - Page routing configuration
+ * 
+ * This file is AUTO-GENERATED. Do not add imports or modify PAGES manually.
+ * Pages are auto-registered when you create files in the ./pages/ folder.
+ * 
+ * THE ONLY EDITABLE VALUE: mainPage
+ * This controls which page is the landing page (shown when users visit the app).
+ * 
+ * Example file structure:
+ * 
+ *   import HomePage from './pages/HomePage';
+ *   import Dashboard from './pages/Dashboard';
+ *   import Settings from './pages/Settings';
+ *   
+ *   export const PAGES = {
+ *       "HomePage": HomePage,
+ *       "Dashboard": Dashboard,
+ *       "Settings": Settings,
+ *   }
+ *   
+ *   export const pagesConfig = {
+ *       mainPage: "HomePage",
+ *       Pages: PAGES,
+ *   };
+ * 
+ * Example with Layout (wraps all pages):
+ *
+ *   import Home from './pages/Home';
+ *   import Settings from './pages/Settings';
+ *   import __Layout from './Layout.jsx';
+ *
+ *   export const PAGES = {
+ *       "Home": Home,
+ *       "Settings": Settings,
+ *   }
+ *
+ *   export const pagesConfig = {
+ *       mainPage: "Home",
+ *       Pages: PAGES,
+ *       Layout: __Layout,
+ *   };
+ *
+ * To change the main page from HomePage to Dashboard, use find_replace:
+ *   Old: mainPage: "HomePage",
+ *   New: mainPage: "Dashboard",
+ *
+ * The mainPage value must match a key in the PAGES object exactly.
+ */
 import AIInnovations from './pages/AIInnovations';
 import AIInsightsDashboard from './pages/AIInsightsDashboard';
 import AccountsManagement from './pages/AccountsManagement';
@@ -47,6 +96,7 @@ import InvoiceTemplateEditor from './pages/InvoiceTemplateEditor';
 import LeadAutomation from './pages/LeadAutomation';
 import LoyaltyProgram from './pages/LoyaltyProgram';
 import MaintenanceManagement from './pages/MaintenanceManagement';
+import MonthlyGenerationManager from './pages/MonthlyGenerationManager';
 import MonthlyReconciliation from './pages/MonthlyReconciliation';
 import MonthlyUsageReport from './pages/MonthlyUsageReport';
 import NotificationCenter from './pages/NotificationCenter';
@@ -59,6 +109,7 @@ import PlantCapacityManager from './pages/PlantCapacityManager';
 import PlantMonitoring from './pages/PlantMonitoring';
 import PlantOwnerContracts from './pages/PlantOwnerContracts';
 import PlantPerformanceDashboard from './pages/PlantPerformanceDashboard';
+import PowerPlantDashboard from './pages/PowerPlantDashboard';
 import PowerPlantManager from './pages/PowerPlantManager';
 import PowerPlantUnitsManager from './pages/PowerPlantUnitsManager';
 import ProsumerDashboard from './pages/ProsumerDashboard';
@@ -84,8 +135,6 @@ import WeatherForecast from './pages/WeatherForecast';
 import WhatsAppCampaigns from './pages/WhatsAppCampaigns';
 import WhatsAppEvolution from './pages/WhatsAppEvolution';
 import WhatsAppManagement from './pages/WhatsAppManagement';
-import PowerPlantDashboard from './pages/PowerPlantDashboard';
-import MonthlyGenerationManager from './pages/MonthlyGenerationManager';
 import __Layout from './Layout.jsx';
 
 
@@ -139,6 +188,7 @@ export const PAGES = {
     "LeadAutomation": LeadAutomation,
     "LoyaltyProgram": LoyaltyProgram,
     "MaintenanceManagement": MaintenanceManagement,
+    "MonthlyGenerationManager": MonthlyGenerationManager,
     "MonthlyReconciliation": MonthlyReconciliation,
     "MonthlyUsageReport": MonthlyUsageReport,
     "NotificationCenter": NotificationCenter,
@@ -151,6 +201,7 @@ export const PAGES = {
     "PlantMonitoring": PlantMonitoring,
     "PlantOwnerContracts": PlantOwnerContracts,
     "PlantPerformanceDashboard": PlantPerformanceDashboard,
+    "PowerPlantDashboard": PowerPlantDashboard,
     "PowerPlantManager": PowerPlantManager,
     "PowerPlantUnitsManager": PowerPlantUnitsManager,
     "ProsumerDashboard": ProsumerDashboard,
@@ -176,8 +227,6 @@ export const PAGES = {
     "WhatsAppCampaigns": WhatsAppCampaigns,
     "WhatsAppEvolution": WhatsAppEvolution,
     "WhatsAppManagement": WhatsAppManagement,
-    "PowerPlantDashboard": PowerPlantDashboard,
-    "MonthlyGenerationManager": MonthlyGenerationManager,
 }
 
 export const pagesConfig = {
