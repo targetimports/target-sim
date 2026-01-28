@@ -645,7 +645,7 @@ export default function ConsumerUnitsManager() {
                     <SelectValue placeholder="Selecione um cliente" />
                   </SelectTrigger>
                   <SelectContent>
-                    {customers.map(customer => (
+                    {customers.filter(c => c.email).map(customer => (
                       <SelectItem key={customer.id} value={customer.email}>
                         {customer.name} ({customer.email})
                       </SelectItem>
