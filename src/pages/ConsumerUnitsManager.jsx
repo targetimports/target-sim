@@ -632,14 +632,26 @@ export default function ConsumerUnitsManager() {
               </div>
 
               <div className="space-y-2">
-                <Label>Email do Cliente *</Label>
-                <Input
-                  type="email"
-                  value={formData.customer_email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, customer_email: e.target.value }))}
-                  placeholder="cliente@email.com"
-                  required
-                />
+                <Label>Cliente *</Label>
+                <Select value={formData.customer_email} onValueChange={(value) => {
+                  const customer = customers.find(c => c.email === value);
+                  setFormData(prev => ({ 
+                    ...prev, 
+                    customer_email: value,
+                    subscription_id: customer?.id || ''
+                  }));
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um cliente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {customers.map(customer => (
+                      <SelectItem key={customer.id} value={customer.email}>
+                        {customer.name} ({customer.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
