@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { 
   Plus, Edit, Trash2, ArrowLeft, Zap, Building2, Search, FileText, Download, ChevronDown, ChevronUp, ArrowUpDown, Maximize2, Minimize2
 } from 'lucide-react';
