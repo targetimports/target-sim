@@ -31,6 +31,7 @@ export default function SubscriptionManager() {
   const [subscriptionToDelete, setSubscriptionToDelete] = useState(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
   const [selectedUnits, setSelectedUnits] = useState([]);
+  const [allConsumerUnits, setAllConsumerUnits] = useState([]);
   const [formData, setFormData] = useState({
     customer_id: '',
     customer_number: '',
@@ -50,6 +51,7 @@ export default function SubscriptionManager() {
     power_plant_name: '',
     business_type: '',
     plan_id: '',
+    consumer_unit_ids: [],
     status: 'pending',
     discount_percentage: '',
     invoice_unlock_password: '',
@@ -75,6 +77,11 @@ export default function SubscriptionManager() {
   const { data: customers = [] } = useQuery({
     queryKey: ['customers'],
     queryFn: () => base44.entities.Customer.list()
+  });
+
+  const { data: allUnits = [] } = useQuery({
+    queryKey: ['all-consumer-units'],
+    queryFn: () => base44.entities.ConsumerUnit.list()
   });
 
   const { data: consumerUnits = [] } = useQuery({
@@ -133,37 +140,64 @@ export default function SubscriptionManager() {
   });
 
   const updateSubscription = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Subscription.update(id, {
-      customer_number: data.customer_number,
-      customer_name: data.customer_name,
-      customer_email: data.customer_email,
-      customer_phone: data.customer_phone,
-      customer_cpf_cnpj: data.customer_cpf_cnpj,
-      customer_type: data.customer_type,
-      address: data.address,
-      city: data.city,
-      state: data.state,
-      zip_code: data.zip_code,
-      distributor: data.distributor,
-      installation_number: data.installation_number,
-      average_bill_value: data.average_bill_value ? parseFloat(data.average_bill_value) : undefined,
-      power_plant_id: data.power_plant_id,
-      power_plant_name: data.power_plant_name,
-      business_type: data.business_type,
-      plan_id: data.plan_id,
-      status: data.status,
-      discount_percentage: data.discount_percentage ? parseFloat(data.discount_percentage) : undefined,
-      invoice_unlock_password: data.invoice_unlock_password,
-      send_email: data.send_email,
-      referred_by: data.referred_by,
-      notes: data.notes,
-      allocation_priority: data.allocation_priority,
-      priority_weight: data.priority_weight ? parseFloat(data.priority_weight) : undefined,
-      contract_start_date: data.contract_start_date,
-      contract_end_date: data.contract_end_date
-    }),
+    mutationFn: async ({ id, data }) => {
+      const oldSubscription = subscriptions.find(s => s.id === id);
+      
+      // Remover a assinatura das unidades que não foram selecionadas
+      if (oldSubscription?.consumer_unit_ids) {
+        for (const unitId of oldSubscription.consumer_unit_ids) {
+          if (!data.consumer_unit_ids || !data.consumer_unit_ids.includes(unitId)) {
+            await base44.entities.ConsumerUnit.update(unitId, { subscription_id: null });
+          }
+        }
+      }
+
+      // Adicionar a assinatura às novas unidades
+      for (const unitId of (data.consumer_unit_ids || [])) {
+        if (!oldSubscription?.consumer_unit_ids?.includes(unitId)) {
+          const unit = allUnits.find(u => u.id === unitId);
+          await base44.entities.ConsumerUnit.update(unitId, { 
+            subscription_id: id,
+            power_plant_name: data.power_plant_name
+          });
+        }
+      }
+
+      return base44.entities.Subscription.update(id, {
+        customer_number: data.customer_number,
+        customer_name: data.customer_name,
+        customer_email: data.customer_email,
+        customer_phone: data.customer_phone,
+        customer_cpf_cnpj: data.customer_cpf_cnpj,
+        customer_type: data.customer_type,
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        zip_code: data.zip_code,
+        distributor: data.distributor,
+        installation_number: data.installation_number,
+        average_bill_value: data.average_bill_value ? parseFloat(data.average_bill_value) : undefined,
+        power_plant_id: data.power_plant_id,
+        power_plant_name: data.power_plant_name,
+        business_type: data.business_type,
+        plan_id: data.plan_id,
+        consumer_unit_ids: data.consumer_unit_ids || [],
+        status: data.status,
+        discount_percentage: data.discount_percentage ? parseFloat(data.discount_percentage) : undefined,
+        invoice_unlock_password: data.invoice_unlock_password,
+        send_email: data.send_email,
+        referred_by: data.referred_by,
+        notes: data.notes,
+        allocation_priority: data.allocation_priority,
+        priority_weight: data.priority_weight ? parseFloat(data.priority_weight) : undefined,
+        contract_start_date: data.contract_start_date,
+        contract_end_date: data.contract_end_date
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['subscriptions']);
+      queryClient.invalidateQueries(['consumer-units']);
+      queryClient.invalidateQueries(['all-consumer-units']);
       setIsDialogOpen(false);
       resetForm();
       toast.success('Assinatura atualizada com sucesso!');
@@ -200,6 +234,7 @@ export default function SubscriptionManager() {
       power_plant_name: '',
       business_type: '',
       plan_id: '',
+      consumer_unit_ids: [],
       status: 'pending',
       discount_percentage: '',
       invoice_unlock_password: '',
@@ -218,6 +253,7 @@ export default function SubscriptionManager() {
 
   const openEditDialog = (subscription) => {
     setEditingSubscription(subscription);
+    setSelectedUnits(subscription.consumer_unit_ids || []);
     setFormData({
       customer_id: subscription.customer_id || '',
       customer_number: subscription.customer_number || '',
@@ -237,6 +273,7 @@ export default function SubscriptionManager() {
       power_plant_name: subscription.power_plant_name || '',
       business_type: subscription.business_type || '',
       plan_id: subscription.plan_id || '',
+      consumer_unit_ids: subscription.consumer_unit_ids || [],
       status: subscription.status || 'pending',
       discount_percentage: subscription.discount_percentage?.toString() || '',
       invoice_unlock_password: subscription.invoice_unlock_password || '',
@@ -284,10 +321,11 @@ export default function SubscriptionManager() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const submitData = { ...formData, consumer_unit_ids: selectedUnits };
     if (editingSubscription) {
-      updateSubscription.mutate({ id: editingSubscription.id, data: formData });
+      updateSubscription.mutate({ id: editingSubscription.id, data: submitData });
     } else {
-      createSubscription.mutate(formData);
+      createSubscription.mutate(submitData);
     }
   };
 
@@ -547,10 +585,10 @@ export default function SubscriptionManager() {
             <DialogTitle>{editingSubscription ? 'Editar Assinatura' : 'Nova Assinatura'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {!editingSubscription && (
-              <>
-                <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-slate-900 border-b pb-2">1. Selecionar Cliente</h3>
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-slate-900 border-b pb-2">
+                {editingSubscription ? 'Unidades Consumidoras' : '1. Selecionar Cliente'}
+              </h3>
                   
                   <div className="space-y-2">
                     <Label>Cliente *</Label>
@@ -708,7 +746,45 @@ export default function SubscriptionManager() {
                     )}
                   </div>
                 )}
-              </>
+            {editingSubscription && (
+              <div className="space-y-2 max-h-60 overflow-y-auto p-4 bg-slate-50 rounded-lg">
+                {allUnits.filter(u => u.customer_email === editingSubscription.customer_email).map(unit => (
+                  <Card 
+                    key={unit.id}
+                    className={`cursor-pointer transition-all ${
+                      selectedUnits.includes(unit.id) 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'hover:bg-slate-50'
+                    }`}
+                    onClick={() => toggleUnitSelection(unit.id)}
+                  >
+                    <CardContent className="p-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                          selectedUnits.includes(unit.id) 
+                            ? 'bg-blue-600 border-blue-600' 
+                            : 'border-slate-300'
+                        }`}>
+                          {selectedUnits.includes(unit.id) && (
+                            <CheckCircle className="w-4 h-4 text-white" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{unit.unit_name || unit.unit_number}</p>
+                          <p className="text-xs text-slate-600">
+                            {unit.unit_number} - {unit.distributor}
+                          </p>
+                        </div>
+                        {unit.monthly_consumption_kwh && (
+                          <Badge variant="outline">
+                            {unit.monthly_consumption_kwh} kWh/mês
+                          </Badge>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             )}
 
             <div className="space-y-4">
