@@ -33,10 +33,31 @@ export default function SubscriptionManager() {
   const [selectedUnits, setSelectedUnits] = useState([]);
   const [formData, setFormData] = useState({
     customer_id: '',
+    customer_number: '',
+    customer_name: '',
+    customer_email: '',
+    customer_phone: '',
+    customer_cpf_cnpj: '',
+    customer_type: 'residential',
+    address: '',
+    city: '',
+    state: '',
+    zip_code: '',
+    distributor: '',
+    installation_number: '',
+    average_bill_value: '',
     power_plant_id: '',
+    power_plant_name: '',
+    business_type: '',
+    plan_id: '',
     status: 'pending',
     discount_percentage: '',
+    invoice_unlock_password: '',
+    send_email: true,
+    referred_by: '',
     notes: '',
+    allocation_priority: 'normal',
+    priority_weight: '1',
     contract_start_date: '',
     contract_end_date: ''
   });
@@ -113,9 +134,31 @@ export default function SubscriptionManager() {
 
   const updateSubscription = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Subscription.update(id, {
+      customer_number: data.customer_number,
+      customer_name: data.customer_name,
+      customer_email: data.customer_email,
+      customer_phone: data.customer_phone,
+      customer_cpf_cnpj: data.customer_cpf_cnpj,
+      customer_type: data.customer_type,
+      address: data.address,
+      city: data.city,
+      state: data.state,
+      zip_code: data.zip_code,
+      distributor: data.distributor,
+      installation_number: data.installation_number,
+      average_bill_value: data.average_bill_value ? parseFloat(data.average_bill_value) : undefined,
+      power_plant_id: data.power_plant_id,
+      power_plant_name: data.power_plant_name,
+      business_type: data.business_type,
+      plan_id: data.plan_id,
       status: data.status,
       discount_percentage: data.discount_percentage ? parseFloat(data.discount_percentage) : undefined,
+      invoice_unlock_password: data.invoice_unlock_password,
+      send_email: data.send_email,
+      referred_by: data.referred_by,
       notes: data.notes,
+      allocation_priority: data.allocation_priority,
+      priority_weight: data.priority_weight ? parseFloat(data.priority_weight) : undefined,
       contract_start_date: data.contract_start_date,
       contract_end_date: data.contract_end_date
     }),
@@ -140,10 +183,31 @@ export default function SubscriptionManager() {
   const resetForm = () => {
     setFormData({
       customer_id: '',
+      customer_number: '',
+      customer_name: '',
+      customer_email: '',
+      customer_phone: '',
+      customer_cpf_cnpj: '',
+      customer_type: 'residential',
+      address: '',
+      city: '',
+      state: '',
+      zip_code: '',
+      distributor: '',
+      installation_number: '',
+      average_bill_value: '',
       power_plant_id: '',
+      power_plant_name: '',
+      business_type: '',
+      plan_id: '',
       status: 'pending',
       discount_percentage: '',
+      invoice_unlock_password: '',
+      send_email: true,
+      referred_by: '',
       notes: '',
+      allocation_priority: 'normal',
+      priority_weight: '1',
       contract_start_date: '',
       contract_end_date: ''
     });
@@ -155,9 +219,32 @@ export default function SubscriptionManager() {
   const openEditDialog = (subscription) => {
     setEditingSubscription(subscription);
     setFormData({
+      customer_id: subscription.customer_id || '',
+      customer_number: subscription.customer_number || '',
+      customer_name: subscription.customer_name || '',
+      customer_email: subscription.customer_email || '',
+      customer_phone: subscription.customer_phone || '',
+      customer_cpf_cnpj: subscription.customer_cpf_cnpj || '',
+      customer_type: subscription.customer_type || 'residential',
+      address: subscription.address || '',
+      city: subscription.city || '',
+      state: subscription.state || '',
+      zip_code: subscription.zip_code || '',
+      distributor: subscription.distributor || '',
+      installation_number: subscription.installation_number || '',
+      average_bill_value: subscription.average_bill_value?.toString() || '',
+      power_plant_id: subscription.power_plant_id || '',
+      power_plant_name: subscription.power_plant_name || '',
+      business_type: subscription.business_type || '',
+      plan_id: subscription.plan_id || '',
       status: subscription.status || 'pending',
       discount_percentage: subscription.discount_percentage?.toString() || '',
+      invoice_unlock_password: subscription.invoice_unlock_password || '',
+      send_email: subscription.send_email !== false,
+      referred_by: subscription.referred_by || '',
       notes: subscription.notes || '',
+      allocation_priority: subscription.allocation_priority || 'normal',
+      priority_weight: subscription.priority_weight?.toString() || '1',
       contract_start_date: subscription.contract_start_date || '',
       contract_end_date: subscription.contract_end_date || ''
     });
@@ -626,19 +713,162 @@ export default function SubscriptionManager() {
 
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-slate-900 border-b pb-2">
-                {editingSubscription ? 'Editar Informações' : '4. Configurações da Assinatura'}
+                {editingSubscription ? 'Informações da Assinatura' : '4. Configurações da Assinatura'}
               </h3>
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Desconto (%)</Label>
+                  <Label>Nome do Cliente</Label>
+                  <Input
+                    value={formData.customer_name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, customer_name: e.target.value }))}
+                    placeholder="Nome/Razão Social"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Email</Label>
+                  <Input
+                    type="email"
+                    value={formData.customer_email}
+                    onChange={(e) => setFormData(prev => ({ ...prev, customer_email: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Telefone</Label>
+                  <Input
+                    value={formData.customer_phone}
+                    onChange={(e) => setFormData(prev => ({ ...prev, customer_phone: e.target.value }))}
+                    placeholder="Telefone/WhatsApp"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>CPF/CNPJ</Label>
+                  <Input
+                    value={formData.customer_cpf_cnpj}
+                    onChange={(e) => setFormData(prev => ({ ...prev, customer_cpf_cnpj: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Tipo de Cliente</Label>
+                  <Select value={formData.customer_type} onValueChange={(v) => setFormData(prev => ({ ...prev, customer_type: v }))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="residential">Residencial</SelectItem>
+                      <SelectItem value="commercial">Comercial</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Número do Cliente</Label>
+                  <Input
+                    value={formData.customer_number}
+                    onChange={(e) => setFormData(prev => ({ ...prev, customer_number: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2 col-span-2">
+                  <Label>Endereço</Label>
+                  <Input
+                    value={formData.address}
+                    onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Cidade</Label>
+                  <Input
+                    value={formData.city}
+                    onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Estado</Label>
+                  <Input
+                    value={formData.state}
+                    onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>CEP</Label>
+                  <Input
+                    value={formData.zip_code}
+                    onChange={(e) => setFormData(prev => ({ ...prev, zip_code: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Distribuidora</Label>
+                  <Input
+                    value={formData.distributor}
+                    onChange={(e) => setFormData(prev => ({ ...prev, distributor: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Número de Instalação</Label>
+                  <Input
+                    value={formData.installation_number}
+                    onChange={(e) => setFormData(prev => ({ ...prev, installation_number: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Valor Médio da Conta (R$)</Label>
                   <Input
                     type="number"
                     step="0.01"
-                    value={formData.discount_percentage}
-                    onChange={(e) => setFormData(prev => ({ ...prev, discount_percentage: e.target.value }))}
-                    placeholder="0"
+                    value={formData.average_bill_value}
+                    onChange={(e) => setFormData(prev => ({ ...prev, average_bill_value: e.target.value }))}
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Tipo de Negócio</Label>
+                  <Input
+                    value={formData.business_type}
+                    onChange={(e) => setFormData(prev => ({ ...prev, business_type: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>ID do Plano</Label>
+                  <Input
+                    value={formData.plan_id}
+                    onChange={(e) => setFormData(prev => ({ ...prev, plan_id: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Usina</Label>
+                  <Select value={formData.power_plant_id} onValueChange={(v) => {
+                    const plant = powerPlants.find(p => p.id === v);
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      power_plant_id: v,
+                      power_plant_name: plant?.name || ''
+                    }));
+                  }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a usina" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={null}>Nenhuma</SelectItem>
+                      {powerPlants.map(plant => (
+                        <SelectItem key={plant.id} value={plant.id}>
+                          {plant.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
@@ -658,6 +888,42 @@ export default function SubscriptionManager() {
                 </div>
 
                 <div className="space-y-2">
+                  <Label>Desconto (%)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.discount_percentage}
+                    onChange={(e) => setFormData(prev => ({ ...prev, discount_percentage: e.target.value }))}
+                    placeholder="0"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Prioridade na Alocação</Label>
+                  <Select value={formData.allocation_priority} onValueChange={(v) => setFormData(prev => ({ ...prev, allocation_priority: v }))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Baixa</SelectItem>
+                      <SelectItem value="normal">Normal</SelectItem>
+                      <SelectItem value="high">Alta</SelectItem>
+                      <SelectItem value="vip">VIP</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Peso da Prioridade</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    value={formData.priority_weight}
+                    onChange={(e) => setFormData(prev => ({ ...prev, priority_weight: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <Label>Data de Início</Label>
                   <Input
                     type="date"
@@ -672,6 +938,24 @@ export default function SubscriptionManager() {
                     type="date"
                     value={formData.contract_end_date}
                     onChange={(e) => setFormData(prev => ({ ...prev, contract_end_date: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Senha de Desbloqueio de Faturas</Label>
+                  <Input
+                    type="password"
+                    value={formData.invoice_unlock_password}
+                    onChange={(e) => setFormData(prev => ({ ...prev, invoice_unlock_password: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Indicado por</Label>
+                  <Input
+                    value={formData.referred_by}
+                    onChange={(e) => setFormData(prev => ({ ...prev, referred_by: e.target.value }))}
+                    placeholder="Email de quem indicou"
                   />
                 </div>
               </div>
