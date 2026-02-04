@@ -22,6 +22,7 @@ export default function AdminPowerPlantContracts() {
   const [showDialog, setShowDialog] = useState(false);
   const [showBalanceDialog, setShowBalanceDialog] = useState(false);
   const [selectedPlant, setSelectedPlant] = useState(null);
+  const [subscriptionSearch, setSubscriptionSearch] = useState('');
   const [formData, setFormData] = useState({
     subscription_id: '',
     power_plant_id: '',
@@ -382,16 +383,39 @@ export default function AdminPowerPlantContracts() {
           <div className="space-y-4">
             <div>
               <Label>Assinatura *</Label>
-              <Select value={formData.subscription_id} onValueChange={(v) => setFormData(prev => ({ ...prev, subscription_id: v }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o cliente" />
-                </SelectTrigger>
-                <SelectContent>
-                  {subscriptions.map(sub => (
-                    <SelectItem key={sub.id} value={sub.id}>{sub.customer_name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="relative">
+                <Input
+                  placeholder="Digite para buscar..."
+                  value={subscriptionSearch}
+                  onChange={(e) => setSubscriptionSearch(e.target.value)}
+                  className="mb-2"
+                />
+                <div className="border rounded-lg max-h-48 overflow-y-auto bg-white">
+                  {subscriptions
+                    .filter(sub => 
+                      sub.customer_name.toLowerCase().includes(subscriptionSearch.toLowerCase()) ||
+                      sub.customer_email.toLowerCase().includes(subscriptionSearch.toLowerCase())
+                    )
+                    .map(sub => (
+                      <div
+                        key={sub.id}
+                        onClick={() => {
+                          setFormData(prev => ({ ...prev, subscription_id: sub.id }));
+                          setSubscriptionSearch('');
+                        }}
+                        className="p-3 hover:bg-slate-100 cursor-pointer border-b last:border-b-0 text-sm"
+                      >
+                        <p className="font-medium">{sub.customer_name}</p>
+                        <p className="text-xs text-slate-500">{sub.customer_email}</p>
+                      </div>
+                    ))}
+                </div>
+              </div>
+              {formData.subscription_id && (
+                <div className="mt-2 p-2 bg-blue-50 rounded text-sm text-blue-900">
+                  {subscriptions.find(s => s.id === formData.subscription_id)?.customer_name}
+                </div>
+              )}
             </div>
 
             <div>
