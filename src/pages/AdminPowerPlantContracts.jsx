@@ -23,6 +23,7 @@ export default function AdminPowerPlantContracts() {
   const [showBalanceDialog, setShowBalanceDialog] = useState(false);
   const [selectedPlant, setSelectedPlant] = useState(null);
   const [subscriptionSearch, setSubscriptionSearch] = useState('');
+  const [unitAllocations, setUnitAllocations] = useState({});
   const [formData, setFormData] = useState({
     subscription_id: '',
     power_plant_id: '',
@@ -50,13 +51,37 @@ export default function AdminPowerPlantContracts() {
     queryFn: () => base44.entities.Subscription.list()
   });
 
+  const { data: consumerUnits = [] } = useQuery({
+    queryKey: ['consumer-units-all'],
+    queryFn: () => base44.entities.ConsumerUnit.list()
+  });
+
   const { data: balances = [] } = useQuery({
     queryKey: ['power-plant-balances'],
     queryFn: () => base44.entities.PowerPlantBalance.list()
   });
 
   const createContract = useMutation({
-    mutationFn: (data) => base44.entities.PowerPlantContract.create(data),
+    mutationFn: async (data) => {
+      const subscription = subscriptions.find(s => s.id === data.subscription_id);
+      const unitsToAllocate = subscription?.consumer_unit_ids || [];
+      
+      // Criar contrato para cada unidade consumidora
+      for (const unitId of unitsToAllocate) {
+        const allocation = parseFloat(unitAllocations[unitId] || 0);
+        if (allocation > 0) {
+          await base44.entities.PowerPlantContract.create({
+            consumer_unit_id: unitId,
+            subscription_id: data.subscription_id,
+            power_plant_id: data.power_plant_id,
+            allocation_percentage: allocation,
+            monthly_allocation_kwh: data.monthly_allocation_kwh,
+            start_date: data.start_date,
+            status: 'active'
+          });
+        }
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['power-plant-contracts']);
       setShowDialog(false);
@@ -67,6 +92,8 @@ export default function AdminPowerPlantContracts() {
         monthly_allocation_kwh: 0,
         start_date: new Date().toISOString().split('T')[0]
       });
+      setUnitAllocations({});
+      setSubscriptionSearch('');
     }
   });
 
@@ -107,6 +134,14 @@ export default function AdminPowerPlantContracts() {
   const getPlantName = (id) => plants.find(p => p.id === id)?.name || 'N/A';
   const getSubscriptionName = (id) => subscriptions.find(s => s.id === id)?.customer_name || 'N/A';
   const getPlantBalance = (plantId) => balances.find(b => b.power_plant_id === plantId);
+
+  const getSubscriptionUnits = (subscriptionId) => {
+    const subscription = subscriptions.find(s => s.id === subscriptionId);
+    if (!subscription?.consumer_unit_ids) return [];
+    return consumerUnits.filter(u => subscription.consumer_unit_ids.includes(u.id));
+  };
+
+  const totalAllocationPercentage = Object.values(unitAllocations).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
 
   const plantStats = plants
     .filter(p => p.status === 'operational')
@@ -375,8 +410,15 @@ export default function AdminPowerPlantContracts() {
       </main>
 
       {/* New Contract Dialog */}
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-lg">
+      <Dialog open={showDialog} onOpenChange={(open) => {
+        setShowDialog(open);
+        if (!open) {
+          setFormData({ subscription_id: '', power_plant_id: '', allocation_percentage: 5, monthly_allocation_kwh: 0, start_date: new Date().toISOString().split('T')[0] });
+          setUnitAllocations({});
+          setSubscriptionSearch('');
+        }
+      }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Novo Contrato de Alocação</DialogTitle>
           </DialogHeader>
@@ -402,6 +444,7 @@ export default function AdminPowerPlantContracts() {
                         onClick={() => {
                           setFormData(prev => ({ ...prev, subscription_id: sub.id }));
                           setSubscriptionSearch('');
+                          setUnitAllocations({});
                         }}
                         className="p-3 hover:bg-slate-100 cursor-pointer border-b last:border-b-0 text-sm"
                       >
@@ -432,18 +475,44 @@ export default function AdminPowerPlantContracts() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Alocação (%) *</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  value={formData.allocation_percentage}
-                  onChange={(e) => setFormData(prev => ({ ...prev, allocation_percentage: parseFloat(e.target.value) }))}
-                />
+            {formData.subscription_id && getSubscriptionUnits(formData.subscription_id).length > 0 && (
+              <div className="space-y-3 p-4 bg-slate-50 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-semibold text-slate-900">Unidades Consumidoras</h4>
+                  <span className="text-sm text-slate-600">Total: {totalAllocationPercentage.toFixed(1)}%</span>
+                </div>
+                <div className="space-y-2">
+                  {getSubscriptionUnits(formData.subscription_id).map(unit => (
+                    <div key={unit.id} className="flex items-center gap-3 p-3 bg-white rounded border border-slate-200">
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{unit.unit_name || unit.unit_number}</p>
+                        <p className="text-xs text-slate-500">{unit.distributor}</p>
+                      </div>
+                      <div className="w-32">
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          min="0"
+                          max="100"
+                          step="0.1"
+                          value={unitAllocations[unit.id] || ''}
+                          onChange={(e) => setUnitAllocations(prev => ({ ...prev, [unit.id]: e.target.value }))}
+                          className="text-right text-sm"
+                        />
+                        <span className="text-xs text-slate-500">%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {totalAllocationPercentage > 100 && (
+                  <div className="p-2 bg-red-50 border border-red-200 rounded text-xs text-red-800">
+                    ⚠️ Alocação total ultrapassa 100%
+                  </div>
+                )}
               </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Alocação Mensal (kWh)</Label>
                 <Input
@@ -453,18 +522,21 @@ export default function AdminPowerPlantContracts() {
                   onChange={(e) => setFormData(prev => ({ ...prev, monthly_allocation_kwh: parseFloat(e.target.value) }))}
                 />
               </div>
+              <div>
+                <Label>Data de Início</Label>
+                <Input
+                  type="date"
+                  value={formData.start_date}
+                  onChange={(e) => setFormData(prev => ({ ...prev, start_date: e.target.value }))}
+                />
+              </div>
             </div>
 
-            <div>
-              <Label>Data de Início</Label>
-              <Input
-                type="date"
-                value={formData.start_date}
-                onChange={(e) => setFormData(prev => ({ ...prev, start_date: e.target.value }))}
-              />
-            </div>
-
-            <Button className="w-full bg-amber-500 hover:bg-amber-600" onClick={() => createContract.mutate(formData)}>
+            <Button 
+              className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-50" 
+              onClick={() => createContract.mutate(formData)}
+              disabled={!formData.subscription_id || !formData.power_plant_id || totalAllocationPercentage === 0}
+            >
               Criar Contrato
             </Button>
           </div>
