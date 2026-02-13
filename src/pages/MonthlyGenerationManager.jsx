@@ -130,14 +130,24 @@ export default function MonthlyGenerationManager() {
     if (!file || !selectedPlantForImport) return;
 
     setIsImporting(true);
-    setImportMessage('Processando PDF...');
+    setImportMessage('Upload do arquivo...');
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('power_plant_id', selectedPlantForImport);
+      // 1. Upload do arquivo primeiro
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file);
+      const uploadResponse = await base44.integrations.Core.UploadFile({ file });
+      
+      if (!uploadResponse.file_url) {
+        throw new Error('Falha ao fazer upload do arquivo');
+      }
 
-      const response = await base44.functions.invoke('extractGenerationFromPDF', formData);
+      // 2. Enviar URL do arquivo para processing
+      setImportMessage('Processando PDF...');
+      const response = await base44.functions.invoke('extractGenerationFromPDF', {
+        file_url: uploadResponse.file_url,
+        power_plant_id: selectedPlantForImport
+      });
       
       if (response.data?.status === 'success') {
         setImportMessage(`✅ ${response.data.message}`);
