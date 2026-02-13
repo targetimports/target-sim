@@ -41,6 +41,10 @@ export default function MonthlyGenerationManager() {
   const [selectedPlant, setSelectedPlant] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [selectedPlantForImport, setSelectedPlantForImport] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  const [importMessage, setImportMessage] = useState('');
   
   const [formData, setFormData] = useState({
     power_plant_id: '',
@@ -120,6 +124,39 @@ export default function MonthlyGenerationManager() {
       setRecordToDelete(null);
     }
   });
+
+  const handlePDFImport = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file || !selectedPlantForImport) return;
+
+    setIsImporting(true);
+    setImportMessage('Processando PDF...');
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('power_plant_id', selectedPlantForImport);
+
+      const response = await base44.functions.invoke('extractGenerationFromPDF', formData);
+      
+      if (response.data?.status === 'success') {
+        setImportMessage(`✅ ${response.data.message}`);
+        queryClient.invalidateQueries(['monthly-generations']);
+        setTimeout(() => {
+          setImportDialogOpen(false);
+          setSelectedPlantForImport('');
+          setImportMessage('');
+        }, 2000);
+      } else {
+        setImportMessage(`❌ Erro: ${response.data?.message || 'Falha na importação'}`);
+      }
+    } catch (error) {
+      setImportMessage(`❌ Erro: ${error.message}`);
+    } finally {
+      setIsImporting(false);
+      event.target.value = '';
+    }
+  };
 
   const resetForm = () => {
     setFormData({
@@ -239,10 +276,16 @@ export default function MonthlyGenerationManager() {
                 </div>
               </div>
             </div>
-            <Button onClick={() => { resetForm(); setIsDialogOpen(true); }} className="bg-blue-500 hover:bg-blue-600">
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Registro
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={() => setImportDialogOpen(true)} variant="outline" className="border-blue-500 text-blue-600">
+                <Upload className="w-4 h-4 mr-2" />
+                Importar PDF
+              </Button>
+              <Button onClick={() => { resetForm(); setIsDialogOpen(true); }} className="bg-blue-500 hover:bg-blue-600">
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Registro
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -602,6 +645,80 @@ export default function MonthlyGenerationManager() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Import PDF Dialog */}
+      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Importar Geração via PDF</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-slate-600">
+              Selecione a usina e faça upload do relatório de faturamento em PDF fornecido pela distribuidora.
+            </p>
+            
+            <div className="space-y-2">
+              <Label>Usina *</Label>
+              <Select value={selectedPlantForImport} onValueChange={setSelectedPlantForImport} disabled={isImporting}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a usina" />
+                </SelectTrigger>
+                <SelectContent>
+                  {powerPlants
+                    .filter(p => p.operation_mode === 'monthly_generation')
+                    .map(plant => (
+                      <SelectItem key={plant.id} value={plant.id}>{plant.name}</SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Arquivo PDF *</Label>
+              <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={handlePDFImport}
+                  disabled={!selectedPlantForImport || isImporting}
+                  className="hidden"
+                  id="pdf-input"
+                />
+                <label 
+                  htmlFor="pdf-input"
+                  className={`cursor-pointer inline-block ${!selectedPlantForImport || isImporting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                  <p className="text-sm font-medium text-slate-700">Clique para fazer upload</p>
+                  <p className="text-xs text-slate-500">ou arraste o arquivo PDF aqui</p>
+                </label>
+              </div>
+            </div>
+
+            {importMessage && (
+              <div className={`p-3 rounded-lg text-sm ${
+                importMessage.includes('❌') 
+                  ? 'bg-red-50 text-red-700' 
+                  : 'bg-green-50 text-green-700'
+              }`}>
+                {importMessage}
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="flex-1" 
+                onClick={() => setImportDialogOpen(false)}
+                disabled={isImporting}
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
