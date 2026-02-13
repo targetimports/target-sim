@@ -3,21 +3,17 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const formData = await req.formData();
+    const body = await req.json();
     
-    const file = formData.get('file');
-    const powerPlantId = formData.get('power_plant_id');
+    const fileUrl = body.file_url;
+    const powerPlantId = body.power_plant_id;
 
-    if (!file || !powerPlantId) {
+    if (!fileUrl || !powerPlantId) {
       return Response.json({ 
         status: 'error', 
-        message: 'Arquivo e ID da usina são obrigatórios' 
+        message: 'URL do arquivo e ID da usina são obrigatórios' 
       }, { status: 400 });
     }
-
-    // 1. Upload do arquivo
-    const uploadResponse = await base44.integrations.Core.UploadFile({ file });
-    const fileUrl = uploadResponse.file_url;
 
     // 2. Extrair dados do PDF com OCR
     const ocrResponse = await base44.integrations.Core.InvokeLLM({
