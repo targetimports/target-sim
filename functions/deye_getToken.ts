@@ -67,6 +67,8 @@ Deno.serve(async (req) => {
     });
 
     const tokenText = await tokenResponse.text();
+    console.log('[DEBUG] Token response - Status:', tokenResponse.status);
+    console.log('[DEBUG] Token response - Body (first 500 chars):', tokenText.substring(0, 500));
     let tokenData;
     
     try {
