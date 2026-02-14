@@ -53,6 +53,10 @@ Deno.serve(async (req) => {
     // Requisição de token
     const tokenUrl = new URL(`${baseURL}/account/token`);
     tokenUrl.searchParams.append('appId', config.appId);
+    
+    console.log('[DEBUG] Token request - URL:', tokenUrl.toString());
+    console.log('[DEBUG] Token request - Body keys:', Object.keys(tokenBody));
+    console.log('[DEBUG] Config keys:', Object.keys(config));
 
     const tokenResponse = await fetch(tokenUrl.toString(), {
       method: 'POST',
