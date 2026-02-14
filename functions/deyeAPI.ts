@@ -201,6 +201,48 @@ Deno.serve(async (req) => {
     };
 
     switch (action) {
+          case 'list_stations': {
+            // Listar todas as estações com paginação
+            try {
+              const pageSize = 100;
+              let allStations = [];
+              let page = 1;
+              let hasMore = true;
+
+              while (hasMore) {
+                console.log(`[LIST] Buscando página ${page} com ${pageSize} estações...`);
+                const result = await callDeyeAPI('/v1.0/station/list', {
+                  page: page,
+                  size: pageSize
+                });
+
+                if (result.success === true && result.stationList && result.stationList.length > 0) {
+                  allStations = allStations.concat(result.stationList);
+                  console.log(`[LIST] Página ${page}: ${result.stationList.length} estações. Total: ${allStations.length}`);
+
+                  // Se retornou menos que o pageSize, é a última página
+                  hasMore = result.stationList.length === pageSize;
+                  page++;
+                } else {
+                  hasMore = false;
+                }
+              }
+
+              console.log(`[LIST] Total de estações encontradas: ${allStations.length}`);
+
+              return Response.json({
+                status: 'success',
+                total: allStations.length,
+                stations: allStations
+              });
+            } catch (error) {
+              return Response.json({
+                status: 'error',
+                message: error.message
+              }, { status: 400 });
+            }
+          }
+
           case 'get_station_by_id': {
             // Buscar estação específica por ID
             try {
@@ -208,10 +250,10 @@ Deno.serve(async (req) => {
                 stationId: integration.station_id
               });
 
-              if (result.success === true && result.stationInfo) {
+              if (result.success === true) {
                 return Response.json({
                   status: 'success',
-                  data: result.stationInfo
+                  data: result
                 });
               } else {
                 throw new Error(result.msg || 'Estação não encontrada');
