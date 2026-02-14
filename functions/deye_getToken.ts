@@ -53,10 +53,6 @@ Deno.serve(async (req) => {
     // Requisição de token
     const tokenUrl = new URL(`${baseURL}/account/token`);
     tokenUrl.searchParams.append('appId', config.appId);
-    
-    console.log('[DEBUG] Token request - URL:', tokenUrl.toString());
-    console.log('[DEBUG] Token request - Body keys:', Object.keys(tokenBody));
-    console.log('[DEBUG] Config keys:', Object.keys(config));
 
     const tokenResponse = await fetch(tokenUrl.toString(), {
       method: 'POST',
@@ -67,19 +63,33 @@ Deno.serve(async (req) => {
     });
 
     const tokenText = await tokenResponse.text();
-    console.log('[DEBUG] Token response - Status:', tokenResponse.status);
-    console.log('[DEBUG] Token response - Body (first 500 chars):', tokenText.substring(0, 500));
     let tokenData;
     
     try {
       tokenData = JSON.parse(tokenText);
     } catch (e) {
-      throw new Error(`Resposta inválida (status ${tokenResponse.status}): ${tokenText.substring(0, 200)}`);
+      return Response.json({ 
+        success: false,
+        error: `Resposta inválida (status ${tokenResponse.status}): ${tokenText.substring(0, 200)}`,
+        debug: {
+          url: tokenUrl.toString(),
+          statusCode: tokenResponse.status,
+          responseBody: tokenText.substring(0, 500)
+        }
+      }, { status: 500 });
     }
 
     // Validar resposta
     if (!tokenData.data || !tokenData.data.accessToken) {
-      throw new Error(tokenData.msg || 'Token não obtido');
+      return Response.json({
+        success: false,
+        error: tokenData.msg || 'Token não obtido',
+        debug: {
+          url: tokenUrl.toString(),
+          statusCode: tokenResponse.status,
+          responseBody: tokenData
+        }
+      }, { status: 500 });
     }
 
     // Salvar token
