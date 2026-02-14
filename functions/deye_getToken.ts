@@ -61,12 +61,14 @@ Deno.serve(async (req) => {
     const tokenResponse = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `bearer ${null}` // será adicionado em request posterior
       },
       body: bodyStr
     });
 
     const tokenText = await tokenResponse.text();
+    console.log('[DEBUG] Token response:', tokenResponse.status, 'body:', tokenText.substring(0, 300));
     let tokenData;
     
     try {
