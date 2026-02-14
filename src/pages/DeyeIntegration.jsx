@@ -127,14 +127,16 @@ export default function DeyeIntegration() {
         integration_id: integrationId
       });
       
-      if (response.data?.status === 'success') {
+      if (response?.data?.status === 'success') {
         alert('✅ Conexão testada com sucesso!');
       } else {
-        alert(`❌ Erro: ${response.data?.message || 'Falha no teste'}`);
+        const errorMsg = response?.data?.message || response?.message || 'Falha ao testar conexão';
+        alert(`❌ Erro: ${errorMsg}`);
       }
       queryClient.invalidateQueries(['deye-integrations']);
     } catch (error) {
-      alert(`❌ Erro: ${error.message}`);
+      console.error('Erro ao testar conexão:', error);
+      alert(`❌ Erro: ${error?.response?.data?.message || error.message || 'Erro desconhecido'}`);
     } finally {
       setSyncingId(null);
     }
