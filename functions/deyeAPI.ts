@@ -134,7 +134,7 @@ Deno.serve(async (req) => {
 
       case 'get_realtime_data': {
         // Buscar dados em tempo real
-        const result = await callDeyeAPI('/station/realtime', {
+        const result = await callDeyeAPI('/v1.0/station/latest', {
           stationId: integration.station_id
         });
 
