@@ -64,10 +64,17 @@ Deno.serve(async (req) => {
         url.searchParams.append('sign', signature);
 
         const response = await fetch(url.toString());
-        if (!response.ok) {
-          throw new Error(`API Deye retornou ${response.status}: ${response.statusText}`);
+        const text = await response.text();
+        
+        // Verificar se é JSON válido
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          throw new Error(`API Deye retornou HTML/texto inválido (status ${response.status}). Verifique app_id, app_secret e station_id. Resposta: ${text.substring(0, 200)}`);
         }
-        return await response.json();
+        
+        return data;
       } catch (error) {
         throw new Error(`Erro ao chamar API Deye em ${endpoint}: ${error.message}`);
       }
