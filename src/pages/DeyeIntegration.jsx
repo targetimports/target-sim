@@ -147,30 +147,36 @@ export default function DeyeIntegration() {
 
   const handleTestConnection = async (integrationId) => {
     setSyncingId(integrationId);
+    setLogs([]);
+    addLog('Testando conexão...');
     try {
       const config = settings[0];
       if (!config?.manualToken) {
-        alert('❌ Token manual não configurado. Configure um token em Deye Configuration.');
+        addLog('❌ Token manual não configurado');
         setSyncingId(null);
         return;
       }
 
+      addLog('Token encontrado, enviando requisição...');
       const response = await base44.functions.invoke('deyeAPI', {
         action: 'test_connection',
         integration_id: integrationId,
         manual_token: config.manualToken
       });
       
+      addLog(`Resposta: ${JSON.stringify(response)}`);
+      
       if (response?.data?.status === 'success') {
-        alert('✅ Conexão testada com sucesso!');
+        addLog('✅ Conexão testada com sucesso!');
       } else {
         const errorMsg = response?.data?.message || response?.message || 'Falha ao testar conexão';
-        alert(`❌ Erro: ${errorMsg}`);
+        addLog(`❌ Erro: ${errorMsg}`);
       }
       queryClient.invalidateQueries(['deye-integrations']);
     } catch (error) {
+      const errorMsg = error?.response?.data?.message || error.message || 'Erro desconhecido';
+      addLog(`❌ Erro: ${errorMsg}`);
       console.error('Erro ao testar conexão:', error);
-      alert(`❌ Erro: ${error?.response?.data?.message || error.message || 'Erro desconhecido'}`);
     } finally {
       setSyncingId(null);
     }
