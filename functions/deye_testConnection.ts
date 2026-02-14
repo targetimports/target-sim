@@ -19,10 +19,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Tentar fazer uma requisição simples para validar
+    // Tentar fazer uma requisição simples para validar (usando POST como esperado pela API)
     const infoRes = await base44.functions.invoke('deye_request', {
-      path: '/account/info',
-      method: 'GET'
+      path: '/station/list',
+      method: 'POST'
     });
 
     if (infoRes.data.ok) {
