@@ -60,8 +60,20 @@ Deno.serve(async (req) => {
       Object.keys(tokenParams).forEach(key => url.searchParams.append(key, tokenParams[key]));
       url.searchParams.append('sign', signature);
 
-      const response = await fetch(url.toString(), { method: 'POST', body: '{}' });
-      const data = await response.json();
+      const response = await fetch(url.toString(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+      });
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        throw new Error(`Resposta inválida ao obter token (status ${response.status}): ${text.substring(0, 200)}`);
+      }
       
       if (data.code === 0 && data.data?.accessToken) {
         return data.data.accessToken;
