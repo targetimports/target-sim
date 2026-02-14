@@ -197,9 +197,12 @@ Deno.serve(async (req) => {
           const result = await callDeyeAPI('/v1.0/station/list');
 
           console.log('[DEBUG] Test connection result:', JSON.stringify(result));
+          console.log('[DEBUG] Result code:', result.code);
+          console.log('[DEBUG] Result msg:', result.msg);
+          console.log('[DEBUG] Result status:', result.status);
 
           const isSuccess = result.code === 0;
-          const errorMessage = !isSuccess ? (result.msg || `Erro com código ${result.code}`) : null;
+          const errorMessage = !isSuccess ? (result.msg || result.message || `Erro com código ${result.code}`) : null;
 
           console.log('[DEBUG] isSuccess:', isSuccess, 'errorMessage:', errorMessage);
 
