@@ -10,7 +10,9 @@ Deno.serve(async (req) => {
     
     const { action, integration_id, power_plant_id, start_time, end_time } = body;
 
-    // Buscar configuração da integração
+    // Buscar configuração - pode ser DeyeIntegration ou DeyeSettings
+    let config;
+    let configType;
     let integration;
     
     try {
@@ -19,54 +21,97 @@ Deno.serve(async (req) => {
           id: integration_id
         });
         integration = integrations[0];
+        config = integration;
+        configType = 'integration';
       } else if (power_plant_id) {
         const integrations = await base44.asServiceRole.entities.DeyeIntegration.filter({
           power_plant_id,
           is_active: true
         });
         integration = integrations[0];
+        config = integration;
+        configType = 'integration';
+      } else {
+        // Tentar usar DeyeSettings como fallback
+        const settings = await base44.asServiceRole.entities.DeyeSettings.list();
+        if (settings && settings.length > 0) {
+          config = settings[0];
+          configType = 'settings';
+        }
       }
 
-      if (!integration) {
+      if (!config) {
         return Response.json({
           status: 'error',
-          message: 'Integração Deye não encontrada'
+          message: 'Configuração Deye não encontrada'
         }, { status: 404 });
       }
     } catch (error) {
       return Response.json({
         status: 'error',
-        message: `Erro ao buscar integração: ${error.message}`
+        message: `Erro ao buscar configuração: ${error.message}`
       }, { status: 400 });
     }
 
     // Obter token de autenticação
     let authToken;
     const getAuthToken = async () => {
-      const timestamp = Date.now();
-      const tokenParams = {
-        appId: integration.app_id,
-        timestamp
-      };
-
-      const sortedKeys = Object.keys(tokenParams).sort();
-      const signString = sortedKeys.map(key => `${key}=${tokenParams[key]}`).join('&');
+      let tokenUrl;
+      let tokenBody;
       
-      const signature = createHash('sha256')
-        .update(signString + integration.app_secret)
-        .digest('hex');
+      if (configType === 'integration') {
+        // Usar método de integração (app_id + app_secret + timestamp)
+        const timestamp = Date.now();
+        const tokenParams = {
+          appId: config.app_id,
+          timestamp
+        };
 
-      const url = new URL(`${DEYE_API_BASE}/v1.0/account/token`);
-      Object.keys(tokenParams).forEach(key => url.searchParams.append(key, tokenParams[key]));
-      url.searchParams.append('sign', signature);
+        const sortedKeys = Object.keys(tokenParams).sort();
+        const signString = sortedKeys.map(key => `${key}=${tokenParams[key]}`).join('&');
+        
+        const signature = createHash('sha256')
+          .update(signString + config.app_secret)
+          .digest('hex');
 
-      const response = await fetch(url.toString(), {
+        const url = new URL(`${DEYE_API_BASE}/v1.0/account/token`);
+        Object.keys(tokenParams).forEach(key => url.searchParams.append(key, tokenParams[key]));
+        url.searchParams.append('sign', signature);
+        tokenUrl = url.toString();
+        tokenBody = JSON.stringify({});
+      } else {
+        // Usar método de settings (email + password SHA-256)
+        const baseURLs = {
+          'EU': 'https://eu1-developer.deyecloud.com',
+          'US': 'https://us1-developer.deyecloud.com',
+          'AMEA': 'https://amea1-developer.deyecloud.com'
+        };
+        const baseUrl = baseURLs[config.region] || baseURLs['EU'];
+        
+        const passwordHash = createHash('sha256')
+          .update(config.password)
+          .digest('hex');
+
+        const url = new URL(`${baseUrl}/v1.0/account/token`);
+        url.searchParams.append('appId', config.appId);
+        tokenUrl = url.toString();
+        
+        tokenBody = JSON.stringify({
+          appSecret: config.appSecret,
+          email: config.email,
+          password: passwordHash,
+          ...(config.companyId && { companyId: config.companyId })
+        });
+      }
+
+      const response = await fetch(tokenUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({})
+        body: tokenBody
       });
+      
       const text = await response.text();
       let data;
       try {
