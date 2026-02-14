@@ -489,10 +489,33 @@ export default function MonthlyGenerationManager() {
            </>
          )}
 
+        {/* Log de Sincronização */}
+        {syncLog && (
+          <Card className="mb-6 border-0 shadow-sm bg-slate-900">
+            <CardHeader>
+              <CardTitle className="text-white">Log de Sincronização Deye</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-slate-800 text-slate-100 p-4 rounded-lg font-mono text-sm whitespace-pre-wrap max-h-64 overflow-y-auto">
+                {syncLog}
+              </div>
+              <Button 
+                variant="outline" 
+                className="mt-4 w-full"
+                onClick={() => setSyncLog('')}
+              >
+                Limpar Log
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Tabela de Registros */}
         <Card className="border-0 shadow-sm">
           <CardHeader>
-            <CardTitle>Registros de Geração Mensal</CardTitle>
+            <CardTitle>
+              {selectedPlant ? `Registros de ${selectedPlantData?.name}` : 'Registros de Geração Mensal'}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
