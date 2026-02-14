@@ -233,9 +233,8 @@ Deno.serve(async (req) => {
 
           console.log('[TEST] Result completo:', JSON.stringify(result));
 
-          // API Deye retorna code: "1000000" e success: true para sucesso
-          // Quando há erro de autenticação, retorna success: false
-          const isSuccess = result.success === true || result.code === "1000000";
+          // API Deye retorna success: true para sucesso
+          const isSuccess = result.success === true;
           const errorMessage = !isSuccess ? (result.msg || result.message || `Código: ${result.code}`) : null;
 
           console.log('[TEST] isSuccess:', isSuccess, 'errorMessage:', errorMessage);
