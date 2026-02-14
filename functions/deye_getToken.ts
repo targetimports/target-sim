@@ -39,15 +39,15 @@ Deno.serve(async (req) => {
       .update(config.password)
       .digest('hex');
 
-    // Preparar body da requisição de token
+    // Preparar body da requisição de token - SEMPRE strings!
     const tokenBody = {
-      appSecret: config.appSecret,
-      email: config.email,
-      password: passwordHash
+      appSecret: String(config.appSecret),
+      email: String(config.email),
+      password: String(passwordHash)
     };
 
-    if (config.companyId) {
-      tokenBody.companyId = config.companyId;
+    if (config.companyId && String(config.companyId).trim() !== '') {
+      tokenBody.companyId = String(config.companyId);
     }
 
     // Requisição de token - IMPORTANTE: appId vai na URL, não no body
