@@ -127,11 +127,16 @@ Deno.serve(async (req) => {
         throw new Error(`Resposta inválida ao obter token (status ${response.status}): ${text.substring(0, 200)}`);
       }
 
-      // Aceitar sucesso com accessToken presente
+      // Aceitar sucesso com accessToken presente (pode estar em data.data ou data.accessToken)
       if (data.data?.accessToken) {
         return data.data.accessToken;
       }
-      throw new Error(`Falha ao obter token: ${data.msg || data.status || JSON.stringify(data)}`);
+      if (data.accessToken) {
+        return data.accessToken;
+      }
+      
+      // Se chegou aqui, é erro
+      throw new Error(`Falha ao obter token (código: ${data.code || data.status}, msg: ${data.msg || 'desconhecido'}). Resposta completa: ${text.substring(0, 300)}`);
     };
 
     // Obter token uma vez
@@ -185,26 +190,27 @@ Deno.serve(async (req) => {
           const result = await callDeyeAPI('/v1.0/station/list');
           
           const isSuccess = result.code === 0;
+          const errorMessage = !isSuccess ? (result.msg || `Erro com código ${result.code}`) : null;
           
           // Atualizar status apenas se for uma integração (não settings)
           if (integration) {
             await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
               sync_status: isSuccess ? 'success' : 'error',
-              error_message: isSuccess ? null : result.msg,
+              error_message: errorMessage,
               last_sync: new Date().toISOString()
             });
           } else if (configType === 'settings') {
             await base44.asServiceRole.entities.DeyeSettings.update(config.id, {
               lastTestStatus: isSuccess ? 'success' : 'failed',
-              lastTestMessage: isSuccess ? 'Conexão testada com sucesso' : result.msg,
+              lastTestMessage: isSuccess ? 'Conexão testada com sucesso' : errorMessage,
               lastTestDate: new Date().toISOString()
             });
           }
 
           return Response.json({
             status: isSuccess ? 'success' : 'error',
-            message: result.msg || 'Conexão testada com sucesso',
-            data: result.data
+            message: isSuccess ? 'Conexão testada com sucesso' : errorMessage,
+            data: isSuccess ? result.data : null
           });
         } catch (error) {
           if (integration) {
