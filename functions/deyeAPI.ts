@@ -201,10 +201,35 @@ Deno.serve(async (req) => {
     };
 
     switch (action) {
-      case 'test_connection': {
-        try {
-          // Testar conexão buscando lista de estações
-          const result = await callDeyeAPI('/v1.0/station/list');
+          case 'get_station_by_id': {
+            // Buscar estação específica por ID
+            try {
+              const result = await callDeyeAPI('/v1.0/station/detail', {
+                stationId: integration.station_id
+              });
+
+              if (result.success === true && result.stationInfo) {
+                return Response.json({
+                  status: 'success',
+                  data: result.stationInfo
+                });
+              } else {
+                throw new Error(result.msg || 'Estação não encontrada');
+              }
+            } catch (error) {
+              return Response.json({
+                status: 'error',
+                message: error.message
+              }, { status: 400 });
+            }
+          }
+
+          case 'test_connection': {
+            try {
+              // Testar conexão buscando estação específica
+              const result = await callDeyeAPI('/v1.0/station/detail', {
+                stationId: integration.station_id
+              });
 
           console.log('[TEST] Result completo:', JSON.stringify(result));
 
