@@ -75,7 +75,10 @@ Deno.serve(async (req) => {
       let tokenUrl;
       let tokenBody = {};
 
-      if (configType === 'integration') {
+      // SEMPRE usar integração se disponível (prioridade)
+      const isIntegration = configType === 'integration' && config.app_id && config.app_secret;
+
+      if (isIntegration) {
         // Usar método de integração (app_id + app_secret + timestamp)
         const timestamp = Date.now();
 
@@ -89,8 +92,8 @@ Deno.serve(async (req) => {
         tokenUrl = `${baseUrl}/v1.0/account/token?appId=${config.app_id}&timestamp=${timestamp}&sign=${signature}`;
         tokenBody = {};
 
-        console.log('[DEBUG] Integration auth - URL:', tokenUrl);
-      } else {
+        console.log('[DEBUG] Integration auth - appId:', config.app_id, 'stationId:', config.station_id);
+      } else if (config.appId && config.appSecret && config.email && config.password) {
         // Usar método de settings (email + password SHA-256)
         const passwordHash = createHash('sha256')
           .update(config.password)
@@ -107,6 +110,8 @@ Deno.serve(async (req) => {
         };
 
         console.log('[DEBUG] Settings auth - appId:', config.appId, 'email:', config.email);
+      } else {
+        throw new Error('Credenciais Deye não configuradas corretamente');
       }
 
       const response = await fetch(tokenUrl, {
