@@ -137,6 +137,7 @@ import WhatsAppEvolution from './pages/WhatsAppEvolution';
 import WhatsAppManagement from './pages/WhatsAppManagement';
 import DeyeIntegration from './pages/DeyeIntegration';
 import DeyeConfiguration from './pages/DeyeConfiguration';
+import DeyeMonitor from './pages/DeyeMonitor';
 import __Layout from './Layout.jsx';
 
 
@@ -231,6 +232,7 @@ export const PAGES = {
     "WhatsAppManagement": WhatsAppManagement,
     "DeyeIntegration": DeyeIntegration,
     "DeyeConfiguration": DeyeConfiguration,
+    "DeyeMonitor": DeyeMonitor,
 }
 
 export const pagesConfig = {
