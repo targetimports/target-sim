@@ -291,7 +291,6 @@ export default function DeyeIntegration() {
                       </div>
                       <div className="grid sm:grid-cols-2 gap-2 text-sm text-slate-600">
                         <p><strong>Station ID:</strong> {integration.station_id}</p>
-                        <p><strong>App ID:</strong> {integration.app_id}</p>
                         {integration.last_sync && (
                           <p><strong>Última Sinc:</strong> {format(new Date(integration.last_sync), 'dd/MM/yyyy HH:mm')}</p>
                         )}
