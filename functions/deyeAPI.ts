@@ -40,30 +40,62 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    // Função auxiliar para fazer requisições à API Deye
+    // Obter token de autenticação
+    let authToken;
+    const getAuthToken = async () => {
+      const timestamp = Date.now();
+      const tokenParams = {
+        appId: integration.app_id,
+        timestamp
+      };
+
+      const sortedKeys = Object.keys(tokenParams).sort();
+      const signString = sortedKeys.map(key => `${key}=${tokenParams[key]}`).join('&');
+      
+      const signature = createHash('sha256')
+        .update(signString + integration.app_secret)
+        .digest('hex');
+
+      const url = new URL(`${DEYE_API_BASE}/v1.0/account/token`);
+      Object.keys(tokenParams).forEach(key => url.searchParams.append(key, tokenParams[key]));
+      url.searchParams.append('sign', signature);
+
+      const response = await fetch(url.toString(), { method: 'POST', body: '{}' });
+      const data = await response.json();
+      
+      if (data.code === 0 && data.data?.accessToken) {
+        return data.data.accessToken;
+      }
+      throw new Error(`Falha ao obter token: ${data.msg || 'erro desconhecido'}`);
+    };
+
+    // Obter token uma vez
+    try {
+      authToken = await getAuthToken();
+    } catch (error) {
+      return Response.json({
+        status: 'error',
+        message: error.message
+      }, { status: 401 });
+    }
+
+    // Função auxiliar para fazer requisições à API Deye com token
     const callDeyeAPI = async (endpoint, params = {}) => {
       try {
-        const timestamp = Date.now();
-        const allParams = {
-          appId: integration.app_id,
-          timestamp,
-          ...params
-        };
-
-        // Ordenar parâmetros alfabeticamente
-        const sortedKeys = Object.keys(allParams).sort();
-        const signString = sortedKeys.map(key => `${key}=${allParams[key]}`).join('&');
-        
-        // Gerar assinatura
-        const signature = createHash('sha256')
-          .update(signString + integration.app_secret)
-          .digest('hex');
-
         const url = new URL(`${DEYE_API_BASE}${endpoint}`);
-        Object.keys(allParams).forEach(key => url.searchParams.append(key, allParams[key]));
-        url.searchParams.append('sign', signature);
-
-        const response = await fetch(url.toString());
+        
+        // Adicionar parâmetros
+        Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+        
+        const response = await fetch(url.toString(), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify(params)
+        });
+        
         const text = await response.text();
         
         // Verificar se é JSON válido
@@ -71,7 +103,7 @@ Deno.serve(async (req) => {
         try {
           data = JSON.parse(text);
         } catch (e) {
-          throw new Error(`API Deye retornou HTML/texto inválido (status ${response.status}). Verifique app_id, app_secret e station_id. Resposta: ${text.substring(0, 200)}`);
+          throw new Error(`API Deye retornou resposta inválida (status ${response.status}): ${text.substring(0, 200)}`);
         }
         
         return data;
