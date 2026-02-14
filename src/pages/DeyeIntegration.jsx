@@ -53,6 +53,11 @@ export default function DeyeIntegration() {
     queryFn: () => base44.entities.PowerPlant.list()
   });
 
+  const { data: settings = [] } = useQuery({
+    queryKey: ['deye-settings'],
+    queryFn: () => base44.entities.DeyeSettings.list()
+  });
+
   const { data: integrations = [] } = useQuery({
     queryKey: ['deye-integrations'],
     queryFn: () => base44.entities.DeyeIntegration.list('-created_date')
@@ -100,9 +105,17 @@ export default function DeyeIntegration() {
   const handleSync = async (integrationId, action = 'sync_all') => {
     setSyncingId(integrationId);
     try {
+      const config = settings[0];
+      if (!config?.manualToken) {
+        alert('❌ Token manual não configurado. Configure um token em Deye Configuration.');
+        setSyncingId(null);
+        return;
+      }
+
       const response = await base44.functions.invoke('deyeAPI', {
         action,
-        integration_id: integrationId
+        integration_id: integrationId,
+        manual_token: config.manualToken
       });
       
       if (response?.data?.status === 'success') {
@@ -123,9 +136,17 @@ export default function DeyeIntegration() {
   const handleTestConnection = async (integrationId) => {
     setSyncingId(integrationId);
     try {
+      const config = settings[0];
+      if (!config?.manualToken) {
+        alert('❌ Token manual não configurado. Configure um token em Deye Configuration.');
+        setSyncingId(null);
+        return;
+      }
+
       const response = await base44.functions.invoke('deyeAPI', {
         action: 'test_connection',
-        integration_id: integrationId
+        integration_id: integrationId,
+        manual_token: config.manualToken
       });
       
       if (response?.data?.status === 'success') {
