@@ -140,7 +140,6 @@ export default function DeyeIntegration() {
       const errorMsg = error?.response?.data?.message || error.message || 'Erro desconhecido';
       addLog(`❌ Erro: ${errorMsg}`);
       console.error('Erro ao sincronizar:', error);
-      alert(`❌ Erro: ${errorMsg}`);
     } finally {
       setSyncingId(null);
     }
