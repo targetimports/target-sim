@@ -42,28 +42,35 @@ Deno.serve(async (req) => {
 
     // Função auxiliar para fazer requisições à API Deye
     const callDeyeAPI = async (endpoint, params = {}) => {
-      const timestamp = Date.now();
-      const allParams = {
-        appId: integration.app_id,
-        timestamp,
-        ...params
-      };
+      try {
+        const timestamp = Date.now();
+        const allParams = {
+          appId: integration.app_id,
+          timestamp,
+          ...params
+        };
 
-      // Ordenar parâmetros alfabeticamente
-      const sortedKeys = Object.keys(allParams).sort();
-      const signString = sortedKeys.map(key => `${key}=${allParams[key]}`).join('&');
-      
-      // Gerar assinatura
-      const signature = createHash('sha256')
-        .update(signString + integration.app_secret)
-        .digest('hex');
+        // Ordenar parâmetros alfabeticamente
+        const sortedKeys = Object.keys(allParams).sort();
+        const signString = sortedKeys.map(key => `${key}=${allParams[key]}`).join('&');
+        
+        // Gerar assinatura
+        const signature = createHash('sha256')
+          .update(signString + integration.app_secret)
+          .digest('hex');
 
-      const url = new URL(`${DEYE_API_BASE}${endpoint}`);
-      Object.keys(allParams).forEach(key => url.searchParams.append(key, allParams[key]));
-      url.searchParams.append('sign', signature);
+        const url = new URL(`${DEYE_API_BASE}${endpoint}`);
+        Object.keys(allParams).forEach(key => url.searchParams.append(key, allParams[key]));
+        url.searchParams.append('sign', signature);
 
-      const response = await fetch(url.toString());
-      return await response.json();
+        const response = await fetch(url.toString());
+        if (!response.ok) {
+          throw new Error(`API Deye retornou ${response.status}: ${response.statusText}`);
+        }
+        return await response.json();
+      } catch (error) {
+        throw new Error(`Erro ao chamar API Deye em ${endpoint}: ${error.message}`);
+      }
     };
 
     switch (action) {
