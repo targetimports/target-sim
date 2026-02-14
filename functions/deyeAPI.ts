@@ -154,10 +154,10 @@ Deno.serve(async (req) => {
       try {
         const baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES[DEFAULT_REGION];
         const url = new URL(`${baseUrl}${endpoint}`);
-        
+
         // Adicionar parâmetros
         Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
-        
+
         const response = await fetch(url.toString(), {
           method: 'POST',
           headers: {
@@ -166,19 +166,26 @@ Deno.serve(async (req) => {
           },
           body: JSON.stringify(params)
         });
-        
+
         const text = await response.text();
-        
+
+        console.log('[DEBUG] callDeyeAPI response status:', response.status, 'text length:', text.length);
+
         // Verificar se é JSON válido
         let data;
         try {
           data = JSON.parse(text);
         } catch (e) {
+          console.log('[DEBUG] JSON parse error:', e.message, 'text:', text.substring(0, 300));
           throw new Error(`API Deye retornou resposta inválida (status ${response.status}): ${text.substring(0, 200)}`);
         }
-        
+
+        console.log('[DEBUG] Parsed data:', JSON.stringify(data).substring(0, 300));
+
+        // Sempre retornar a resposta - o caller verifica se foi sucesso
         return data;
       } catch (error) {
+        console.log('[DEBUG] callDeyeAPI error:', error.message);
         throw new Error(`Erro ao chamar API Deye em ${endpoint}: ${error.message}`);
       }
     };
