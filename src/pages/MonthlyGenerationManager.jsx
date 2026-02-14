@@ -150,6 +150,26 @@ export default function MonthlyGenerationManager() {
     }
   });
 
+  const handleSyncDeye = async () => {
+    setSyncingDeye(true);
+    try {
+      for (const integration of deyeIntegrations) {
+        if (integration.is_active) {
+          await base44.functions.invoke('deyeAPI', {
+            action: 'sync_all',
+            integration_id: integration.id
+          });
+        }
+      }
+      queryClient.invalidateQueries(['monthly-generations']);
+      alert('✅ Sincronização Deye concluída!');
+    } catch (error) {
+      alert(`❌ Erro: ${error.message}`);
+    } finally {
+      setSyncingDeye(false);
+    }
+  };
+
   const handlePDFImport = async (event) => {
     const file = event.target.files?.[0];
     if (!file || !selectedPlantForImport) return;
