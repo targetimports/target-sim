@@ -289,87 +289,94 @@ Deno.serve(async (req) => {
 
       case 'get_monthly_generation': {
         // Buscar geração mensal da API Deye
-        const result = await callDeyeAPI('/v1.0/station/history', {
-          stationId: integration.station_id,
-          ...(start_time && { startTime: start_time }),
-          ...(end_time && { endTime: end_time })
-        });
-
-        if (result.code === 0) {
-          // Buscar planta para atualizar MonthlyGeneration
-          const plants = await base44.asServiceRole.entities.PowerPlant.filter({
-            id: integration.power_plant_id
+        try {
+          const result = await callDeyeAPI('/v1.0/station/history', {
+            stationId: integration.station_id,
+            ...(start_time && { startTime: start_time }),
+            ...(end_time && { endTime: end_time })
           });
 
-          if (plants.length > 0 && result.data?.list && result.data.list.length > 0) {
-            const plant = plants[0];
-            
-            // Processar cada mês de geração
-            for (const item of result.data.list) {
-              try {
-                // Extrair ano-mês (pode vir como YYYY-MM ou timestamp)
-                let referenceMonth;
-                if (item.date) {
-                  // Se for string no formato YYYY-MM
-                  referenceMonth = item.date.substring(0, 7);
-                } else if (item.time) {
-                  // Se for timestamp, converter para YYYY-MM
-                  const date = new Date(item.time * 1000);
-                  referenceMonth = date.toISOString().substring(0, 7);
+          if (result.success === true && result.stationMonthList && result.stationMonthList.length > 0) {
+            // Buscar planta para atualizar MonthlyGeneration
+            const plants = await base44.asServiceRole.entities.PowerPlant.filter({
+              id: integration.power_plant_id
+            });
+
+            if (plants.length > 0) {
+              const plant = plants[0];
+              let syncedCount = 0;
+
+              // Processar cada mês de geração
+              for (const item of result.stationMonthList) {
+                try {
+                  // Extrair ano-mês (Deye usa YYYY-MM)
+                  const referenceMonth = item.statisticsMonth;
+                  if (!referenceMonth || !/^\d{4}-\d{2}$/.test(referenceMonth)) continue;
+
+                  // Buscar registro existente
+                  const existing = await base44.asServiceRole.entities.MonthlyGeneration.filter({
+                    power_plant_id: integration.power_plant_id,
+                    reference_month: referenceMonth
+                  });
+
+                  // Dados do inversor vêm da Deye (em kWh)
+                  const inverterGeneration = parseFloat(item.energy) || 0;
+
+                  const genData = {
+                    power_plant_id: integration.power_plant_id,
+                    power_plant_name: plant.name,
+                    reference_month: referenceMonth,
+                    reading_date: new Date().toISOString().split('T')[0],
+                    inverter_generation_kwh: inverterGeneration,
+                    generated_kwh: inverterGeneration,
+                    status: 'confirmed',
+                    source: 'other',
+                    notes: `Sincronizado via Deye Cloud API (Station: ${integration.station_id})`
+                  };
+
+                  if (existing.length > 0) {
+                    await base44.asServiceRole.entities.MonthlyGeneration.update(
+                      existing[0].id,
+                      genData
+                    );
+                  } else {
+                    await base44.asServiceRole.entities.MonthlyGeneration.create(genData);
+                  }
+                  syncedCount++;
+                } catch (itemError) {
+                  console.error('[SYNC] Erro ao processar:', itemError.message);
                 }
-
-                if (!referenceMonth) continue;
-
-                // Buscar registro existente
-                const existing = await base44.asServiceRole.entities.MonthlyGeneration.filter({
-                  power_plant_id: integration.power_plant_id,
-                  reference_month: referenceMonth
-                });
-
-                // Dados do inversor vêm da Deye
-                const inverterGeneration = parseFloat(item.energy || item.generation || 0);
-
-                const genData = {
-                  power_plant_id: integration.power_plant_id,
-                  power_plant_name: plant.name,
-                  reference_month: referenceMonth,
-                  reading_date: new Date().toISOString().split('T')[0],
-                  inverter_generation_kwh: inverterGeneration,
-                  generated_kwh: inverterGeneration, // Usar mesmo valor da Deye
-                  status: 'confirmed',
-                  source: 'other', // ou 'solarman' se preferir outro valor
-                  notes: 'Sincronizado via Deye Cloud API'
-                };
-
-                if (existing.length > 0) {
-                  // Atualizar registro existente
-                  await base44.asServiceRole.entities.MonthlyGeneration.update(
-                    existing[0].id,
-                    genData
-                  );
-                } else {
-                  // Criar novo registro
-                  await base44.asServiceRole.entities.MonthlyGeneration.create(genData);
-                }
-              } catch (itemError) {
-                console.error('[DEBUG] Erro ao processar item de geração:', itemError.message);
-                // Continuar para o próximo mês
               }
-            }
-          }
 
-          // Atualizar status da integração
+              // Atualizar status da integração
+              await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
+                sync_status: 'success',
+                last_sync: new Date().toISOString(),
+                error_message: null
+              });
+
+              return Response.json({
+                status: 'success',
+                message: `Geração mensal sincronizada: ${syncedCount} meses`,
+                synced: syncedCount,
+                data: result
+              });
+            }
+          } else {
+            throw new Error(result.msg || 'Resposta inválida da Deye');
+          }
+        } catch (error) {
           await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
-            sync_status: 'success',
+            sync_status: 'error',
+            error_message: error.message,
             last_sync: new Date().toISOString()
           });
-        }
 
-        return Response.json({
-          status: result.code === 0 ? 'success' : 'error',
-          message: result.code === 0 ? 'Geração mensal sincronizada' : result.msg,
-          data: result.data
-        });
+          return Response.json({
+            status: 'error',
+            message: error.message
+          }, { status: 400 });
+        }
       }
 
       case 'get_daily_generation': {
