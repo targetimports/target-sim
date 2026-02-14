@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
       case 'test_connection': {
         try {
           // Testar conexão buscando lista de estações
-          const result = await callDeyeAPI('/station/list');
+          const result = await callDeyeAPI('/v1.0/station/list');
           
           const isSuccess = result.code === 0;
           await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
