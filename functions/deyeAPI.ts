@@ -201,15 +201,14 @@ Deno.serve(async (req) => {
           // Testar conexão buscando lista de estações
           const result = await callDeyeAPI('/v1.0/station/list');
 
-          console.log('[DEBUG] Test connection result:', JSON.stringify(result));
-          console.log('[DEBUG] Result code:', result.code);
-          console.log('[DEBUG] Result msg:', result.msg);
-          console.log('[DEBUG] Result status:', result.status);
+          console.log('[TEST] Result completo:', JSON.stringify(result));
 
-          const isSuccess = result.code === 0;
-          const errorMessage = !isSuccess ? (result.msg || result.message || `Erro com código ${result.code}`) : null;
+          // API Deye retorna code: 0 para sucesso
+          // Pode retornar também {"status":"error","message":"success"} quando há erro de autenticação
+          const isSuccess = result.code === 0 || (result.data && Array.isArray(result.data));
+          const errorMessage = !isSuccess ? (result.msg || result.message || `Código: ${result.code}`) : null;
 
-          console.log('[DEBUG] isSuccess:', isSuccess, 'errorMessage:', errorMessage);
+          console.log('[TEST] isSuccess:', isSuccess, 'errorMessage:', errorMessage);
 
           // Atualizar status apenas se for uma integração (não settings)
           if (integration) {
@@ -226,17 +225,14 @@ Deno.serve(async (req) => {
             });
           }
 
-          const response = {
+          return Response.json({
             status: isSuccess ? 'success' : 'error',
             message: isSuccess ? 'Conexão testada com sucesso' : (errorMessage || 'Erro desconhecido'),
-            data: isSuccess ? result.data : null
-          };
-
-          console.log('[DEBUG] Test response:', JSON.stringify(response));
-
-          return Response.json(response);
+            data: isSuccess ? result : null,
+            debug: { result, isSuccess }
+          });
         } catch (error) {
-          console.log('[DEBUG] Test connection error:', error.message);
+          console.log('[TEST] Erro:', error.message);
 
           if (integration) {
             await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
