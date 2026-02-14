@@ -33,19 +33,20 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function MonthlyGenerationManager() {
-  const queryClient = useQueryClient();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingRecord, setEditingRecord] = useState(null);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [recordToDelete, setRecordToDelete] = useState(null);
-  const [selectedPlant, setSelectedPlant] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [importDialogOpen, setImportDialogOpen] = useState(false);
-  const [selectedPlantForImport, setSelectedPlantForImport] = useState('');
-  const [isImporting, setIsImporting] = useState(false);
-  const [importMessage, setImportMessage] = useState('');
-  const [syncingDeye, setSyncingDeye] = useState(false);
+   const queryClient = useQueryClient();
+   const [isDialogOpen, setIsDialogOpen] = useState(false);
+   const [editingRecord, setEditingRecord] = useState(null);
+   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+   const [recordToDelete, setRecordToDelete] = useState(null);
+   const [selectedPlant, setSelectedPlant] = useState(null);
+   const [searchTerm, setSearchTerm] = useState('');
+   const [statusFilter, setStatusFilter] = useState('all');
+   const [importDialogOpen, setImportDialogOpen] = useState(false);
+   const [selectedPlantForImport, setSelectedPlantForImport] = useState('');
+   const [isImporting, setIsImporting] = useState(false);
+   const [importMessage, setImportMessage] = useState('');
+   const [syncingDeye, setSyncingDeye] = useState(false);
+   const [syncLog, setSyncLog] = useState('');
   
   const [formData, setFormData] = useState({
     power_plant_id: '',
@@ -157,27 +158,43 @@ export default function MonthlyGenerationManager() {
 
   const handleSyncDeye = async () => {
     setSyncingDeye(true);
+    setSyncLog('Iniciando sincronização...');
     try {
       const config = deyeSettings[0];
       if (!config?.manualToken) {
-        alert('❌ Token manual não configurado. Configure em Deye Cloud.');
+        setSyncLog('❌ Token manual não configurado em Deye Cloud.');
         setSyncingDeye(false);
         return;
       }
 
-      for (const integration of deyeIntegrations) {
-        if (integration.is_active) {
-          await base44.functions.invoke('deyeAPI', {
-            action: 'sync_all',
-            integration_id: integration.id,
-            manual_token: config.manualToken
-          });
+      const activeIntegrations = deyeIntegrations.filter(i => i.is_active);
+      if (activeIntegrations.length === 0) {
+        setSyncLog('⚠️ Nenhuma integração Deye ativa configurada.');
+        setSyncingDeye(false);
+        return;
+      }
+
+      setSyncLog(`Sincronizando ${activeIntegrations.length} integração(ões)...`);
+
+      for (const integration of activeIntegrations) {
+        setSyncLog(`📡 Sincronizando ${integration.power_plant_name}...`);
+        const result = await base44.functions.invoke('deyeAPI', {
+          action: 'sync_all',
+          integration_id: integration.id,
+          manual_token: config.manualToken
+        });
+        
+        if (result.data?.status === 'error') {
+          setSyncLog(prev => prev + `\n❌ Erro em ${integration.power_plant_name}: ${result.data.message}`);
+        } else {
+          setSyncLog(prev => prev + `\n✅ ${integration.power_plant_name}: ${result.data?.message || 'OK'}`);
         }
       }
+      
       queryClient.invalidateQueries(['monthly-generations']);
-      alert('✅ Sincronização Deye concluída!');
+      setSyncLog(prev => prev + '\n\n✅ Sincronização concluída!');
     } catch (error) {
-      alert(`❌ Erro: ${error.message}`);
+      setSyncLog(`❌ Erro: ${error.message}`);
     } finally {
       setSyncingDeye(false);
     }
@@ -279,17 +296,20 @@ export default function MonthlyGenerationManager() {
     }
   };
 
+  // Se uma usina foi selecionada, mostrar seus registros
+  const selectedPlantData = selectedPlant ? powerPlants.find(p => p.id === selectedPlant) : null;
+  
   const filteredGenerations = generations.filter(gen => {
-    const matchesPlant = selectedPlant === 'all' || gen.power_plant_id === selectedPlant;
+    const matchesPlant = !selectedPlant || gen.power_plant_id === selectedPlant;
     const matchesSearch = gen.power_plant_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          gen.reference_month?.includes(searchTerm);
     const matchesStatus = statusFilter === 'all' || gen.status === statusFilter;
     return matchesPlant && matchesSearch && matchesStatus;
   });
 
-  // Agrupar por usina
-  const generationsByPlant = powerPlants.map(plant => {
-    const plantGens = filteredGenerations.filter(g => g.power_plant_id === plant.id);
+  // Todas as usinas com geração
+  const allPlantsWithGeneration = powerPlants.map(plant => {
+    const plantGens = generations.filter(g => g.power_plant_id === plant.id);
     const totalGenerated = plantGens.reduce((sum, g) => sum + (g.generated_kwh || 0), 0);
     const totalExpected = plantGens.reduce((sum, g) => sum + (g.expected_generation_kwh || 0), 0);
     const avgPerformance = totalExpected > 0 ? (totalGenerated / totalExpected) * 100 : 0;
@@ -302,7 +322,7 @@ export default function MonthlyGenerationManager() {
       avgPerformance,
       recordCount: plantGens.length
     };
-  }).filter(p => p.recordCount > 0);
+  }).sort((a, b) => b.recordCount - a.recordCount);
 
   const statusColors = {
     pending: 'bg-yellow-100 text-yellow-800',
@@ -372,89 +392,102 @@ export default function MonthlyGenerationManager() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Filtros */}
-        <Card className="mb-6 border-0 shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex flex-wrap gap-4">
-              <div className="flex-1 min-w-64">
-                <Label className="mb-2 block">Usina</Label>
-                <Select value={selectedPlant} onValueChange={setSelectedPlant}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas as Usinas</SelectItem>
-                    {powerPlants.map(plant => (
-                      <SelectItem key={plant.id} value={plant.id}>{plant.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex-1 min-w-48">
-                <Label className="mb-2 block">Status</Label>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="pending">Pendente</SelectItem>
-                    <SelectItem value="confirmed">Confirmado</SelectItem>
-                    <SelectItem value="allocated">Alocado</SelectItem>
-                    <SelectItem value="closed">Fechado</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex-1 min-w-64">
-                <Label className="mb-2 block">Buscar</Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <Input 
-                    placeholder="Usina ou mês..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+         {!selectedPlant ? (
+           <>
+             {/* Vista de Usinas */}
+             <div className="mb-8">
+               <h2 className="text-xl font-bold text-slate-900 mb-4">Selecione uma Usina</h2>
+               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                 {allPlantsWithGeneration.map(({ plant, totalGenerated, totalExpected, avgPerformance, recordCount }) => (
+                   <Card 
+                     key={plant.id} 
+                     className="border-0 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                     onClick={() => setSelectedPlant(plant.id)}
+                   >
+                     <CardHeader className="pb-3">
+                       <CardTitle className="text-lg flex items-center justify-between">
+                         <span>{plant.name}</span>
+                         <Badge variant="outline">{recordCount} meses</Badge>
+                       </CardTitle>
+                     </CardHeader>
+                     <CardContent className="space-y-3">
+                       <div className="p-3 bg-blue-50 rounded-lg">
+                         <p className="text-xs text-blue-700 mb-1">Total Gerado</p>
+                         <p className="text-xl font-bold text-blue-900">
+                           {(totalGenerated / 1000).toFixed(1)}k kWh
+                         </p>
+                       </div>
+                       <div className="p-3 bg-slate-50 rounded-lg">
+                         <p className="text-xs text-slate-700 mb-1">Performance Média</p>
+                         <div className="flex items-center gap-2">
+                           <p className="text-xl font-bold text-slate-900">
+                             {avgPerformance.toFixed(1)}%
+                           </p>
+                           {avgPerformance >= 85 ? (
+                             <TrendingUp className="w-4 h-4 text-green-600" />
+                           ) : (
+                             <TrendingDown className="w-4 h-4 text-red-600" />
+                           )}
+                         </div>
+                       </div>
+                     </CardContent>
+                   </Card>
+                 ))}
+               </div>
+             </div>
+           </>
+         ) : (
+           <>
+             {/* Vista Detalhada da Usina */}
+             <div className="mb-6 flex items-center justify-between">
+               <Button 
+                 variant="outline" 
+                 onClick={() => { setSelectedPlant(null); setSearchTerm(''); setStatusFilter('all'); }}
+                 className="gap-2"
+               >
+                 <ArrowLeft className="w-4 h-4" />
+                 Voltar às Usinas
+               </Button>
+               <h2 className="text-2xl font-bold text-slate-900">{selectedPlantData?.name}</h2>
+               <div></div>
+             </div>
 
-        {/* Resumo por Usina */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {generationsByPlant.map(({ plant, totalGenerated, totalExpected, avgPerformance, recordCount }) => (
-            <Card key={plant.id} className="border-0 shadow-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center justify-between">
-                  <span>{plant.name}</span>
-                  <Badge variant="outline">{recordCount} meses</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <p className="text-xs text-blue-700 mb-1">Total Gerado</p>
-                  <p className="text-xl font-bold text-blue-900">
-                    {(totalGenerated / 1000).toFixed(1)}k kWh
-                  </p>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-lg">
-                  <p className="text-xs text-slate-700 mb-1">Performance Média</p>
-                  <div className="flex items-center gap-2">
-                    <p className="text-xl font-bold text-slate-900">
-                      {avgPerformance.toFixed(1)}%
-                    </p>
-                    {avgPerformance >= 85 ? (
-                      <TrendingUp className="w-4 h-4 text-green-600" />
-                    ) : (
-                      <TrendingDown className="w-4 h-4 text-red-600" />
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+             {/* Filtros */}
+             <Card className="mb-6 border-0 shadow-sm">
+               <CardContent className="p-6">
+                 <div className="flex flex-wrap gap-4">
+                   <div className="flex-1 min-w-48">
+                     <Label className="mb-2 block">Status</Label>
+                     <Select value={statusFilter} onValueChange={setStatusFilter}>
+                       <SelectTrigger>
+                         <SelectValue />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="all">Todos</SelectItem>
+                         <SelectItem value="pending">Pendente</SelectItem>
+                         <SelectItem value="confirmed">Confirmado</SelectItem>
+                         <SelectItem value="allocated">Alocado</SelectItem>
+                         <SelectItem value="closed">Fechado</SelectItem>
+                       </SelectContent>
+                     </Select>
+                   </div>
+                   <div className="flex-1 min-w-64">
+                     <Label className="mb-2 block">Buscar por Mês</Label>
+                     <div className="relative">
+                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                       <Input 
+                         placeholder="YYYY-MM..."
+                         value={searchTerm}
+                         onChange={(e) => setSearchTerm(e.target.value)}
+                         className="pl-10"
+                       />
+                     </div>
+                   </div>
+                 </div>
+               </CardContent>
+             </Card>
+           </>
+         )}
 
         {/* Tabela de Registros */}
         <Card className="border-0 shadow-sm">
