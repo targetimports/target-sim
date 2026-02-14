@@ -40,6 +40,7 @@ export default function DeyeIntegration() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [integrationToDelete, setIntegrationToDelete] = useState(null);
   const [syncingId, setSyncingId] = useState(null);
+  const [logs, setLogs] = useState([]);
   
   const [formData, setFormData] = useState({
     power_plant_id: '',
