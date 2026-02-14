@@ -103,32 +103,46 @@ export default function DeyeIntegration() {
     }
   });
 
+  const addLog = (message) => {
+    const timestamp = new Date().toLocaleTimeString();
+    setLogs(prev => [...prev, `[${timestamp}] ${message}`].slice(-20));
+  };
+
   const handleSync = async (integrationId, action = 'sync_all') => {
     setSyncingId(integrationId);
+    setLogs([]);
+    addLog('Iniciando sincronização...');
     try {
       const config = settings[0];
       if (!config?.manualToken) {
-        alert('❌ Token manual não configurado. Configure um token em Deye Configuration.');
+        addLog('❌ Token manual não configurado');
         setSyncingId(null);
         return;
       }
 
+      addLog('Token encontrado, chamando API...');
       const response = await base44.functions.invoke('deyeAPI', {
         action,
         integration_id: integrationId,
         manual_token: config.manualToken
       });
       
+      addLog(`Resposta recebida: ${JSON.stringify(response)}`);
+      
       if (response?.data?.status === 'success') {
+        addLog('✅ Sincronização concluída com sucesso!');
         alert('✅ Sincronização concluída com sucesso!');
       } else {
         const errorMsg = response?.data?.message || response?.message || 'Falha na sincronização';
+        addLog(`❌ Erro: ${errorMsg}`);
         alert(`❌ Erro: ${errorMsg}`);
       }
       queryClient.invalidateQueries(['deye-integrations']);
     } catch (error) {
+      const errorMsg = error?.response?.data?.message || error.message || 'Erro desconhecido';
+      addLog(`❌ Erro: ${errorMsg}`);
       console.error('Erro ao sincronizar:', error);
-      alert(`❌ Erro: ${error?.response?.data?.message || error.message || 'Erro desconhecido'}`);
+      alert(`❌ Erro: ${errorMsg}`);
     } finally {
       setSyncingId(null);
     }
