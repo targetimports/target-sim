@@ -12,24 +12,32 @@ Deno.serve(async (req) => {
 
     // Buscar configuração da integração
     let integration;
-    if (integration_id) {
-      const integrations = await base44.asServiceRole.entities.DeyeIntegration.filter({
-        id: integration_id
-      });
-      integration = integrations[0];
-    } else if (power_plant_id) {
-      const integrations = await base44.asServiceRole.entities.DeyeIntegration.filter({
-        power_plant_id,
-        is_active: true
-      });
-      integration = integrations[0];
-    }
+    
+    try {
+      if (integration_id) {
+        const integrations = await base44.asServiceRole.entities.DeyeIntegration.filter({
+          id: integration_id
+        });
+        integration = integrations[0];
+      } else if (power_plant_id) {
+        const integrations = await base44.asServiceRole.entities.DeyeIntegration.filter({
+          power_plant_id,
+          is_active: true
+        });
+        integration = integrations[0];
+      }
 
-    if (!integration) {
+      if (!integration) {
+        return Response.json({
+          status: 'error',
+          message: 'Integração Deye não encontrada'
+        }, { status: 404 });
+      }
+    } catch (error) {
       return Response.json({
         status: 'error',
-        message: 'Integração Deye não encontrada'
-      }, { status: 404 });
+        message: `Erro ao buscar integração: ${error.message}`
+      }, { status: 400 });
     }
 
     // Função auxiliar para fazer requisições à API Deye
