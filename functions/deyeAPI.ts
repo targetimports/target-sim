@@ -122,10 +122,11 @@ Deno.serve(async (req) => {
         throw new Error(`Resposta inválida ao obter token (status ${response.status}): ${text.substring(0, 200)}`);
       }
       
-      if (data.code === 0 && data.data?.accessToken) {
+      // Aceitar tanto code === 0 quanto status === 'success'
+      if ((data.code === 0 || data.code === '0' || data.msg === 'success' || data.status === 'success') && data.data?.accessToken) {
         return data.data.accessToken;
       }
-      throw new Error(`Falha ao obter token: ${data.msg || 'erro desconhecido'}`);
+      throw new Error(`Falha ao obter token: ${data.msg || data.status || 'erro desconhecido'}`);
     };
 
     // Obter token uma vez
