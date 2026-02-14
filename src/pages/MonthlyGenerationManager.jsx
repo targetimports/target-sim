@@ -73,6 +73,11 @@ export default function MonthlyGenerationManager() {
     queryFn: () => base44.entities.DeyeIntegration.list()
   });
 
+  const { data: deyeSettings = [] } = useQuery({
+    queryKey: ['deye-settings'],
+    queryFn: () => base44.entities.DeyeSettings.list()
+  });
+
   const { data: generations = [] } = useQuery({
     queryKey: ['monthly-generations'],
     queryFn: () => base44.entities.MonthlyGeneration.list('-reference_month', 200)
@@ -153,11 +158,19 @@ export default function MonthlyGenerationManager() {
   const handleSyncDeye = async () => {
     setSyncingDeye(true);
     try {
+      const config = deyeSettings[0];
+      if (!config?.manualToken) {
+        alert('❌ Token manual não configurado. Configure em Deye Cloud.');
+        setSyncingDeye(false);
+        return;
+      }
+
       for (const integration of deyeIntegrations) {
         if (integration.is_active) {
           await base44.functions.invoke('deyeAPI', {
             action: 'sync_all',
-            integration_id: integration.id
+            integration_id: integration.id,
+            manual_token: config.manualToken
           });
         }
       }
