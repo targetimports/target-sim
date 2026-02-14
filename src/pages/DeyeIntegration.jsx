@@ -106,14 +106,16 @@ export default function DeyeIntegration() {
         integration_id: integrationId
       });
       
-      if (response.data?.status === 'success') {
+      if (response?.data?.status === 'success') {
         alert('✅ Sincronização concluída com sucesso!');
       } else {
-        alert(`❌ Erro: ${response.data?.message || 'Falha na sincronização'}`);
+        const errorMsg = response?.data?.message || response?.message || 'Falha na sincronização';
+        alert(`❌ Erro: ${errorMsg}`);
       }
       queryClient.invalidateQueries(['deye-integrations']);
     } catch (error) {
-      alert(`❌ Erro: ${error.message}`);
+      console.error('Erro ao sincronizar:', error);
+      alert(`❌ Erro: ${error?.response?.data?.message || error.message || 'Erro desconhecido'}`);
     } finally {
       setSyncingId(null);
     }
