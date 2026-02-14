@@ -68,6 +68,11 @@ export default function MonthlyGenerationManager() {
     queryFn: () => base44.entities.PowerPlant.list()
   });
 
+  const { data: deyeIntegrations = [] } = useQuery({
+    queryKey: ['deye-integrations'],
+    queryFn: () => base44.entities.DeyeIntegration.list()
+  });
+
   const { data: generations = [] } = useQuery({
     queryKey: ['monthly-generations'],
     queryFn: () => base44.entities.MonthlyGeneration.list('-reference_month', 200)
