@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Zap, Plus, Pencil, Trash2, ArrowLeft, Calendar, TrendingUp, 
-  TrendingDown, Search, Download, Upload, CheckCircle, XCircle
+  TrendingDown, Search, Download, Upload, CheckCircle, XCircle, Cloud
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
