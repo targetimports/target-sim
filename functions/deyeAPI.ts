@@ -1,7 +1,12 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { createHash } from 'node:crypto';
 
-const DEYE_API_BASE = 'https://eu1-developer.deyecloud.com';
+// URLs base por região (será determinada pela configuração)
+const DEYE_API_BASES = {
+  'EU': 'https://eu1-developer.deyecloud.com',
+  'US': 'https://us1-developer.deyecloud.com',
+  'AMEA': 'https://amea1-developer.deyecloud.com'
+};
 
 Deno.serve(async (req) => {
   try {
@@ -58,6 +63,7 @@ Deno.serve(async (req) => {
     const getAuthToken = async () => {
       let tokenUrl;
       let tokenBody;
+      let baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES['EU'];
       
       if (configType === 'integration') {
         // Usar método de integração (app_id + app_secret + timestamp)
@@ -74,20 +80,13 @@ Deno.serve(async (req) => {
           .update(signString + config.app_secret)
           .digest('hex');
 
-        const url = new URL(`${DEYE_API_BASE}/v1.0/account/token`);
+        const url = new URL(`${baseUrl}/v1.0/account/token`);
         Object.keys(tokenParams).forEach(key => url.searchParams.append(key, tokenParams[key]));
         url.searchParams.append('sign', signature);
         tokenUrl = url.toString();
         tokenBody = JSON.stringify({});
       } else {
         // Usar método de settings (email + password SHA-256)
-        const baseURLs = {
-          'EU': 'https://eu1-developer.deyecloud.com',
-          'US': 'https://us1-developer.deyecloud.com',
-          'AMEA': 'https://amea1-developer.deyecloud.com'
-        };
-        const baseUrl = baseURLs[config.region] || baseURLs['EU'];
-        
         const passwordHash = createHash('sha256')
           .update(config.password)
           .digest('hex');
@@ -139,7 +138,8 @@ Deno.serve(async (req) => {
     // Função auxiliar para fazer requisições à API Deye com token
     const callDeyeAPI = async (endpoint, params = {}) => {
       try {
-        const url = new URL(`${DEYE_API_BASE}${endpoint}`);
+        const baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES['EU'];
+        const url = new URL(`${baseUrl}${endpoint}`);
         
         // Adicionar parâmetros
         Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
