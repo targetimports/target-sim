@@ -1,12 +1,15 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { createHash } from 'node:crypto';
 
-// URLs base por região (será determinada pela configuração)
+// URLs base por região - baseado na documentação oficial
 const DEYE_API_BASES = {
   'EU': 'https://eu1-developer.deyecloud.com',
   'US': 'https://us1-developer.deyecloud.com',
   'AMEA': 'https://amea1-developer.deyecloud.com'
 };
+
+// Validar que a região está configurada corretamente
+const DEFAULT_REGION = 'US';
 
 Deno.serve(async (req) => {
   try {
@@ -63,7 +66,7 @@ Deno.serve(async (req) => {
     const getAuthToken = async () => {
       let tokenUrl;
       let tokenBody;
-      let baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES['EU'];
+      let baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES[DEFAULT_REGION];
       
       if (configType === 'integration') {
         // Usar método de integração (app_id + app_secret + timestamp)
@@ -138,7 +141,7 @@ Deno.serve(async (req) => {
     // Função auxiliar para fazer requisições à API Deye com token
     const callDeyeAPI = async (endpoint, params = {}) => {
       try {
-        const baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES['EU'];
+        const baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES[DEFAULT_REGION];
         const url = new URL(`${baseUrl}${endpoint}`);
         
         // Adicionar parâmetros
