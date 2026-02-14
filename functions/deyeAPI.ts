@@ -158,6 +158,10 @@ Deno.serve(async (req) => {
         // Adicionar parâmetros
         Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
 
+        console.log('[DEBUG] callDeyeAPI URL:', url.toString());
+        console.log('[DEBUG] callDeyeAPI params:', JSON.stringify(params));
+        console.log('[DEBUG] callDeyeAPI token:', authToken.substring(0, 50) + '...');
+
         const response = await fetch(url.toString(), {
           method: 'POST',
           headers: {
@@ -169,7 +173,8 @@ Deno.serve(async (req) => {
 
         const text = await response.text();
 
-        console.log('[DEBUG] callDeyeAPI response status:', response.status, 'text length:', text.length);
+        console.log('[DEBUG] callDeyeAPI response status:', response.status);
+        console.log('[DEBUG] callDeyeAPI response text:', text.substring(0, 500));
 
         // Verificar se é JSON válido
         let data;
