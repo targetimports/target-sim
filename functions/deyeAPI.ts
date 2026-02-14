@@ -227,7 +227,7 @@ Deno.serve(async (req) => {
           case 'test_connection': {
             try {
               // Testar conexão buscando estação específica
-              const result = await callDeyeAPI('/v1.0/station/detail', {
+              const result = await callDeyeAPI('/v1.0/station/latest', {
                 stationId: integration.station_id
               });
 
