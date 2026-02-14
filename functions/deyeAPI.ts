@@ -2,10 +2,11 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { createHash } from 'node:crypto';
 
 // URLs base por região - baseado na documentação oficial
+// AMEA (Américas) = US1, EU = EU1
 const DEYE_API_BASES = {
   'EU': 'https://eu1-developer.deyecloud.com',
   'US': 'https://us1-developer.deyecloud.com',
-  'AMEA': 'https://amea1-developer.deyecloud.com'
+  'AMEA': 'https://us1-developer.deyecloud.com' // AMEA = Américas = US1
 };
 
 // Validar que a região está configurada corretamente
