@@ -64,46 +64,38 @@ Deno.serve(async (req) => {
     // Obter token de autenticação
     let authToken;
     const getAuthToken = async () => {
-      let tokenUrl;
-      let tokenBody;
       let baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES[DEFAULT_REGION];
-      
+      let tokenUrl;
+      let tokenBody = {};
+
       if (configType === 'integration') {
         // Usar método de integração (app_id + app_secret + timestamp)
         const timestamp = Date.now();
-        const tokenParams = {
-          appId: config.app_id,
-          timestamp
-        };
 
-        const sortedKeys = Object.keys(tokenParams).sort();
-        const signString = sortedKeys.map(key => `${key}=${tokenParams[key]}`).join('&');
-        
+        // Construir string para assinatura
+        const signString = `appId=${config.app_id}&timestamp=${timestamp}${config.app_secret}`;
+
         const signature = createHash('sha256')
-          .update(signString + config.app_secret)
+          .update(signString)
           .digest('hex');
 
-        const url = new URL(`${baseUrl}/v1.0/account/token`);
-        Object.keys(tokenParams).forEach(key => url.searchParams.append(key, tokenParams[key]));
-        url.searchParams.append('sign', signature);
-        tokenUrl = url.toString();
-        tokenBody = JSON.stringify({});
+        tokenUrl = `${baseUrl}/v1.0/account/token?appId=${config.app_id}&timestamp=${timestamp}&sign=${signature}`;
+        tokenBody = {};
       } else {
         // Usar método de settings (email + password SHA-256)
         const passwordHash = createHash('sha256')
           .update(config.password)
           .digest('hex');
 
-        const url = new URL(`${baseUrl}/v1.0/account/token`);
-        url.searchParams.append('appId', config.appId);
-        tokenUrl = url.toString();
-        
-        tokenBody = JSON.stringify({
+        tokenUrl = `${baseUrl}/v1.0/account/token`;
+
+        tokenBody = {
+          appId: config.appId,
           appSecret: config.appSecret,
           email: config.email,
           password: passwordHash,
           ...(config.companyId && { companyId: config.companyId })
-        });
+        };
       }
 
       const response = await fetch(tokenUrl, {
@@ -111,9 +103,9 @@ Deno.serve(async (req) => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: tokenBody
+        body: JSON.stringify(tokenBody)
       });
-      
+
       const text = await response.text();
       let data;
       try {
@@ -121,7 +113,7 @@ Deno.serve(async (req) => {
       } catch (e) {
         throw new Error(`Resposta inválida ao obter token (status ${response.status}): ${text.substring(0, 200)}`);
       }
-      
+
       // Aceitar sucesso com accessToken presente
       if (data.data?.accessToken) {
         return data.data.accessToken;
