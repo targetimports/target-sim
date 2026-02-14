@@ -334,6 +334,17 @@ export default function MonthlyGenerationManager() {
               </div>
             </div>
             <div className="flex gap-2">
+              {deyeIntegrations.length > 0 && (
+                <Button 
+                  onClick={handleSyncDeye} 
+                  variant="outline" 
+                  className="border-blue-500 text-blue-600"
+                  disabled={syncingDeye}
+                >
+                  <Cloud className={`w-4 h-4 mr-2 ${syncingDeye ? 'animate-spin' : ''}`} />
+                  {syncingDeye ? 'Sincronizando...' : 'Sincronizar Deye'}
+                </Button>
+              )}
               <Button onClick={() => setImportDialogOpen(true)} variant="outline" className="border-blue-500 text-blue-600">
                 <Upload className="w-4 h-4 mr-2" />
                 Importar PDF
