@@ -81,6 +81,7 @@ import CustomerDetails from './pages/CustomerDetails';
 import CustomerManagement from './pages/CustomerManagement';
 import CustomerPortal from './pages/CustomerPortal';
 import DeficitCompensation from './pages/DeficitCompensation';
+import DeyeIntegration from './pages/DeyeIntegration';
 import DistributorIntegrations from './pages/DistributorIntegrations';
 import DocumentManager from './pages/DocumentManager';
 import DocumentsDashboard from './pages/DocumentsDashboard';
@@ -135,7 +136,6 @@ import WeatherForecast from './pages/WeatherForecast';
 import WhatsAppCampaigns from './pages/WhatsAppCampaigns';
 import WhatsAppEvolution from './pages/WhatsAppEvolution';
 import WhatsAppManagement from './pages/WhatsAppManagement';
-import DeyeIntegration from './pages/DeyeIntegration';
 import DeyeConfiguration from './pages/DeyeConfiguration';
 import DeyeMonitor from './pages/DeyeMonitor';
 import __Layout from './Layout.jsx';
@@ -176,6 +176,7 @@ export const PAGES = {
     "CustomerManagement": CustomerManagement,
     "CustomerPortal": CustomerPortal,
     "DeficitCompensation": DeficitCompensation,
+    "DeyeIntegration": DeyeIntegration,
     "DistributorIntegrations": DistributorIntegrations,
     "DocumentManager": DocumentManager,
     "DocumentsDashboard": DocumentsDashboard,
@@ -230,7 +231,6 @@ export const PAGES = {
     "WhatsAppCampaigns": WhatsAppCampaigns,
     "WhatsAppEvolution": WhatsAppEvolution,
     "WhatsAppManagement": WhatsAppManagement,
-    "DeyeIntegration": DeyeIntegration,
     "DeyeConfiguration": DeyeConfiguration,
     "DeyeMonitor": DeyeMonitor,
 }

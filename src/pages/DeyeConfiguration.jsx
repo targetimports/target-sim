@@ -169,12 +169,15 @@ export default function DeyeConfiguration() {
                   <SelectContent>
                     <SelectItem value="EU">Europa (EU)</SelectItem>
                     <SelectItem value="US">Estados Unidos (US)</SelectItem>
+                    <SelectItem value="AMEA">AMEA (Ásia, Oriente Médio, África)</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-slate-500">
                   {formData.region === 'EU' 
                     ? 'eu1-developer.deyecloud.com' 
-                    : 'us1-developer.deyecloud.com'}
+                    : formData.region === 'US'
+                    ? 'us1-developer.deyecloud.com'
+                    : 'amea1-developer.deyecloud.com'}
                 </p>
               </div>
 
