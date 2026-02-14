@@ -146,7 +146,7 @@ Deno.serve(async (req) => {
 
       case 'get_monthly_generation': {
         // Buscar geração mensal
-        const result = await callDeyeAPI('/station/energy/month', {
+        const result = await callDeyeAPI('/v1.0/station/history', {
           stationId: integration.station_id,
           startTime: start_time,
           endTime: end_time
