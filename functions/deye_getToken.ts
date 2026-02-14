@@ -50,16 +50,20 @@ Deno.serve(async (req) => {
       tokenBody.companyId = config.companyId;
     }
 
-    // Requisição de token
+    // Requisição de token - IMPORTANTE: appId vai na URL, não no body
     const tokenUrl = new URL(`${baseURL}/account/token`);
     tokenUrl.searchParams.append('appId', config.appId);
+    
+    // Log para debug
+    const url = tokenUrl.toString();
+    const bodyStr = JSON.stringify(tokenBody);
 
-    const tokenResponse = await fetch(tokenUrl.toString(), {
+    const tokenResponse = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(tokenBody)
+      body: bodyStr
     });
 
     const tokenText = await tokenResponse.text();
