@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { createHash } from 'node:crypto';
 
-const DEYE_API_BASE = 'https://developer.deyecloud.com/api';
+const DEYE_API_BASE = 'https://eu1-developer.deyecloud.com';
 
 Deno.serve(async (req) => {
   try {
