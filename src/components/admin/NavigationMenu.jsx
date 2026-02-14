@@ -54,15 +54,17 @@ const menuCategories = {
     ]
   },
   'operations': {
-    title: '⚙️ Operações',
-    color: 'border-purple-500 bg-purple-50',
-    items: [
-      { name: 'Gerenciar Usinas', url: 'AdminPowerPlants', icon: '🏭' },
-      { name: 'Dashboard Usinas', url: 'PowerPlantDashboard', icon: '⚡' },
-      { name: 'Geração Mensal', url: 'MonthlyGenerationManager', icon: '📊' },
-      { name: 'Integração Solarman', url: 'SolarmanIntegration', icon: '☀️' },
-      { name: 'Integração Deye Cloud', url: 'DeyeIntegration', icon: '☁️' },
-      { name: 'Monitoramento Usinas', url: 'PlantMonitoring', icon: '📡' },
+   title: '⚙️ Operações',
+   color: 'border-purple-500 bg-purple-50',
+   items: [
+     { name: 'Gerenciar Usinas', url: 'AdminPowerPlants', icon: '🏭' },
+     { name: 'Dashboard Usinas', url: 'PowerPlantDashboard', icon: '⚡' },
+     { name: 'Geração Mensal', url: 'MonthlyGenerationManager', icon: '📊' },
+     { name: 'Integração Solarman', url: 'SolarmanIntegration', icon: '☀️' },
+     { name: 'Integração Deye Cloud', url: 'DeyeIntegration', icon: '☁️' },
+     { name: 'Config. DeyeCloud', url: 'DeyeConfiguration', icon: '⚙️' },
+     { name: 'Monitor DeyeCloud', url: 'DeyeMonitor', icon: '📡' },
+     { name: 'Monitoramento Usinas', url: 'PlantMonitoring', icon: '📡' },
       { name: 'Performance Usinas', url: 'PlantPerformanceDashboard', icon: '📈' },
       { name: 'Manutenções', url: 'MaintenanceManagement', icon: '🔧' },
       { name: 'Contratos Usinas', url: 'AdminPowerPlantContracts', icon: '📋' },
