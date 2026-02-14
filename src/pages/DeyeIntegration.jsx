@@ -256,6 +256,22 @@ export default function DeyeIntegration() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {/* Logs */}
+        {logs.length > 0 && (
+          <Card className="mb-8 bg-slate-900 border-slate-700">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-white text-sm">Logs de Execução</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-slate-950 rounded p-3 h-48 overflow-y-auto font-mono text-xs text-green-400 space-y-1">
+                {logs.map((log, i) => (
+                  <div key={i}>{log}</div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Estatísticas */}
         <div className="grid sm:grid-cols-3 gap-6 mb-8">
           <Card className="border-0 shadow-sm">
