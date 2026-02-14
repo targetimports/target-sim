@@ -381,27 +381,6 @@ export default function DeyeIntegration() {
             </div>
 
             <div className="space-y-2">
-              <Label>App ID *</Label>
-              <Input
-                value={formData.app_id}
-                onChange={(e) => setFormData(prev => ({ ...prev, app_id: e.target.value }))}
-                placeholder="Seu App ID Deye"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>App Secret *</Label>
-              <Input
-                type="password"
-                value={formData.app_secret}
-                onChange={(e) => setFormData(prev => ({ ...prev, app_secret: e.target.value }))}
-                placeholder="Seu App Secret Deye"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
               <Label>Station ID *</Label>
               <Input
                 value={formData.station_id}
