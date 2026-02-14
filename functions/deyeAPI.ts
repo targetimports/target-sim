@@ -206,31 +206,44 @@ Deno.serve(async (req) => {
       }
 
       case 'sync_all': {
-        // Sincronizar todos os dados
-        const results = {};
-        
-        // Info da estação
-        const infoResult = await callDeyeAPI('/station/info', {
-          stationId: integration.station_id
-        });
-        results.station_info = infoResult.data;
+        try {
+          // Sincronizar todos os dados
+          const results = {};
+          
+          // Info da estação
+          const infoResult = await callDeyeAPI('/station/info', {
+            stationId: integration.station_id
+          });
+          results.station_info = infoResult.data;
 
-        // Dados em tempo real
-        const realtimeResult = await callDeyeAPI('/station/realtime', {
-          stationId: integration.station_id
-        });
-        results.realtime = realtimeResult.data;
+          // Dados em tempo real
+          const realtimeResult = await callDeyeAPI('/station/realtime', {
+            stationId: integration.station_id
+          });
+          results.realtime = realtimeResult.data;
 
-        await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
-          last_data: results,
-          sync_status: 'success',
-          last_sync: new Date().toISOString()
-        });
+          await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
+            last_data: results,
+            sync_status: 'success',
+            last_sync: new Date().toISOString()
+          });
 
-        return Response.json({
-          status: 'success',
-          data: results
-        });
+          return Response.json({
+            status: 'success',
+            data: results
+          });
+        } catch (error) {
+          await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
+            sync_status: 'error',
+            error_message: error.message,
+            last_sync: new Date().toISOString()
+          });
+          
+          return Response.json({
+            status: 'error',
+            message: error.message
+          }, { status: 400 });
+        }
       }
 
       default:
