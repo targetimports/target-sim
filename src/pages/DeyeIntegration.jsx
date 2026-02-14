@@ -164,7 +164,10 @@ export default function DeyeIntegration() {
         manual_token: config.manualToken
       });
       
-      addLog(`Resposta: ${JSON.stringify(response)}`);
+      addLog(`Status HTTP: ${response?.status}`);
+      addLog(`Data.status: ${response?.data?.status}`);
+      addLog(`Data.message: ${response?.data?.message}`);
+      addLog(`Data.debug: ${JSON.stringify(response?.data?.debug || {})}`);
       
       if (response?.data?.status === 'success') {
         addLog('✅ Conexão testada com sucesso!');
