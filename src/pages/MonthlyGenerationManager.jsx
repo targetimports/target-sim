@@ -51,6 +51,7 @@ export default function MonthlyGenerationManager() {
     power_plant_name: '',
     reference_month: '',
     reading_date: '',
+    inverter_generation_kwh: '',
     generated_kwh: '',
     expected_generation_kwh: '',
     injected_kwh: '',
@@ -74,16 +75,25 @@ export default function MonthlyGenerationManager() {
   const createGeneration = useMutation({
     mutationFn: (data) => {
       const plant = powerPlants.find(p => p.id === data.power_plant_id);
+      const inverterGen = data.inverter_generation_kwh ? parseFloat(data.inverter_generation_kwh) : undefined;
+      const concessionaireGen = parseFloat(data.generated_kwh);
+      const variance = (inverterGen && concessionaireGen) ? inverterGen - concessionaireGen : undefined;
+      const variancePerc = (inverterGen && concessionaireGen && concessionaireGen > 0) ? 
+        ((inverterGen - concessionaireGen) / concessionaireGen) * 100 : undefined;
+
       return base44.entities.MonthlyGeneration.create({
         ...data,
         power_plant_name: plant?.name || '',
-        generated_kwh: parseFloat(data.generated_kwh),
+        inverter_generation_kwh: inverterGen,
+        generated_kwh: concessionaireGen,
+        generation_variance_kwh: variance,
+        generation_variance_percentage: variancePerc,
         expected_generation_kwh: data.expected_generation_kwh ? parseFloat(data.expected_generation_kwh) : undefined,
         injected_kwh: data.injected_kwh ? parseFloat(data.injected_kwh) : undefined,
         consumed_kwh: data.consumed_kwh ? parseFloat(data.consumed_kwh) : undefined,
         available_for_allocation_kwh: data.available_for_allocation_kwh ? parseFloat(data.available_for_allocation_kwh) : undefined,
         performance_ratio: data.expected_generation_kwh ? 
-          (parseFloat(data.generated_kwh) / parseFloat(data.expected_generation_kwh)) * 100 : undefined,
+          (concessionaireGen / parseFloat(data.expected_generation_kwh)) * 100 : undefined,
         remaining_kwh: data.available_for_allocation_kwh ? parseFloat(data.available_for_allocation_kwh) : undefined
       });
     },
@@ -97,16 +107,25 @@ export default function MonthlyGenerationManager() {
   const updateGeneration = useMutation({
     mutationFn: ({ id, data }) => {
       const plant = powerPlants.find(p => p.id === data.power_plant_id);
+      const inverterGen = data.inverter_generation_kwh ? parseFloat(data.inverter_generation_kwh) : undefined;
+      const concessionaireGen = parseFloat(data.generated_kwh);
+      const variance = (inverterGen && concessionaireGen) ? inverterGen - concessionaireGen : undefined;
+      const variancePerc = (inverterGen && concessionaireGen && concessionaireGen > 0) ? 
+        ((inverterGen - concessionaireGen) / concessionaireGen) * 100 : undefined;
+
       return base44.entities.MonthlyGeneration.update(id, {
         ...data,
         power_plant_name: plant?.name || '',
-        generated_kwh: parseFloat(data.generated_kwh),
+        inverter_generation_kwh: inverterGen,
+        generated_kwh: concessionaireGen,
+        generation_variance_kwh: variance,
+        generation_variance_percentage: variancePerc,
         expected_generation_kwh: data.expected_generation_kwh ? parseFloat(data.expected_generation_kwh) : undefined,
         injected_kwh: data.injected_kwh ? parseFloat(data.injected_kwh) : undefined,
         consumed_kwh: data.consumed_kwh ? parseFloat(data.consumed_kwh) : undefined,
         available_for_allocation_kwh: data.available_for_allocation_kwh ? parseFloat(data.available_for_allocation_kwh) : undefined,
         performance_ratio: data.expected_generation_kwh ? 
-          (parseFloat(data.generated_kwh) / parseFloat(data.expected_generation_kwh)) * 100 : undefined
+          (concessionaireGen / parseFloat(data.expected_generation_kwh)) * 100 : undefined
       });
     },
     onSuccess: () => {
@@ -174,6 +193,7 @@ export default function MonthlyGenerationManager() {
       power_plant_name: '',
       reference_month: '',
       reading_date: '',
+      inverter_generation_kwh: '',
       generated_kwh: '',
       expected_generation_kwh: '',
       injected_kwh: '',
@@ -193,6 +213,7 @@ export default function MonthlyGenerationManager() {
       power_plant_name: record.power_plant_name,
       reference_month: record.reference_month,
       reading_date: record.reading_date || '',
+      inverter_generation_kwh: record.inverter_generation_kwh?.toString() || '',
       generated_kwh: record.generated_kwh?.toString() || '',
       expected_generation_kwh: record.expected_generation_kwh?.toString() || '',
       injected_kwh: record.injected_kwh?.toString() || '',
@@ -397,12 +418,12 @@ export default function MonthlyGenerationManager() {
                   <tr className="border-b border-slate-200">
                     <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Usina</th>
                     <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Mês Ref.</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Gerado (kWh)</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Esperado (kWh)</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Inversor (kWh)</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Concessionária (kWh)</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Variação</th>
                     <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Performance</th>
                     <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Disponível</th>
                     <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Status</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500">Origem</th>
                     <th className="text-right py-3 px-4 text-sm font-medium text-slate-500">Ações</th>
                   </tr>
                 </thead>
@@ -416,10 +437,22 @@ export default function MonthlyGenerationManager() {
                         {gen.reference_month}
                       </td>
                       <td className="py-4 px-4 text-slate-900">
+                        {gen.inverter_generation_kwh?.toLocaleString() || '-'}
+                      </td>
+                      <td className="py-4 px-4 text-slate-900">
                         {gen.generated_kwh?.toLocaleString()}
                       </td>
-                      <td className="py-4 px-4 text-slate-600">
-                        {gen.expected_generation_kwh?.toLocaleString() || '-'}
+                      <td className="py-4 px-4">
+                        {gen.generation_variance_percentage ? (
+                          <div className="flex items-center gap-2">
+                            <span className={`font-semibold text-xs ${
+                              Math.abs(gen.generation_variance_percentage) <= 2 ? 'text-green-700' : 
+                              Math.abs(gen.generation_variance_percentage) <= 5 ? 'text-yellow-700' : 'text-red-700'
+                            }`}>
+                              {gen.generation_variance_percentage > 0 ? '+' : ''}{gen.generation_variance_percentage.toFixed(1)}%
+                            </span>
+                          </div>
+                        ) : '-'}
                       </td>
                       <td className="py-4 px-4">
                         {gen.performance_ratio ? (
@@ -445,9 +478,6 @@ export default function MonthlyGenerationManager() {
                         <Badge className={statusColors[gen.status]}>
                           {statusLabels[gen.status]}
                         </Badge>
-                      </td>
-                      <td className="py-4 px-4">
-                        <Badge variant="outline">{sourceLabels[gen.source]}</Badge>
                       </td>
                       <td className="py-4 px-4 text-right">
                         <div className="flex justify-end gap-1">
@@ -527,7 +557,19 @@ export default function MonthlyGenerationManager() {
               </div>
 
               <div className="space-y-2">
-                <Label>Energia Gerada (kWh) *</Label>
+                <Label>Geração Inversor (kWh)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.inverter_generation_kwh}
+                  onChange={(e) => setFormData(prev => ({ ...prev, inverter_generation_kwh: e.target.value }))}
+                  placeholder="152000"
+                />
+                <p className="text-xs text-slate-500">Leitura do inversor/monitoramento</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Geração Concessionária (kWh) *</Label>
                 <Input
                   type="number"
                   step="0.01"
@@ -536,6 +578,7 @@ export default function MonthlyGenerationManager() {
                   placeholder="150000"
                   required
                 />
+                <p className="text-xs text-slate-500">Leitura da conta de luz (PDF)</p>
               </div>
 
               <div className="space-y-2">
