@@ -61,6 +61,7 @@ const menuCategories = {
       { name: 'Dashboard Usinas', url: 'PowerPlantDashboard', icon: '⚡' },
       { name: 'Geração Mensal', url: 'MonthlyGenerationManager', icon: '📊' },
       { name: 'Integração Solarman', url: 'SolarmanIntegration', icon: '☀️' },
+      { name: 'Integração Deye Cloud', url: 'DeyeIntegration', icon: '☁️' },
       { name: 'Monitoramento Usinas', url: 'PlantMonitoring', icon: '📡' },
       { name: 'Performance Usinas', url: 'PlantPerformanceDashboard', icon: '📈' },
       { name: 'Manutenções', url: 'MaintenanceManagement', icon: '🔧' },
