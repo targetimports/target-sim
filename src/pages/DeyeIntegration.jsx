@@ -131,11 +131,9 @@ export default function DeyeIntegration() {
       
       if (response?.data?.status === 'success') {
         addLog('✅ Sincronização concluída com sucesso!');
-        alert('✅ Sincronização concluída com sucesso!');
       } else {
         const errorMsg = response?.data?.message || response?.message || 'Falha na sincronização';
         addLog(`❌ Erro: ${errorMsg}`);
-        alert(`❌ Erro: ${errorMsg}`);
       }
       queryClient.invalidateQueries(['deye-integrations']);
     } catch (error) {
