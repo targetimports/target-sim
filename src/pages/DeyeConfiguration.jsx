@@ -28,6 +28,8 @@ export default function DeyeConfiguration() {
     email: '',
     password: '',
     companyId: '',
+    manualToken: '',
+    manualTokenExpiresAt: '',
     enabled: false
   });
 
@@ -47,6 +49,8 @@ export default function DeyeConfiguration() {
         email: config.email || '',
         password: config.password || '',
         companyId: config.companyId || '',
+        manualToken: config.manualToken || '',
+        manualTokenExpiresAt: config.manualTokenExpiresAt || '',
         enabled: config.enabled || false
       });
     }
@@ -245,6 +249,35 @@ export default function DeyeConfiguration() {
                 />
               </div>
 
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">Token Manual (Alternativo)</h3>
+                <p className="text-sm text-slate-600 mb-4">Se você já tem um token válido da DeyeCloud, pode informá-lo aqui para pular a etapa de geração automática.</p>
+
+              {/* Manual Token */}
+              <div className="grid gap-2">
+                <Label htmlFor="manualToken">Token de Acesso</Label>
+                <Input
+                  id="manualToken"
+                  type="password"
+                  placeholder="Cole seu token JWT da DeyeCloud"
+                  value={formData.manualToken}
+                  onChange={(e) => setFormData({...formData, manualToken: e.target.value})}
+                />
+              </div>
+
+              {/* Token Expiration */}
+              <div className="grid gap-2">
+                <Label htmlFor="manualTokenExpiresAt">Válido até</Label>
+                <Input
+                  id="manualTokenExpiresAt"
+                  type="datetime-local"
+                  value={formData.manualTokenExpiresAt ? formData.manualTokenExpiresAt.slice(0, 16) : ''}
+                  onChange={(e) => setFormData({...formData, manualTokenExpiresAt: e.target.value ? new Date(e.target.value).toISOString() : ''})}
+                />
+                <p className="text-xs text-slate-500">Opcional - deixe em branco se não sabe quando expira</p>
+              </div>
+              </div>
+
               {/* Enabled */}
               <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
                 <input
@@ -261,11 +294,11 @@ export default function DeyeConfiguration() {
 
               <div className="flex gap-3 pt-4">
                 <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleTest}
-                  disabled={testing || !formData.appId || !formData.appSecret || !formData.email || !formData.password}
-                >
+                   type="button"
+                   variant="outline"
+                   onClick={handleTest}
+                   disabled={testing || (!formData.manualToken && (!formData.appId || !formData.appSecret || !formData.email || !formData.password))}
+                 >
                   {testing ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
