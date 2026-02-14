@@ -397,18 +397,18 @@ Deno.serve(async (req) => {
         try {
           // Sincronizar todos os dados
           const results = {};
-          
+
           // Info da estação
           const infoResult = await callDeyeAPI('/v1.0/station/latest', {
             stationId: integration.station_id
           });
-          results.station_info = infoResult.data;
+          results.station_info = infoResult;
 
           // Dados em tempo real
           const realtimeResult = await callDeyeAPI('/v1.0/station/latest', {
             stationId: integration.station_id
           });
-          results.realtime = realtimeResult.data;
+          results.realtime = realtimeResult;
 
           // Sincronizar geração mensal (últimos 12 meses)
           const now = new Date();
@@ -421,35 +421,29 @@ Deno.serve(async (req) => {
             startTime: `${startMonth}-01`,
             endTime: endMonth
           });
-          results.monthly_generation = historyResult.data;
+          results.monthly_generation = historyResult;
 
           // Atualizar MonthlyGeneration se houver dados
-          if (historyResult.code === 0 && historyResult.data?.list) {
+          if (historyResult.success === true && historyResult.stationMonthList && historyResult.stationMonthList.length > 0) {
             const plants = await base44.asServiceRole.entities.PowerPlant.filter({
               id: integration.power_plant_id
             });
 
             if (plants.length > 0) {
               const plant = plants[0];
+              let syncedCount = 0;
 
-              for (const item of historyResult.data.list) {
+              for (const item of historyResult.stationMonthList) {
                 try {
-                  let referenceMonth;
-                  if (item.date) {
-                    referenceMonth = item.date.substring(0, 7);
-                  } else if (item.time) {
-                    const date = new Date(item.time * 1000);
-                    referenceMonth = date.toISOString().substring(0, 7);
-                  }
-
-                  if (!referenceMonth) continue;
+                  const referenceMonth = item.statisticsMonth;
+                  if (!referenceMonth || !/^\d{4}-\d{2}$/.test(referenceMonth)) continue;
 
                   const existing = await base44.asServiceRole.entities.MonthlyGeneration.filter({
                     power_plant_id: integration.power_plant_id,
                     reference_month: referenceMonth
                   });
 
-                  const inverterGeneration = parseFloat(item.energy || item.generation || 0);
+                  const inverterGeneration = parseFloat(item.energy) || 0;
 
                   const genData = {
                     power_plant_id: integration.power_plant_id,
@@ -460,7 +454,7 @@ Deno.serve(async (req) => {
                     generated_kwh: inverterGeneration,
                     status: 'confirmed',
                     source: 'other',
-                    notes: 'Sincronizado via Deye Cloud API'
+                    notes: `Sincronizado via Deye Cloud API (${new Date().toLocaleString('pt-BR')})`
                   };
 
                   if (existing.length > 0) {
@@ -471,17 +465,21 @@ Deno.serve(async (req) => {
                   } else {
                     await base44.asServiceRole.entities.MonthlyGeneration.create(genData);
                   }
+                  syncedCount++;
                 } catch (itemError) {
-                  console.error('[DEBUG] Erro ao processar geração mensal:', itemError.message);
+                  console.error('[SYNC] Erro ao processar:', itemError.message);
                 }
               }
+
+              console.log('[SYNC] Total de meses sincronizados:', syncedCount);
             }
           }
 
           await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
             last_data: results,
             sync_status: 'success',
-            last_sync: new Date().toISOString()
+            last_sync: new Date().toISOString(),
+            error_message: null
           });
 
           return Response.json({
@@ -490,12 +488,13 @@ Deno.serve(async (req) => {
             data: results
           });
         } catch (error) {
+          console.error('[SYNC] Erro na sincronização:', error.message);
           await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
             sync_status: 'error',
             error_message: error.message,
             last_sync: new Date().toISOString()
           });
-          
+
           return Response.json({
             status: 'error',
             message: error.message
