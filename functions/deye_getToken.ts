@@ -27,9 +27,12 @@ Deno.serve(async (req) => {
     }
 
     // Montar baseURL conforme região
-    const baseURL = config.region === 'US' 
-      ? 'https://us1-developer.deyecloud.com/v1.0'
-      : 'https://eu1-developer.deyecloud.com/v1.0';
+    const baseURLs = {
+      'EU': 'https://eu1-developer.deyecloud.com/v1.0',
+      'US': 'https://us1-developer.deyecloud.com/v1.0',
+      'AMEA': 'https://amea1-developer.deyecloud.com/v1.0'
+    };
+    const baseURL = baseURLs[config.region] || baseURLs['EU'];
 
     // Calcular SHA-256 da senha
     const passwordHash = createHash('sha256')
