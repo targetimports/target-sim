@@ -83,8 +83,9 @@ Deno.serve(async (req) => {
       }, { status: 500 });
     }
 
-    // Validar resposta
-    if (!tokenData.data || !tokenData.data.accessToken) {
+    // Validar resposta - A API retorna accessToken diretamente, não em data.accessToken
+    const token = tokenData.accessToken;
+    if (!token) {
       return Response.json({
         success: false,
         error: tokenData.msg || 'Token não obtido',
@@ -102,14 +103,14 @@ Deno.serve(async (req) => {
     const existingAuth = await base44.asServiceRole.entities.DeyeAuth.list();
     if (existingAuth && existingAuth.length > 0) {
       await base44.asServiceRole.entities.DeyeAuth.update(existingAuth[0].id, {
-        accessToken: tokenData.data.accessToken,
+        accessToken: token,
         expiresAt: expiresAt.toISOString(),
         obtainedAt: new Date().toISOString(),
         status: 'valid'
       });
     } else {
       await base44.asServiceRole.entities.DeyeAuth.create({
-        accessToken: tokenData.data.accessToken,
+        accessToken: token,
         expiresAt: expiresAt.toISOString(),
         obtainedAt: new Date().toISOString(),
         status: 'valid'
@@ -118,7 +119,7 @@ Deno.serve(async (req) => {
 
     return Response.json({
       success: true,
-      token: tokenData.data.accessToken,
+      token: token,
       expiresAt: expiresAt.toISOString()
     });
 
