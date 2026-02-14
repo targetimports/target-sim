@@ -60,8 +60,12 @@ Deno.serve(async (req) => {
       fetchOptions.body = JSON.stringify(payload);
     }
 
+    console.log('[DEBUG] Calling Deye:', method, path, 'with body:', fetchOptions.body);
+    
     const response = await fetch(url.toString(), fetchOptions);
     const responseText = await response.text();
+    
+    console.log('[DEBUG] Response:', response.status, 'body:', responseText.substring(0, 300));
     
     let responseData;
     try {
