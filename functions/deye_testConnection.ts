@@ -29,12 +29,14 @@ Deno.serve(async (req) => {
       return Response.json({
         success: true,
         message: 'Conexão bem-sucedida!',
-        accountInfo: infoRes.data.data?.data
+        data: infoRes.data.data
       });
     } else {
       return Response.json({
         success: false,
-        message: `Erro na requisição: ${infoRes.data.status} - ${infoRes.data.data?.msg || 'erro desconhecido'}`
+        message: `Erro na requisição: ${infoRes.data.status} - ${infoRes.data.data?.msg || 'erro desconhecido'}`,
+        statusCode: infoRes.data.status,
+        responseData: infoRes.data.data
       });
     }
 
