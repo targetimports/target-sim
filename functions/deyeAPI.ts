@@ -188,10 +188,14 @@ Deno.serve(async (req) => {
         try {
           // Testar conexão buscando lista de estações
           const result = await callDeyeAPI('/v1.0/station/list');
-          
+
+          console.log('[DEBUG] Test connection result:', JSON.stringify(result));
+
           const isSuccess = result.code === 0;
           const errorMessage = !isSuccess ? (result.msg || `Erro com código ${result.code}`) : null;
-          
+
+          console.log('[DEBUG] isSuccess:', isSuccess, 'errorMessage:', errorMessage);
+
           // Atualizar status apenas se for uma integração (não settings)
           if (integration) {
             await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
@@ -207,12 +211,18 @@ Deno.serve(async (req) => {
             });
           }
 
-          return Response.json({
+          const response = {
             status: isSuccess ? 'success' : 'error',
-            message: isSuccess ? 'Conexão testada com sucesso' : errorMessage,
+            message: isSuccess ? 'Conexão testada com sucesso' : (errorMessage || 'Erro desconhecido'),
             data: isSuccess ? result.data : null
-          });
+          };
+
+          console.log('[DEBUG] Test response:', JSON.stringify(response));
+
+          return Response.json(response);
         } catch (error) {
+          console.log('[DEBUG] Test connection error:', error.message);
+
           if (integration) {
             await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
               sync_status: 'error',
@@ -226,7 +236,7 @@ Deno.serve(async (req) => {
               lastTestDate: new Date().toISOString()
             });
           }
-          
+
           return Response.json({
             status: 'error',
             message: error.message
