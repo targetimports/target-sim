@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
     
-    const { action, integration_id, power_plant_id, start_time, end_time } = body;
+    const { action, integration_id, power_plant_id, start_time, end_time, manual_token } = body;
 
     // Buscar configuração - pode ser DeyeIntegration ou DeyeSettings
     let config;
@@ -65,6 +65,12 @@ Deno.serve(async (req) => {
     // Obter token de autenticação
     let authToken;
     const getAuthToken = async () => {
+      // Se foi passado um token manual, usar ele
+      if (manual_token) {
+        console.log('[DEBUG] Usando token manual fornecido');
+        return manual_token;
+      }
+
       let baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES[DEFAULT_REGION];
       let tokenUrl;
       let tokenBody = {};
