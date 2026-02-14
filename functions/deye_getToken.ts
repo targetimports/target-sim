@@ -50,9 +50,9 @@ Deno.serve(async (req) => {
       tokenBody.companyId = String(config.companyId);
     }
 
-    // Requisição de token - IMPORTANTE: appId vai na URL, não no body
+    // Requisição de token - appId vai como query param na URL
     const tokenUrl = new URL(`${baseURL}/account/token`);
-    tokenUrl.searchParams.append('appId', config.appId);
+    tokenUrl.searchParams.append('appId', String(config.appId));
     
     // Log para debug
     const url = tokenUrl.toString();
