@@ -45,6 +45,7 @@ export default function MonthlyGenerationManager() {
   const [selectedPlantForImport, setSelectedPlantForImport] = useState('');
   const [isImporting, setIsImporting] = useState(false);
   const [importMessage, setImportMessage] = useState('');
+  const [syncingDeye, setSyncingDeye] = useState(false);
   
   const [formData, setFormData] = useState({
     power_plant_id: '',
