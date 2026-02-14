@@ -204,7 +204,7 @@ Deno.serve(async (req) => {
           case 'get_station_by_id': {
             // Buscar estação específica por ID
             try {
-              const result = await callDeyeAPI('/v1.0/station/detail', {
+              const result = await callDeyeAPI('/v1.0/station/latest', {
                 stationId: integration.station_id
               });
 
