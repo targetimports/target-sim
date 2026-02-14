@@ -43,8 +43,6 @@ export default function DeyeIntegration() {
   
   const [formData, setFormData] = useState({
     power_plant_id: '',
-    app_id: '',
-    app_secret: '',
     station_id: '',
     is_active: true,
     auto_import_generation: false
