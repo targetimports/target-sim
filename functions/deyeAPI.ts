@@ -180,11 +180,21 @@ Deno.serve(async (req) => {
           const result = await callDeyeAPI('/v1.0/station/list');
           
           const isSuccess = result.code === 0;
-          await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
-            sync_status: isSuccess ? 'success' : 'error',
-            error_message: isSuccess ? null : result.msg,
-            last_sync: new Date().toISOString()
-          });
+          
+          // Atualizar status apenas se for uma integração (não settings)
+          if (integration) {
+            await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
+              sync_status: isSuccess ? 'success' : 'error',
+              error_message: isSuccess ? null : result.msg,
+              last_sync: new Date().toISOString()
+            });
+          } else if (configType === 'settings') {
+            await base44.asServiceRole.entities.DeyeSettings.update(config.id, {
+              lastTestStatus: isSuccess ? 'success' : 'failed',
+              lastTestMessage: isSuccess ? 'Conexão testada com sucesso' : result.msg,
+              lastTestDate: new Date().toISOString()
+            });
+          }
 
           return Response.json({
             status: isSuccess ? 'success' : 'error',
@@ -192,11 +202,19 @@ Deno.serve(async (req) => {
             data: result.data
           });
         } catch (error) {
-          await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
-            sync_status: 'error',
-            error_message: error.message,
-            last_sync: new Date().toISOString()
-          });
+          if (integration) {
+            await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
+              sync_status: 'error',
+              error_message: error.message,
+              last_sync: new Date().toISOString()
+            });
+          } else if (configType === 'settings') {
+            await base44.asServiceRole.entities.DeyeSettings.update(config.id, {
+              lastTestStatus: 'failed',
+              lastTestMessage: error.message,
+              lastTestDate: new Date().toISOString()
+            });
+          }
           
           return Response.json({
             status: 'error',
