@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
 
       case 'get_station_info': {
         // Buscar informações da estação
-        const result = await callDeyeAPI('/station/info', {
+        const result = await callDeyeAPI('/v1.0/station/latest', {
           stationId: integration.station_id
         });
 
