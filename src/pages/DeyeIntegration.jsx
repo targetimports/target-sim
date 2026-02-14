@@ -363,6 +363,9 @@ export default function DeyeIntegration() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>{editingIntegration ? 'Editar Integração' : 'Nova Integração Deye'}</DialogTitle>
+            <DialogDescription>
+              {editingIntegration ? 'Altere as configurações da integração Deye' : 'Configure uma nova integração com Deye Cloud API'}
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
