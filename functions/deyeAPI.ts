@@ -218,13 +218,13 @@ Deno.serve(async (req) => {
           const results = {};
           
           // Info da estação
-          const infoResult = await callDeyeAPI('/station/info', {
+          const infoResult = await callDeyeAPI('/v1.0/station/latest', {
             stationId: integration.station_id
           });
           results.station_info = infoResult.data;
 
           // Dados em tempo real
-          const realtimeResult = await callDeyeAPI('/station/realtime', {
+          const realtimeResult = await callDeyeAPI('/v1.0/station/latest', {
             stationId: integration.station_id
           });
           results.realtime = realtimeResult.data;
