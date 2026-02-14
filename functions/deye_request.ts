@@ -25,7 +25,8 @@ Deno.serve(async (req) => {
     }
 
     const config = settings[0];
-    const baseURL = config.region === 'US' 
+    // AMEA (Américas) = US1, EU = EU1
+    const baseURL = (config.region === 'US' || config.region === 'AMEA')
       ? 'https://us1-developer.deyecloud.com/v1.0'
       : 'https://eu1-developer.deyecloud.com/v1.0';
 
