@@ -75,20 +75,34 @@ Deno.serve(async (req) => {
 
     switch (action) {
       case 'test_connection': {
-        // Testar conexão buscando lista de estações
-        const result = await callDeyeAPI('/station/list');
-        
-        await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
-          sync_status: result.code === 0 ? 'success' : 'error',
-          error_message: result.code === 0 ? null : result.msg,
-          last_sync: new Date().toISOString()
-        });
+        try {
+          // Testar conexão buscando lista de estações
+          const result = await callDeyeAPI('/station/list');
+          
+          const isSuccess = result.code === 0;
+          await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
+            sync_status: isSuccess ? 'success' : 'error',
+            error_message: isSuccess ? null : result.msg,
+            last_sync: new Date().toISOString()
+          });
 
-        return Response.json({
-          status: result.code === 0 ? 'success' : 'error',
-          message: result.msg || 'Conexão testada',
-          data: result.data
-        });
+          return Response.json({
+            status: isSuccess ? 'success' : 'error',
+            message: result.msg || 'Conexão testada com sucesso',
+            data: result.data
+          });
+        } catch (error) {
+          await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
+            sync_status: 'error',
+            error_message: error.message,
+            last_sync: new Date().toISOString()
+          });
+          
+          return Response.json({
+            status: 'error',
+            message: error.message
+          }, { status: 400 });
+        }
       }
 
       case 'get_station_info': {
