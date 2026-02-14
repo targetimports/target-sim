@@ -53,7 +53,10 @@ Deno.serve(async (req) => {
       }
     };
 
-    if (method !== 'GET' && Object.keys(payload).length > 0) {
+    // IMPORTANTE: POST sempre com body JSON (mínimo {})
+    if (method === 'POST') {
+      fetchOptions.body = JSON.stringify(payload && Object.keys(payload).length > 0 ? payload : {});
+    } else if (method !== 'GET' && Object.keys(payload).length > 0) {
       fetchOptions.body = JSON.stringify(payload);
     }
 
