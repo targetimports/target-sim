@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
         // Usar método de integração (app_id + app_secret + timestamp)
         const timestamp = Date.now();
 
-        // Construir string para assinatura
+        // Construir string para assinatura: appId=XXX&timestamp=YYYZappSecret
         const signString = `appId=${config.app_id}&timestamp=${timestamp}${config.app_secret}`;
 
         const signature = createHash('sha256')
@@ -81,6 +81,8 @@ Deno.serve(async (req) => {
 
         tokenUrl = `${baseUrl}/v1.0/account/token?appId=${config.app_id}&timestamp=${timestamp}&sign=${signature}`;
         tokenBody = {};
+
+        console.log('[DEBUG] Integration auth - URL:', tokenUrl);
       } else {
         // Usar método de settings (email + password SHA-256)
         const passwordHash = createHash('sha256')
@@ -96,6 +98,8 @@ Deno.serve(async (req) => {
           password: passwordHash,
           ...(config.companyId && { companyId: config.companyId })
         };
+
+        console.log('[DEBUG] Settings auth - appId:', config.appId, 'email:', config.email);
       }
 
       const response = await fetch(tokenUrl, {
@@ -107,6 +111,8 @@ Deno.serve(async (req) => {
       });
 
       const text = await response.text();
+      console.log('[DEBUG] Token response status:', response.status, 'body:', text.substring(0, 300));
+
       let data;
       try {
         data = JSON.parse(text);
