@@ -24,42 +24,56 @@ Deno.serve(async (req) => {
     let configType;
     let integration;
     
-    try {
-      if (integration_id) {
-        const integrations = await base44.asServiceRole.entities.DeyeIntegration.filter({
-          id: integration_id
-        });
-        integration = integrations[0];
-        config = integration;
-        configType = 'integration';
-      } else if (power_plant_id) {
-        const integrations = await base44.asServiceRole.entities.DeyeIntegration.filter({
-          power_plant_id,
-          is_active: true
-        });
-        integration = integrations[0];
-        config = integration;
-        configType = 'integration';
-      } else {
-        // Tentar usar DeyeSettings como fallback
-        const settings = await base44.asServiceRole.entities.DeyeSettings.list();
-        if (settings && settings.length > 0) {
-          config = settings[0];
-          configType = 'settings';
-        }
-      }
-
-      if (!config) {
+    // Para list_stations, só precisa do token (config settings)
+    if (action === 'list_stations') {
+      const settings = await base44.asServiceRole.entities.DeyeSettings.list();
+      if (!settings || settings.length === 0) {
         return Response.json({
           status: 'error',
-          message: 'Configuração Deye não encontrada'
+          message: 'Configuração Deye Settings não encontrada'
         }, { status: 404 });
       }
-    } catch (error) {
-      return Response.json({
-        status: 'error',
-        message: `Erro ao buscar configuração: ${error.message}`
-      }, { status: 400 });
+      config = settings[0];
+      configType = 'settings';
+    } else {
+      // Para outras ações, buscar integração específica
+      try {
+        if (integration_id) {
+          const integrations = await base44.asServiceRole.entities.DeyeIntegration.filter({
+            id: integration_id
+          });
+          integration = integrations[0];
+          config = integration;
+          configType = 'integration';
+        } else if (power_plant_id) {
+          const integrations = await base44.asServiceRole.entities.DeyeIntegration.filter({
+            power_plant_id,
+            is_active: true
+          });
+          integration = integrations[0];
+          config = integration;
+          configType = 'integration';
+        } else {
+          // Tentar usar DeyeSettings como fallback
+          const settings = await base44.asServiceRole.entities.DeyeSettings.list();
+          if (settings && settings.length > 0) {
+            config = settings[0];
+            configType = 'settings';
+          }
+        }
+
+        if (!config) {
+          return Response.json({
+            status: 'error',
+            message: 'Configuração Deye não encontrada'
+          }, { status: 404 });
+        }
+      } catch (error) {
+        return Response.json({
+          status: 'error',
+          message: `Erro ao buscar configuração: ${error.message}`
+        }, { status: 400 });
+      }
     }
 
     // Obter token de autenticação
