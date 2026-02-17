@@ -41,6 +41,8 @@ export default function DeyeIntegration() {
   const [integrationToDelete, setIntegrationToDelete] = useState(null);
   const [syncingId, setSyncingId] = useState(null);
   const [logs, setLogs] = useState([]);
+  const [listingStations, setListingStations] = useState(false);
+  const [availableStations, setAvailableStations] = useState([]);
   
   const [formData, setFormData] = useState({
     power_plant_id: '',
@@ -142,6 +144,45 @@ export default function DeyeIntegration() {
       console.error('Erro ao sincronizar:', error);
     } finally {
       setSyncingId(null);
+    }
+  };
+
+  const handleListStations = async () => {
+    setListingStations(true);
+    setLogs([]);
+    setAvailableStations([]);
+    addLog('🔍 Listando todas as estações...');
+    try {
+      const config = settings[0];
+      if (!config?.manualToken) {
+        addLog('❌ Token manual não configurado');
+        setListingStations(false);
+        return;
+      }
+
+      addLog('Token encontrado, buscando estações...');
+      const response = await base44.functions.invoke('deyeAPI', {
+        action: 'list_stations',
+        manual_token: config.manualToken
+      });
+      
+      if (response?.data?.status === 'success') {
+        const stations = response.data.stations || [];
+        setAvailableStations(stations);
+        addLog(`✅ ${stations.length} estações encontradas!`);
+        stations.forEach((s, i) => {
+          addLog(`${i + 1}. ${s.stationName || s.name} (ID: ${s.stationId || s.id})`);
+        });
+      } else {
+        const errorMsg = response?.data?.message || 'Falha ao listar estações';
+        addLog(`❌ Erro: ${errorMsg}`);
+      }
+    } catch (error) {
+      const errorMsg = error?.response?.data?.message || error.message || 'Erro desconhecido';
+      addLog(`❌ Erro: ${errorMsg}`);
+      console.error('Erro ao listar estações:', error);
+    } finally {
+      setListingStations(false);
     }
   };
 
@@ -253,10 +294,16 @@ export default function DeyeIntegration() {
                 </div>
               </div>
             </div>
-            <Button onClick={() => { resetForm(); setIsDialogOpen(true); }} className="bg-blue-500 hover:bg-blue-600">
-              <Plus className="w-4 h-4 mr-2" />
-              Nova Integração
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={handleListStations} variant="outline" disabled={listingStations} className="text-white border-white hover:bg-white/10">
+                <Activity className={`w-4 h-4 mr-2 ${listingStations ? 'animate-spin' : ''}`} />
+                Listar Estações
+              </Button>
+              <Button onClick={() => { resetForm(); setIsDialogOpen(true); }} className="bg-blue-500 hover:bg-blue-600">
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Integração
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -439,12 +486,36 @@ export default function DeyeIntegration() {
 
             <div className="space-y-2">
               <Label>Station ID *</Label>
-              <Input
-                value={formData.station_id}
-                onChange={(e) => setFormData(prev => ({ ...prev, station_id: e.target.value }))}
-                placeholder="ID da estação no Deye Cloud"
-                required
-              />
+              {availableStations.length > 0 ? (
+                <Select 
+                  value={formData.station_id} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, station_id: value }))}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma estação" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableStations.map(station => (
+                      <SelectItem key={station.stationId || station.id} value={String(station.stationId || station.id)}>
+                        {station.stationName || station.name} (ID: {station.stationId || station.id})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  value={formData.station_id}
+                  onChange={(e) => setFormData(prev => ({ ...prev, station_id: e.target.value }))}
+                  placeholder="ID da estação no Deye Cloud"
+                  required
+                />
+              )}
+              {availableStations.length === 0 && (
+                <p className="text-xs text-slate-500">
+                  Clique em "Listar Estações" no topo para ver as estações disponíveis
+                </p>
+              )}
             </div>
 
             <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
