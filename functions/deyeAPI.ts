@@ -223,26 +223,37 @@ Deno.serve(async (req) => {
               let page = 1;
               let hasMore = true;
 
-              while (hasMore) {
-                console.log(`[LIST] Buscando página ${page} com ${pageSize} estações...`);
+              while (hasMore && page <= 20) { // Max 20 páginas = 2000 estações
+                console.log(`[LIST] Buscando página ${page}...`);
                 const result = await callDeyeAPI('/v1.0/station/list', {
                   page: page,
                   size: pageSize
                 });
 
+                console.log(`[LIST] Resposta página ${page}:`, JSON.stringify(result).substring(0, 500));
+                console.log(`[LIST] success=${result.success}, stationList.length=${result.stationList?.length}, total=${result.total}, totalPage=${result.totalPage}`);
+
                 if (result.success === true && result.stationList && result.stationList.length > 0) {
                   allStations = allStations.concat(result.stationList);
-                  console.log(`[LIST] Página ${page}: ${result.stationList.length} estações. Total: ${allStations.length}`);
+                  console.log(`[LIST] ✓ Página ${page}: +${result.stationList.length} estações. Total acumulado: ${allStations.length}`);
 
-                  // Se retornou menos que o pageSize, é a última página
-                  hasMore = result.stationList.length === pageSize;
-                  page++;
+                  // Verificar se tem mais páginas (usando totalPage se disponível)
+                  if (result.totalPage && page >= result.totalPage) {
+                    console.log(`[LIST] Atingiu última página: ${result.totalPage}`);
+                    hasMore = false;
+                  } else if (result.stationList.length < pageSize) {
+                    console.log(`[LIST] Última página (retornou menos que ${pageSize})`);
+                    hasMore = false;
+                  } else {
+                    page++;
+                  }
                 } else {
+                  console.log(`[LIST] Sem mais dados na página ${page}`);
                   hasMore = false;
                 }
               }
 
-              console.log(`[LIST] Total de estações encontradas: ${allStations.length}`);
+              console.log(`[LIST] ✅ Total final: ${allStations.length} estações`);
 
               return Response.json({
                 status: 'success',
@@ -250,6 +261,7 @@ Deno.serve(async (req) => {
                 stations: allStations
               });
             } catch (error) {
+              console.error('[LIST] Erro:', error);
               return Response.json({
                 status: 'error',
                 message: error.message
