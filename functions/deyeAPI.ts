@@ -152,11 +152,9 @@ Deno.serve(async (req) => {
         };
 
         console.log('[AUTH] 📡 POST', tokenUrl);
-        console.log('[AUTH] appId tipo:', typeof config.appId, 'valor:', config.appId);
-        console.log('[AUTH] appSecret tipo:', typeof config.appSecret, 'valor:', config.appSecret ? '***' : 'null');
+        console.log('[AUTH] appId:', config.appId);
         console.log('[AUTH] email:', config.email);
-        console.log('[AUTH] companyId:', companyId || 'vazio');
-        console.log('[AUTH] Body completo:', JSON.stringify(tokenBody));
+        console.log('[AUTH] Body (sem senha):', JSON.stringify({ appSecret: '***', email: config.email, companyId }));
 
         const response = await fetch(tokenUrl, {
           method: 'POST',
