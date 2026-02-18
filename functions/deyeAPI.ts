@@ -41,9 +41,7 @@ Deno.serve(async (req) => {
           console.log('[INIT] Buscando DeyeSettings...');
           const settings = await base44.asServiceRole.entities.DeyeSettings.list();
           console.log('[INIT] Settings encontradas:', settings.length);
-          if (settings.length > 0) {
-            console.log('[INIT] Primeira setting:', JSON.stringify(settings[0]).substring(0, 500));
-          }
+
           if (!settings || settings.length === 0) {
             console.log('[INIT] ❌ DeyeSettings não encontrada');
             return Response.json({
@@ -51,12 +49,32 @@ Deno.serve(async (req) => {
               message: 'Configuração Deye Settings não encontrada'
             }, { status: 404 });
           }
-          config = settings[0];
-          configType = 'settings';
-          console.log('[INIT] ✅ DeyeSettings carregada');
+
+          // ✅ DESEMPACOTAR .data (o objeto real está dentro de "data")
+          const raw = settings[0];
+          config = raw.data ?? raw;
+
+          console.log('[INIT] Keys na raiz:', Object.keys(raw).slice(0, 10));
+          console.log('[INIT] Keys em .data:', Object.keys(raw.data || {}).slice(0, 10));
+          console.log('[INIT] ✅ DeyeSettings desempacotada');
           console.log('[INIT] config.region:', config.region);
           console.log('[INIT] config.appId:', config.appId);
+          console.log('[INIT] config.appSecret:', config.appSecret ? '✓' : '❌');
           console.log('[INIT] config.email:', config.email);
+          console.log('[INIT] config.password:', config.password ? '✓' : '❌');
+
+          // ✅ Validar campos obrigatórios ANTES de tentar auth
+          const required = ['appId', 'appSecret', 'email', 'password'];
+          const missing = required.filter(k => !String(config?.[k] ?? '').trim());
+          if (missing.length > 0) {
+            console.log('[INIT] ❌ Config Deye incompleta:', missing);
+            return Response.json({
+              status: 'error',
+              message: `Config Deye incompleta: faltando ${missing.join(', ')}`
+            }, { status: 400 });
+          }
+
+          configType = 'settings';
         } else {
       // Para outras ações, buscar integração específica
       try {
