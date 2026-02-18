@@ -13,11 +13,23 @@ const DEYE_API_BASES = {
 const DEFAULT_REGION = 'US';
 
 Deno.serve(async (req) => {
-  try {
-    const base44 = createClientFromRequest(req);
-    const body = await req.json();
-    
-    const { action, integration_id, power_plant_id, start_time, end_time, manual_token, includeBusinessContext } = body;
+        try {
+          console.log('[START] 🚀 deyeAPI function iniciada');
+          const base44 = createClientFromRequest(req);
+
+          console.log('[AUTH] Verificando autenticação...');
+          const user = await base44.auth.me();
+          if (!user) {
+            console.log('[AUTH] ❌ Usuário NÃO autenticado');
+            return Response.json({ status: 'error', message: 'Não autenticado' }, { status: 401 });
+          }
+          console.log('[AUTH] ✅ Usuário autenticado:', user.email);
+
+          const body = await req.json();
+          console.log('[BODY] Body recebido:', JSON.stringify(body).substring(0, 200));
+
+          const { action, integration_id, power_plant_id, start_time, end_time, manual_token, includeBusinessContext } = body;
+          console.log('[PARAMS] action:', action, 'integration_id:', integration_id, 'power_plant_id:', power_plant_id);
 
     // Buscar configuração - pode ser DeyeIntegration ou DeyeSettings
     let config;
