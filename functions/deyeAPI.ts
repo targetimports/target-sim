@@ -99,15 +99,16 @@ Deno.serve(async (req) => {
 
       // Validar credenciais
       console.log('[AUTH] Validando credenciais:');
-      console.log('[AUTH]   appId:', config.appId || '❌ FALTANDO');
-      console.log('[AUTH]   appSecret:', config.appSecret ? '✓ presente' : '❌ FALTANDO');
-      console.log('[AUTH]   email:', config.email || '❌ FALTANDO');
-      console.log('[AUTH]   password:', config.password ? '✓ presente' : '❌ FALTANDO');
+      console.log('[AUTH]   config.appId (tipo:', typeof config.appId, '):', config.appId);
+      console.log('[AUTH]   config.appSecret (tipo:', typeof config.appSecret, '):', config.appSecret ? '✓ presente' : '❌ FALTANDO');
+      console.log('[AUTH]   config.email:', config.email);
+      console.log('[AUTH]   config.password:', config.password ? '✓ presente' : '❌ FALTANDO');
 
       let baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES[DEFAULT_REGION];
       console.log('[AUTH] baseUrl:', baseUrl);
 
       // Método de settings (email + password SHA-256) - é o padrão
+      console.log('[AUTH] Verificando IF (appId && appSecret && email && password):', !!(config.appId && config.appSecret && config.email && config.password));
       if (config.appId && config.appSecret && config.email && config.password) {
         const passwordHash = createHash('sha256')
           .update(config.password)
