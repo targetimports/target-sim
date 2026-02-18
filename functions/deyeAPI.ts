@@ -283,8 +283,8 @@ Deno.serve(async (req) => {
                 }
               }
 
-              // Se achou estações, retorna
-              if (allStations.length > 0) {
+              // Se achou estações E não quer forçar Business context, retorna
+              if (allStations.length > 0 && !includeBusinessContext) {
                 console.log(`[LIST] ✅ Encontradas ${allStations.length} estações no contexto pessoal`);
                 return Response.json({
                   status: 'success',
@@ -294,8 +294,8 @@ Deno.serve(async (req) => {
                 });
               }
 
-              // Se não encontrou, tentar descobrir empresas (Business context)
-              console.log('[LIST] 2️⃣ Contexto pessoal vazio. Descobrindo empresas (Business context)...');
+              // Tentar descobrir empresas (Business context)
+              console.log('[LIST] 2️⃣ Descobrindo empresas (Business context)...');
               const companies = await getAccountInfo();
 
               if (companies && companies.length > 0) {
