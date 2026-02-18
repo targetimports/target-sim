@@ -247,46 +247,31 @@ Deno.serve(async (req) => {
 
     switch (action) {
           case 'list_stations': {
-                // Listar todas as estações com paginação
                 try {
-                  console.log('[LIST] ⚙️ Iniciando list_stations...');
-                  console.log('[LIST] authToken:', authToken.substring(0, 50) + '...');
-                  console.log('[LIST] includeBusinessContext:', includeBusinessContext);
+                  console.log('[LIST] ⚙️ list_stations - includeBusinessContext:', includeBusinessContext);
 
-                  // Primeira tentativa: listar no contexto atual (pessoal)
-                  console.log('[LIST] 1️⃣ Tentando listar estações no contexto pessoal...');
+                  // Listar no contexto pessoal
+                  console.log('[LIST] 1️⃣ Listando estações (contexto pessoal)...');
                   let allStations = [];
-                  const pageSize = 100;
 
-                  for (let page = 1; page <= 20; page++) {
-                    console.log(`[LIST] Chamando callDeyeAPI para página ${page}...`);
-                    const result = await callDeyeAPI('/v1.0/station/list', {
-                      page: page,
-                      size: pageSize
-                    });
+                  const result = await callDeyeAPI('/v1.0/station/list', {});
 
-                    console.log(`[LIST] Resposta página ${page}:`, JSON.stringify(result).substring(0, 300));
-
-                    if (result.success === true && result.stationList && result.stationList.length > 0) {
-                      allStations = allStations.concat(result.stationList);
-                      console.log(`[LIST] ✓ Página ${page}: +${result.stationList.length}. Total: ${allStations.length}`);
-                      if (result.stationList.length < pageSize) break;
-                    } else {
-                      console.log(`[LIST] - Página ${page}: sem estações ou erro`);
-                      break;
-                    }
+                  if (result.stationList && result.stationList.length > 0) {
+                    allStations = result.stationList;
+                    console.log(`[LIST] ✅ Personal: ${allStations.length} estações`);
+                  } else {
+                    console.log('[LIST] - Personal: sem estações');
                   }
 
-              // Se achou estações E não quer forçar Business context, retorna
-              if (allStations.length > 0 && !includeBusinessContext) {
-                console.log(`[LIST] ✅ Encontradas ${allStations.length} estações no contexto pessoal`);
-                return Response.json({
-                  status: 'success',
-                  total: allStations.length,
-                  stations: allStations,
-                  context: 'personal'
-                });
-              }
+                  // Se achou estações E não quer forçar Business context, retorna
+                  if (allStations.length > 0 && !includeBusinessContext) {
+                    return Response.json({
+                      status: 'success',
+                      total: allStations.length,
+                      stations: allStations,
+                      context: 'personal'
+                    });
+                  }
 
               // Tentar descobrir empresas (Business context)
               console.log('[LIST] 2️⃣ Descobrindo empresas (Business context)...');
