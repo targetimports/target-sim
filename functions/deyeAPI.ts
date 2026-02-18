@@ -260,48 +260,90 @@ Deno.serve(async (req) => {
           case 'list_stations': {
             // Listar todas as estações com paginação
             try {
-              const pageSize = 100;
+              // Primeira tentativa: listar no contexto atual (pessoal)
+              console.log('[LIST] 1️⃣ Tentando listar estações no contexto pessoal...');
               let allStations = [];
-              let page = 1;
-              let hasMore = true;
+              const pageSize = 100;
 
-              while (hasMore && page <= 20) { // Max 20 páginas = 2000 estações
-                console.log(`[LIST] Buscando página ${page}...`);
+              for (let page = 1; page <= 20; page++) {
                 const result = await callDeyeAPI('/v1.0/station/list', {
                   page: page,
                   size: pageSize
                 });
 
-                console.log(`[LIST] Resposta página ${page}:`, JSON.stringify(result).substring(0, 500));
-                console.log(`[LIST] success=${result.success}, stationList.length=${result.stationList?.length}, total=${result.total}, totalPage=${result.totalPage}`);
-
                 if (result.success === true && result.stationList && result.stationList.length > 0) {
                   allStations = allStations.concat(result.stationList);
-                  console.log(`[LIST] ✓ Página ${page}: +${result.stationList.length} estações. Total acumulado: ${allStations.length}`);
-
-                  // Verificar se tem mais páginas (usando totalPage se disponível)
-                  if (result.totalPage && page >= result.totalPage) {
-                    console.log(`[LIST] Atingiu última página: ${result.totalPage}`);
-                    hasMore = false;
-                  } else if (result.stationList.length < pageSize) {
-                    console.log(`[LIST] Última página (retornou menos que ${pageSize})`);
-                    hasMore = false;
-                  } else {
-                    page++;
-                  }
+                  console.log(`[LIST] ✓ Página ${page}: +${result.stationList.length}. Total: ${allStations.length}`);
+                  if (result.stationList.length < pageSize) break;
                 } else {
-                  console.log(`[LIST] Sem mais dados na página ${page}`);
-                  hasMore = false;
+                  break;
                 }
               }
 
-              console.log(`[LIST] ✅ Total final: ${allStations.length} estações`);
+              // Se achou estações, retorna
+              if (allStations.length > 0) {
+                console.log(`[LIST] ✅ Encontradas ${allStations.length} estações no contexto pessoal`);
+                return Response.json({
+                  status: 'success',
+                  total: allStations.length,
+                  stations: allStations,
+                  context: 'personal'
+                });
+              }
+
+              // Se não encontrou, tentar descobrir empresas (Business context)
+              console.log('[LIST] 2️⃣ Contexto pessoal vazio. Descobrindo empresas (Business context)...');
+              const companies = await getAccountInfo();
+
+              if (companies && companies.length > 0) {
+                console.log(`[LIST] 🏢 Encontradas ${companies.length} empresas:`, companies.map(c => c.companyId).join(', '));
+
+                // Tentar cada empresa até encontrar estações
+                for (const company of companies) {
+                  console.log(`[LIST] Tentando empresa: ${company.companyId}`);
+
+                  // Regenerar token com companyId
+                  authToken = await getAuthToken(company.companyId);
+
+                  allStations = [];
+                  for (let page = 1; page <= 20; page++) {
+                    const result = await callDeyeAPI('/v1.0/station/list', {
+                      page: page,
+                      size: pageSize
+                    });
+
+                    if (result.success === true && result.stationList && result.stationList.length > 0) {
+                      allStations = allStations.concat(result.stationList);
+                      console.log(`[LIST] ✓ Empresa ${company.companyId}, página ${page}: +${result.stationList.length}. Total: ${allStations.length}`);
+                      if (result.stationList.length < pageSize) break;
+                    } else {
+                      break;
+                    }
+                  }
+
+                  if (allStations.length > 0) {
+                    console.log(`[LIST] ✅ Encontradas ${allStations.length} estações na empresa ${company.companyId}`);
+                    return Response.json({
+                      status: 'success',
+                      total: allStations.length,
+                      stations: allStations,
+                      context: 'business',
+                      companyId: company.companyId
+                    });
+                  }
+                }
+
+                return Response.json({
+                  status: 'error',
+                  message: 'Nenhuma estação encontrada em nenhuma das empresas',
+                  companies: companies.map(c => c.companyId)
+                }, { status: 400 });
+              }
 
               return Response.json({
-                status: 'success',
-                total: allStations.length,
-                stations: allStations
-              });
+                status: 'error',
+                message: 'Nenhuma estação encontrada e nenhuma empresa configurada'
+              }, { status: 400 });
             } catch (error) {
               console.error('[LIST] Erro:', error);
               return Response.json({
