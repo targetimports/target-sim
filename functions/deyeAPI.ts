@@ -85,6 +85,13 @@ Deno.serve(async (req) => {
       console.log('[AUTH] 🔐 Obtendo token OpenAPI...');
       console.log('[AUTH] forceCompanyId:', forceCompanyId);
 
+      // Validar credenciais
+      console.log('[AUTH] Validando credenciais:');
+      console.log('[AUTH]   appId:', config.appId ? '✓ presente' : '❌ FALTANDO');
+      console.log('[AUTH]   appSecret:', config.appSecret ? '✓ presente' : '❌ FALTANDO');
+      console.log('[AUTH]   email:', config.email ? '✓ presente' : '❌ FALTANDO');
+      console.log('[AUTH]   password:', config.password ? '✓ presente' : '❌ FALTANDO');
+
       let baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES[DEFAULT_REGION];
       console.log('[AUTH] baseUrl:', baseUrl);
 
