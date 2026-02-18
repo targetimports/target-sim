@@ -162,13 +162,17 @@ export default function DeyeIntegration() {
       if (response?.data?.status === 'success') {
         const stations = response.data.stations || [];
         setAvailableStations(stations);
-        addLog(`✅ ${stations.length} estações encontradas!`);
-        stations.forEach((s, i) => {
-          addLog(`${i + 1}. ${s.stationName || s.name} (ID: ${s.stationId || s.id})`);
+        addLog(`✅ Sucesso! ${stations.length} estações encontradas`);
+        addLog(`Contexto: ${response.data.context}`);
+        stations.slice(0, 10).forEach((s, i) => {
+          addLog(`${i + 1}. ${s.stationName || s.name} (${s.stationId || s.id})`);
         });
+        if (stations.length > 10) {
+          addLog(`... e mais ${stations.length - 10}`);
+        }
       } else {
         const errorMsg = response?.data?.message || 'Falha ao listar estações';
-        addLog(`❌ Erro: ${errorMsg}`);
+        addLog(`❌ ${errorMsg}`);
       }
     } catch (error) {
       const errorMsg = error?.response?.data?.message || error.message || 'Erro desconhecido';
