@@ -189,10 +189,13 @@ Deno.serve(async (req) => {
       }
     };
 
-    // Obter token uma vez
+    // Obter token OpenAPI inicial
     try {
+      console.log('[INIT] 🚀 Obtendo token inicial (contexto pessoal)...');
       authToken = await getAuthToken();
+      console.log('[INIT] ✅ Token obtido com sucesso');
     } catch (error) {
+      console.log('[INIT] ❌ Erro ao obter token:', error.message);
       return Response.json({
         status: 'error',
         message: error.message
