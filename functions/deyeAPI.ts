@@ -87,9 +87,9 @@ Deno.serve(async (req) => {
 
       // Validar credenciais
       console.log('[AUTH] Validando credenciais:');
-      console.log('[AUTH]   appId:', config.appId ? '✓ presente' : '❌ FALTANDO');
+      console.log('[AUTH]   appId:', config.appId || '❌ FALTANDO');
       console.log('[AUTH]   appSecret:', config.appSecret ? '✓ presente' : '❌ FALTANDO');
-      console.log('[AUTH]   email:', config.email ? '✓ presente' : '❌ FALTANDO');
+      console.log('[AUTH]   email:', config.email || '❌ FALTANDO');
       console.log('[AUTH]   password:', config.password ? '✓ presente' : '❌ FALTANDO');
 
       let baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES[DEFAULT_REGION];
