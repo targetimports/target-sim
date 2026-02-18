@@ -301,14 +301,17 @@ Deno.serve(async (req) => {
               if (companies && companies.length > 0) {
                 console.log(`[LIST] 🏢 Encontradas ${companies.length} empresas:`, companies.map(c => c.companyId).join(', '));
 
-                // Tentar cada empresa até encontrar estações
+                let businessStations = [];
+                let successCompany = null;
+
+                // Tentar cada empresa
                 for (const company of companies) {
-                  console.log(`[LIST] Tentando empresa: ${company.companyId}`);
+                  console.log(`[LIST] 🔍 Tentando empresa: ${company.companyId} (${company.companyName})`);
 
                   // Regenerar token com companyId
                   authToken = await getAuthToken(company.companyId);
 
-                  allStations = [];
+                  let companyStations = [];
                   for (let page = 1; page <= 20; page++) {
                     const result = await callDeyeAPI('/v1.0/station/list', {
                       page: page,
@@ -316,30 +319,44 @@ Deno.serve(async (req) => {
                     });
 
                     if (result.success === true && result.stationList && result.stationList.length > 0) {
-                      allStations = allStations.concat(result.stationList);
-                      console.log(`[LIST] ✓ Empresa ${company.companyId}, página ${page}: +${result.stationList.length}. Total: ${allStations.length}`);
+                      companyStations = companyStations.concat(result.stationList);
+                      console.log(`[LIST] ✓ Empresa ${company.companyId}, página ${page}: +${result.stationList.length}. Total acumulado: ${companyStations.length}`);
                       if (result.stationList.length < pageSize) break;
                     } else {
+                      console.log(`[LIST] - Empresa ${company.companyId}: Nenhuma estação na página ${page}`);
                       break;
                     }
                   }
 
-                  if (allStations.length > 0) {
-                    console.log(`[LIST] ✅ Encontradas ${allStations.length} estações na empresa ${company.companyId}`);
-                    return Response.json({
-                      status: 'success',
-                      total: allStations.length,
-                      stations: allStations,
-                      context: 'business',
-                      companyId: company.companyId
-                    });
+                  if (companyStations.length > 0) {
+                    console.log(`[LIST] ✅ Empresa ${company.companyId} tem ${companyStations.length} estações`);
+                    businessStations = businessStations.concat(companyStations);
+                    if (!successCompany) successCompany = company.companyId;
                   }
+                }
+
+                // Consolidar pessoal + business
+                let consolidatedStations = allStations.concat(businessStations);
+                console.log(`[LIST] 📊 Consolidado: ${allStations.length} pessoal + ${businessStations.length} business = ${consolidatedStations.length} total`);
+
+                if (consolidatedStations.length > 0) {
+                  return Response.json({
+                    status: 'success',
+                    total: consolidatedStations.length,
+                    stations: consolidatedStations,
+                    context: allStations.length > 0 && businessStations.length > 0 ? 'both' : (businessStations.length > 0 ? 'business' : 'personal'),
+                    breakdown: {
+                      personal: allStations.length,
+                      business: businessStations.length,
+                      successCompanies: companies.filter(c => businessStations.some(s => true)).map(c => c.companyId)
+                    }
+                  });
                 }
 
                 return Response.json({
                   status: 'error',
                   message: 'Nenhuma estação encontrada em nenhuma das empresas',
-                  companies: companies.map(c => c.companyId)
+                  companies: companies.map(c => ({id: c.companyId, name: c.companyName}))
                 }, { status: 400 });
               }
 
