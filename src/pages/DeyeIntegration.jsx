@@ -151,19 +151,11 @@ export default function DeyeIntegration() {
     setListingStations(true);
     setLogs([]);
     setAvailableStations([]);
-    addLog(forceBusinessContext ? '🔍 Listando (forçando Business context)...' : '🔍 Listando todas as estações...');
+    addLog(forceBusinessContext ? '🔍 Listando (Business context)...' : '🔍 Listando (contexto pessoal)...');
     try {
-      const config = settings[0];
-      if (!config?.manualToken) {
-        addLog('❌ Token manual não configurado');
-        setListingStations(false);
-        return;
-      }
-
-      addLog('Token encontrado, buscando estações...');
+      addLog('Iniciando list_stations...');
       const response = await base44.functions.invoke('deyeAPI', {
         action: 'list_stations',
-        manual_token: config.manualToken,
         includeBusinessContext: forceBusinessContext
       });
       
