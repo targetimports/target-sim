@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
 
     // Obter token de autenticação
     let authToken;
-    const getAuthToken = async () => {
+    const getAuthToken = async (forceCompanyId = null) => {
       // Se foi passado um token manual, usar ele
       if (manual_token) {
         console.log('[DEBUG] Usando token manual fornecido');
@@ -115,15 +115,18 @@ Deno.serve(async (req) => {
 
         tokenUrl = `${baseUrl}/v1.0/account/token`;
 
+        // Usar companyId forçado ou config.companyId ou tentar descobrir
+        let companyId = forceCompanyId || config.companyId;
+        
         tokenBody = {
           appId: config.appId,
           appSecret: config.appSecret,
           email: config.email,
           password: passwordHash,
-          ...(config.companyId && { companyId: config.companyId })
+          ...(companyId && { companyId: companyId })
         };
 
-        console.log('[DEBUG] Settings auth - appId:', config.appId, 'email:', config.email);
+        console.log('[DEBUG] Settings auth - appId:', config.appId, 'email:', config.email, 'companyId:', companyId);
       } else {
         throw new Error('Credenciais Deye não configuradas corretamente');
       }
@@ -156,6 +159,45 @@ Deno.serve(async (req) => {
       
       // Se chegou aqui, é erro
       throw new Error(`Falha ao obter token (código: ${data.code || data.status}, msg: ${data.msg || 'desconhecido'}). Resposta completa: ${text.substring(0, 300)}`);
+    };
+
+    // Obter companyIds disponíveis
+    const getAccountInfo = async () => {
+      try {
+        const baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES[DEFAULT_REGION];
+        
+        // Primeiro, obter token pessoal (sem companyId)
+        let personalToken = await getAuthToken(null);
+        
+        console.log('[ACCOUNT] Chamando /account/info...');
+        const response = await fetch(`${baseUrl}/v1.0/account/info`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${personalToken}`
+          },
+          body: JSON.stringify({})
+        });
+
+        const text = await response.text();
+        console.log('[ACCOUNT] Response status:', response.status, 'body:', text.substring(0, 500));
+
+        let data = JSON.parse(text);
+        
+        if (data.success === true && data.companyList && data.companyList.length > 0) {
+          console.log('[ACCOUNT] Encontradas empresas:', data.companyList.length);
+          return data.companyList;
+        } else if (data.companyList && data.companyList.length === 0) {
+          console.log('[ACCOUNT] Nenhuma empresa encontrada, usando contexto pessoal');
+          return [];
+        } else {
+          console.log('[ACCOUNT] Erro ao buscar info:', data);
+          return [];
+        }
+      } catch (error) {
+        console.error('[ACCOUNT] Erro:', error.message);
+        return [];
+      }
     };
 
     // Obter token uma vez
