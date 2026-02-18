@@ -273,76 +273,52 @@ Deno.serve(async (req) => {
                     });
                   }
 
-              // Tentar descobrir empresas (Business context)
-              console.log('[LIST] 2️⃣ Descobrindo empresas (Business context)...');
+              // Fallback: tentar Business context (descobrir empresas)
+              console.log('[LIST] 2️⃣ Tentando descobrir empresas (Business context)...');
               const companies = await getAccountInfo();
 
               if (companies && companies.length > 0) {
-                console.log(`[LIST] 🏢 Encontradas ${companies.length} empresas:`, companies.map(c => c.companyId).join(', '));
+                console.log(`[LIST] 🏢 Encontradas ${companies.length} empresas`);
 
                 let businessStations = [];
-                let successCompany = null;
 
                 // Tentar cada empresa
                 for (const company of companies) {
-                  console.log(`[LIST] 🔍 Tentando empresa: ${company.companyId} (${company.companyName})`);
+                  console.log(`[LIST] 🔍 Testando empresa: ${company.companyId} (${company.companyName})`);
+                  try {
+                    // Regenerar token com companyId
+                    authToken = await getAuthToken(company.companyId);
 
-                  // Regenerar token com companyId
-                  authToken = await getAuthToken(company.companyId);
+                    const companyResult = await callDeyeAPI('/v1.0/station/list', {});
 
-                  let companyStations = [];
-                  for (let page = 1; page <= 20; page++) {
-                    const result = await callDeyeAPI('/v1.0/station/list', {
-                      page: page,
-                      size: pageSize
-                    });
-
-                    if (result.success === true && result.stationList && result.stationList.length > 0) {
-                      companyStations = companyStations.concat(result.stationList);
-                      console.log(`[LIST] ✓ Empresa ${company.companyId}, página ${page}: +${result.stationList.length}. Total acumulado: ${companyStations.length}`);
-                      if (result.stationList.length < pageSize) break;
+                    if (companyResult.stationList && companyResult.stationList.length > 0) {
+                      businessStations = businessStations.concat(companyResult.stationList);
+                      console.log(`[LIST] ✅ Empresa ${company.companyId}: +${companyResult.stationList.length}`);
                     } else {
-                      console.log(`[LIST] - Empresa ${company.companyId}: Nenhuma estação na página ${page}`);
-                      break;
+                      console.log(`[LIST] - Empresa ${company.companyId}: sem estações`);
                     }
-                  }
-
-                  if (companyStations.length > 0) {
-                    console.log(`[LIST] ✅ Empresa ${company.companyId} tem ${companyStations.length} estações`);
-                    businessStations = businessStations.concat(companyStations);
-                    if (!successCompany) successCompany = company.companyId;
+                  } catch (err) {
+                    console.log(`[LIST] ⚠️ Erro na empresa ${company.companyId}:`, err.message);
                   }
                 }
 
-                // Consolidar pessoal + business
-                let consolidatedStations = allStations.concat(businessStations);
-                console.log(`[LIST] 📊 Consolidado: ${allStations.length} pessoal + ${businessStations.length} business = ${consolidatedStations.length} total`);
+                const totalStations = allStations.concat(businessStations);
+                console.log(`[LIST] 📊 Total: ${allStations.length} pessoal + ${businessStations.length} business = ${totalStations.length}`);
 
-                if (consolidatedStations.length > 0) {
+                if (totalStations.length > 0) {
                   return Response.json({
                     status: 'success',
-                    total: consolidatedStations.length,
-                    stations: consolidatedStations,
-                    context: allStations.length > 0 && businessStations.length > 0 ? 'both' : (businessStations.length > 0 ? 'business' : 'personal'),
-                    breakdown: {
-                      personal: allStations.length,
-                      business: businessStations.length,
-                      successCompanies: companies.filter(c => businessStations.some(s => true)).map(c => c.companyId)
-                    }
+                    total: totalStations.length,
+                    stations: totalStations,
+                    context: allStations.length > 0 && businessStations.length > 0 ? 'both' : (businessStations.length > 0 ? 'business' : 'personal')
                   });
                 }
-
-                return Response.json({
-                  status: 'error',
-                  message: 'Nenhuma estação encontrada em nenhuma das empresas',
-                  companies: companies.map(c => ({id: c.companyId, name: c.companyName}))
-                }, { status: 400 });
               }
 
               return Response.json({
                 status: 'error',
-                message: 'Nenhuma estação encontrada e nenhuma empresa configurada'
-              }, { status: 400 });
+                message: 'Nenhuma estação encontrada'
+              }, { status: 404 });
             } catch (error) {
               console.error('[LIST] Erro:', error);
               return Response.json({
