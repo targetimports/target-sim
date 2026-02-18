@@ -296,7 +296,11 @@ export default function DeyeIntegration() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button onClick={handleListStations} variant="outline" disabled={listingStations} className="text-white border-white hover:bg-white/10">
+              <Button onClick={() => handleListStations(true)} variant="outline" disabled={listingStations} className="text-white border-white hover:bg-white/10">
+                <Activity className={`w-4 h-4 mr-2 ${listingStations ? 'animate-spin' : ''}`} />
+                Business Context
+              </Button>
+              <Button onClick={() => handleListStations(false)} variant="outline" disabled={listingStations} className="text-white border-white hover:bg-white/10">
                 <Activity className={`w-4 h-4 mr-2 ${listingStations ? 'animate-spin' : ''}`} />
                 Listar Estações
               </Button>
