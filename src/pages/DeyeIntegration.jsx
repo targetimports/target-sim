@@ -147,11 +147,11 @@ export default function DeyeIntegration() {
     }
   };
 
-  const handleListStations = async () => {
+  const handleListStations = async (forceBusinessContext = false) => {
     setListingStations(true);
     setLogs([]);
     setAvailableStations([]);
-    addLog('🔍 Listando todas as estações...');
+    addLog(forceBusinessContext ? '🔍 Listando (forçando Business context)...' : '🔍 Listando todas as estações...');
     try {
       const config = settings[0];
       if (!config?.manualToken) {
@@ -163,7 +163,8 @@ export default function DeyeIntegration() {
       addLog('Token encontrado, buscando estações...');
       const response = await base44.functions.invoke('deyeAPI', {
         action: 'list_stations',
-        manual_token: config.manualToken
+        manual_token: config.manualToken,
+        includeBusinessContext: forceBusinessContext
       });
       
       if (response?.data?.status === 'success') {
