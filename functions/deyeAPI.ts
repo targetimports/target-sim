@@ -78,14 +78,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Obter token de autenticação
+    // Obter token de autenticação OpenAPI
     let authToken;
     const getAuthToken = async (forceCompanyId = null) => {
-      // Se foi passado um token manual, usar ele
-      if (manual_token) {
-        console.log('[DEBUG] Usando token manual fornecido');
-        return manual_token;
-      }
+      // NUNCA usar manual_token - sempre usar o fluxo OpenAPI correto
+      console.log('[AUTH] 🔐 Obtendo token OpenAPI...');
+      console.log('[AUTH] forceCompanyId:', forceCompanyId);
 
       let baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES[DEFAULT_REGION];
       let tokenUrl;
