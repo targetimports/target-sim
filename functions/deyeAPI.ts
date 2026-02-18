@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
     
-    const { action, integration_id, power_plant_id, start_time, end_time, manual_token } = body;
+    const { action, integration_id, power_plant_id, start_time, end_time, manual_token, includeBusinessContext } = body;
 
     // Buscar configuração - pode ser DeyeIntegration ou DeyeSettings
     let config;
