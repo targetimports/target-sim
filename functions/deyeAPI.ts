@@ -142,9 +142,9 @@ Deno.serve(async (req) => {
 
         let companyId = forceCompanyId || config.companyId;
 
-        const tokenUrl = `${baseUrl}/v1.0/account/token`;
+        // ✅ appId vai na QUERY, resto no BODY
+        const tokenUrl = `${baseUrl}/v1.0/account/token?appId=${encodeURIComponent(config.appId)}`;
         const tokenBody = {
-          appId: config.appId,
           appSecret: config.appSecret,
           email: config.email,
           password: passwordHash,
