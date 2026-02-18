@@ -183,19 +183,22 @@ Deno.serve(async (req) => {
         console.log('[ACCOUNT] Response status:', response.status, 'body:', text.substring(0, 500));
 
         let data = JSON.parse(text);
+        console.log('[ACCOUNT] Parsed data:', JSON.stringify(data).substring(0, 500));
         
-        if (data.success === true && data.companyList && data.companyList.length > 0) {
-          console.log('[ACCOUNT] Encontradas empresas:', data.companyList.length);
-          return data.companyList;
-        } else if (data.companyList && data.companyList.length === 0) {
-          console.log('[ACCOUNT] Nenhuma empresa encontrada, usando contexto pessoal');
-          return [];
+        // Deye retorna em data.data ou diretamente em data
+        const accountInfo = data.data || data;
+        const companies = accountInfo.companyList || [];
+        
+        console.log('[ACCOUNT] Companies encontradas:', companies.length);
+        if (companies.length > 0) {
+          console.log('[ACCOUNT] ✅ Encontradas', companies.length, 'empresas:', companies.map(c => c.companyId).join(', '));
+          return companies;
         } else {
-          console.log('[ACCOUNT] Erro ao buscar info:', data);
+          console.log('[ACCOUNT] ⚠️ Nenhuma empresa, contexto pessoal apenas');
           return [];
         }
       } catch (error) {
-        console.error('[ACCOUNT] Erro:', error.message);
+        console.error('[ACCOUNT] ❌ Erro:', error.message);
         return [];
       }
     };
