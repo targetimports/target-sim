@@ -86,39 +86,18 @@ Deno.serve(async (req) => {
       console.log('[AUTH] forceCompanyId:', forceCompanyId);
 
       let baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES[DEFAULT_REGION];
-      let tokenUrl;
-      let tokenBody = {};
+      console.log('[AUTH] baseUrl:', baseUrl);
 
-      // SEMPRE usar integração se disponível (prioridade)
-      const isIntegration = configType === 'integration' && config.app_id && config.app_secret;
-
-      if (isIntegration) {
-        // Usar método de integração (app_id + app_secret + timestamp)
-        const timestamp = Date.now();
-
-        // Construir string para assinatura: appId=XXX&timestamp=YYYZappSecret
-        const signString = `appId=${config.app_id}&timestamp=${timestamp}${config.app_secret}`;
-
-        const signature = createHash('sha256')
-          .update(signString)
-          .digest('hex');
-
-        tokenUrl = `${baseUrl}/v1.0/account/token?appId=${config.app_id}&timestamp=${timestamp}&sign=${signature}`;
-        tokenBody = {};
-
-        console.log('[DEBUG] Integration auth - appId:', config.app_id, 'stationId:', config.station_id);
-      } else if (config.appId && config.appSecret && config.email && config.password) {
-        // Usar método de settings (email + password SHA-256)
+      // Método de settings (email + password SHA-256) - é o padrão
+      if (config.appId && config.appSecret && config.email && config.password) {
         const passwordHash = createHash('sha256')
           .update(config.password)
           .digest('hex');
 
-        tokenUrl = `${baseUrl}/v1.0/account/token`;
-
-        // Usar companyId forçado ou config.companyId ou tentar descobrir
         let companyId = forceCompanyId || config.companyId;
-        
-        tokenBody = {
+
+        const tokenUrl = `${baseUrl}/v1.0/account/token`;
+        const tokenBody = {
           appId: config.appId,
           appSecret: config.appSecret,
           email: config.email,
@@ -126,39 +105,40 @@ Deno.serve(async (req) => {
           ...(companyId && { companyId: companyId })
         };
 
-        console.log('[DEBUG] Settings auth - appId:', config.appId, 'email:', config.email, 'companyId:', companyId);
+        console.log('[AUTH] 📡 POST', tokenUrl);
+        console.log('[AUTH] Body:', { appId: config.appId, email: config.email, companyId });
+
+        const response = await fetch(tokenUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(tokenBody)
+        });
+
+        const text = await response.text();
+        console.log('[AUTH] Status:', response.status);
+        console.log('[AUTH] Response:', text.substring(0, 500));
+
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          throw new Error(`❌ JSON parse error (status ${response.status}): ${text.substring(0, 200)}`);
+        }
+
+        // Aceitar sucesso com accessToken presente
+        const token = data.data?.accessToken || data.accessToken;
+        if (token) {
+          console.log('[AUTH] ✅ Token obtido:', token.substring(0, 50) + '...');
+          return token;
+        }
+
+        // Erro
+        throw new Error(`❌ Token failed (code: ${data.code || data.status}, msg: ${data.msg || 'unknown'})`);
       } else {
-        throw new Error('Credenciais Deye não configuradas corretamente');
+        throw new Error('❌ Credenciais incompletas (appId, appSecret, email, password)');
       }
-
-      const response = await fetch(tokenUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(tokenBody)
-      });
-
-      const text = await response.text();
-      console.log('[DEBUG] Token response status:', response.status, 'body:', text.substring(0, 300));
-
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (e) {
-        throw new Error(`Resposta inválida ao obter token (status ${response.status}): ${text.substring(0, 200)}`);
-      }
-
-      // Aceitar sucesso com accessToken presente (pode estar em data.data ou data.accessToken)
-      if (data.data?.accessToken) {
-        return data.data.accessToken;
-      }
-      if (data.accessToken) {
-        return data.accessToken;
-      }
-      
-      // Se chegou aqui, é erro
-      throw new Error(`Falha ao obter token (código: ${data.code || data.status}, msg: ${data.msg || 'desconhecido'}). Resposta completa: ${text.substring(0, 300)}`);
     };
 
     // Obter companyIds disponíveis
