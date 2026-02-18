@@ -206,45 +206,42 @@ Deno.serve(async (req) => {
     const callDeyeAPI = async (endpoint, params = {}) => {
       try {
         const baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES[DEFAULT_REGION];
-        const url = new URL(`${baseUrl}${endpoint}`);
+        const url = `${baseUrl}${endpoint}`;
 
-        // Adicionar parâmetros
-        Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+        console.log('[API] 📡 POST', url);
+        console.log('[API] Body:', JSON.stringify(params).substring(0, 200));
+        console.log('[API] Token:', authToken.substring(0, 50) + '...');
 
-        console.log('[DEBUG] callDeyeAPI URL:', url.toString());
-        console.log('[DEBUG] callDeyeAPI params:', JSON.stringify(params));
-        console.log('[DEBUG] callDeyeAPI token:', authToken.substring(0, 50) + '...');
-
-        const response = await fetch(url.toString(), {
+        const response = await fetch(url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`
+            'Authorization': `bearer ${authToken}`
           },
           body: JSON.stringify(params)
         });
 
         const text = await response.text();
-
-        console.log('[DEBUG] callDeyeAPI response status:', response.status);
-        console.log('[DEBUG] callDeyeAPI response text:', text.substring(0, 500));
+        console.log('[API] Status:', response.status);
+        console.log('[API] Response:', text.substring(0, 500));
 
         // Verificar se é JSON válido
         let data;
         try {
           data = JSON.parse(text);
         } catch (e) {
-          console.log('[DEBUG] JSON parse error:', e.message, 'text:', text.substring(0, 300));
-          throw new Error(`API Deye retornou resposta inválida (status ${response.status}): ${text.substring(0, 200)}`);
+          throw new Error(`Invalid JSON (status ${response.status}): ${text.substring(0, 200)}`);
         }
 
-        console.log('[DEBUG] Parsed data:', JSON.stringify(data).substring(0, 300));
+        if (response.status !== 200) {
+          const errorMsg = data.msg || data.message || JSON.stringify(data);
+          throw new Error(`HTTP ${response.status}: ${errorMsg}`);
+        }
 
-        // Sempre retornar a resposta - o caller verifica se foi sucesso
         return data;
       } catch (error) {
-        console.log('[DEBUG] callDeyeAPI error:', error.message);
-        throw new Error(`Erro ao chamar API Deye em ${endpoint}: ${error.message}`);
+        console.log('[API] ❌ Error:', error.message);
+        throw error;
       }
     };
 
