@@ -24,18 +24,20 @@ Deno.serve(async (req) => {
     let configType;
     let integration;
     
-    // Para list_stations, só precisa do token (config settings)
-    if (action === 'list_stations') {
-      const settings = await base44.asServiceRole.entities.DeyeSettings.list();
-      if (!settings || settings.length === 0) {
-        return Response.json({
-          status: 'error',
-          message: 'Configuração Deye Settings não encontrada'
-        }, { status: 404 });
-      }
-      config = settings[0];
-      configType = 'settings';
-    } else {
+    // Para list_stations, buscar settings (não precisa manual_token)
+        if (action === 'list_stations') {
+          const settings = await base44.asServiceRole.entities.DeyeSettings.list();
+          if (!settings || settings.length === 0) {
+            console.log('[INIT] ❌ DeyeSettings não encontrada');
+            return Response.json({
+              status: 'error',
+              message: 'Configuração Deye Settings não encontrada'
+            }, { status: 404 });
+          }
+          config = settings[0];
+          configType = 'settings';
+          console.log('[INIT] ✅ DeyeSettings carregada - region:', config.region);
+        } else {
       // Para outras ações, buscar integração específica
       try {
         if (integration_id) {
