@@ -236,6 +236,8 @@ export default function DeyeIntegration() {
     setFormData({
       power_plant_id: integration.power_plant_id,
       station_id: integration.station_id,
+      app_id: integration.app_id || '',
+      app_secret: integration.app_secret || '',
       is_active: integration.is_active,
       auto_import_generation: integration.auto_import_generation || false
     });
