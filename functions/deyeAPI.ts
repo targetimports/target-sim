@@ -628,15 +628,34 @@ Deno.serve(async (req) => {
           console.log('[SYNC] Tentando com timestamps: startTs:', startTs, 'endTs:', endTs);
           let historyResult = null;
           
-          // Documentação oficial Deye: /v1.0/station/history
-          // Campos: stationId (int64), startAt (string yyyy-MM), endAt (string yyyy-MM), granularity (int, 3=mensal)
-          const historyResult = await callDeyeAPI('/v1.0/station/history', {
-            stationId: stationIdNum,
-            startAt: startMonthStr,   // yyyy-MM
-            endAt: endMonthStr,        // yyyy-MM
-            granularity: 3
+          // Usar /v1.0/station/history/power que usa timestamps em segundos (mais confiável)
+          // OU usar a lista de estações que já retornou os dados de geração
+          // Por enquanto, tentar /station/history com diferentes payloads
+          
+          // Abordagem: usar o endpoint de lista de estações que JÁ retornou os dados
+          // e extrair a geração da estação específica
+          const stationListResult = await callDeyeAPI('/v1.0/station/list', {
+            page: 1,
+            size: 1,
+            stationId: stationIdNum
           });
-          console.log('[SYNC] historyResult:', JSON.stringify(historyResult).substring(0, 500));
+          console.log('[SYNC] stationListResult:', JSON.stringify(stationListResult).substring(0, 500));
+          
+          // Também tentar station history com campos corretos
+          let historyResult = null;
+          try {
+            // Tentar como aparece em alguns exemplos da API - apenas stationId e meses
+            historyResult = await callDeyeAPI('/v1.0/station/history', {
+              stationId: stationIdNum,
+              startAt: startMonthStr,
+              endAt: endMonthStr,
+              granularity: 3
+            });
+            console.log('[SYNC] historyResult:', JSON.stringify(historyResult).substring(0, 500));
+          } catch (histErr) {
+            console.log('[SYNC] /station/history falhou:', histErr.message);
+            historyResult = { success: false, stationMonthList: [] };
+          }
           results.monthly_generation = historyResult;
 
           // Atualizar MonthlyGeneration se houver dados
