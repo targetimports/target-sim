@@ -643,9 +643,10 @@ Deno.serve(async (req) => {
           const startDate = new Date(now.getFullYear() - 1, now.getMonth(), 1);
           const startDateStr = startDate.toISOString().substring(0, 7); // YYYY-MM
 
-          console.log('[SYNC] Chamando /v1.0/station/history:', { stationId: stationIdNum, startAt: startDateStr, endAt: endDate, granularity: 3 });
-
           let historyResult = null;
+
+          // Tentativa 1: /v1.0/station/history
+          console.log('[SYNC] Tentativa 1: /v1.0/station/history com stationId:', stationIdNum);
           try {
             historyResult = await callDeyeAPI('/v1.0/station/history', {
               stationId: stationIdNum,
@@ -653,11 +654,26 @@ Deno.serve(async (req) => {
               endAt: endDate,
               granularity: 3
             });
-            console.log('[SYNC] ✅ /station/history sucesso:', JSON.stringify(historyResult).substring(0, 300));
-          } catch (histErr) {
-            console.log('[SYNC] ❌ /station/history falhou:', histErr.message);
-            historyResult = { success: false, stationMonthList: [] };
+            console.log('[SYNC] ✅ /station/history sucesso');
+          } catch (err1) {
+            console.log('[SYNC] ❌ /station/history falhou:', err1.message);
+
+            // Tentativa 2: /v1.0/device/history (pode ser que history seja por device, não station)
+            console.log('[SYNC] Tentativa 2: /v1.0/device/history');
+            try {
+              historyResult = await callDeyeAPI('/v1.0/device/history', {
+                deviceId: stationIdNum,
+                startAt: startDateStr,
+                endAt: endDate,
+                granularity: 3
+              });
+              console.log('[SYNC] ✅ /device/history sucesso');
+            } catch (err2) {
+              console.log('[SYNC] ❌ /device/history falhou:', err2.message);
+              historyResult = { success: false, stationMonthList: [] };
+            }
           }
+
           results.monthly_generation = historyResult;
 
           // Atualizar MonthlyGeneration se houver dados
