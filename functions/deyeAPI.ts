@@ -296,18 +296,31 @@ Deno.serve(async (req) => {
                 try {
                   console.log('[LIST] ⚙️ list_stations - includeBusinessContext:', includeBusinessContext);
 
+                  // Função para buscar TODAS as páginas de estações
+                  const fetchAllStations = async () => {
+                    const PAGE_SIZE = 100;
+                    let page = 1;
+                    let allStations = [];
+                    let total = null;
+
+                    while (true) {
+                      const result = await callDeyeAPI('/v1.0/station/list', { page, size: PAGE_SIZE });
+                      const list = result.stationList || [];
+                      allStations = allStations.concat(list);
+
+                      if (total === null) total = result.total || 0;
+                      console.log(`[LIST] Página ${page}: +${list.length} estações (${allStations.length}/${total})`);
+
+                      if (list.length < PAGE_SIZE || allStations.length >= total) break;
+                      page++;
+                    }
+                    return allStations;
+                  };
+
                   // Listar no contexto pessoal
                   console.log('[LIST] 1️⃣ Listando estações (contexto pessoal)...');
-                  let allStations = [];
-
-                  const result = await callDeyeAPI('/v1.0/station/list', {});
-
-                  if (result.stationList && result.stationList.length > 0) {
-                    allStations = result.stationList;
-                    console.log(`[LIST] ✅ Personal: ${allStations.length} estações`);
-                  } else {
-                    console.log('[LIST] - Personal: sem estações');
-                  }
+                  let allStations = await fetchAllStations();
+                  console.log(`[LIST] ✅ Personal: ${allStations.length} estações`);
 
                   // Se achou estações E não quer forçar Business context, retorna
                   if (allStations.length > 0 && !includeBusinessContext) {
