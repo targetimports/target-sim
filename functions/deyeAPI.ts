@@ -348,11 +348,11 @@ Deno.serve(async (req) => {
                     // Regenerar token com companyId
                     authToken = await getAuthToken(company.companyId);
 
-                    const companyResult = await callDeyeAPI('/v1.0/station/list', {});
+                    const companyStations = await fetchAllStations();
 
-                    if (companyResult.stationList && companyResult.stationList.length > 0) {
-                      businessStations = businessStations.concat(companyResult.stationList);
-                      console.log(`[LIST] ✅ Empresa ${company.companyId}: +${companyResult.stationList.length}`);
+                    if (companyStations.length > 0) {
+                      businessStations = businessStations.concat(companyStations);
+                      console.log(`[LIST] ✅ Empresa ${company.companyId}: +${companyStations.length}`);
                     } else {
                       console.log(`[LIST] - Empresa ${company.companyId}: sem estações`);
                     }
