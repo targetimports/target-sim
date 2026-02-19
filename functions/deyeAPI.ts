@@ -172,8 +172,8 @@ Deno.serve(async (req) => {
           throw new Error(`❌ JSON parse error (status ${response.status}): ${text.substring(0, 200)}`);
         }
 
-        // Aceitar sucesso com accessToken presente
-        const token = data.data?.accessToken || data.accessToken;
+        // Aceitar sucesso com accessToken ou token presente
+        const token = pickTokenFromResponse(data);
         if (token) {
           console.log('[AUTH] ✅ Token obtido:', token.substring(0, 50) + '...');
           return token;
