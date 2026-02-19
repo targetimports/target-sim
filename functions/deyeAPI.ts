@@ -557,10 +557,43 @@ Deno.serve(async (req) => {
 
       case 'sync_all': {
         try {
-          // Garantir contexto business para sincronização
-          if (config.companyId) {
+          // A integração tem app_id e app_secret próprios que podem ter acesso à estação
+          // Tentar usar as credenciais da própria integração se disponíveis
+          const integrationAppId = integration.app_id;
+          const integrationAppSecret = integration.app_secret;
+          
+          if (integrationAppId && integrationAppSecret && integrationAppId !== config.appId) {
+            console.log('[SYNC] Usando credenciais da integração (app_id específico):', integrationAppId);
+            // Gerar token com as credenciais da integração
+            const baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES[DEFAULT_REGION];
+            const { createHash } = await import('node:crypto');
+            const passwordHash = createHash('sha256').update(config.password).digest('hex');
+            const tokenUrl = `${baseUrl}/v1.0/account/token?appId=${encodeURIComponent(integrationAppId)}`;
+            const tokenResp = await fetch(tokenUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ appSecret: integrationAppSecret, email: config.email, password: passwordHash })
+            });
+            const tokenData = await tokenResp.json();
+            const token = tokenData.data?.accessToken || tokenData.accessToken;
+            if (token) {
+              authToken = token;
+              console.log('[SYNC] ✅ Token da integração obtido');
+            } else {
+              console.log('[SYNC] ⚠️ Falha ao obter token da integração, usando token padrão');
+            }
+          } else if (config.companyId) {
             console.log('[SYNC] Usando contexto business (companyId):', config.companyId);
             authToken = await getAuthToken(config.companyId);
+          } else {
+            console.log('[SYNC] Sem companyId, tentando buscar companyId via account/info...');
+            const companies = await getAccountInfo();
+            if (companies.length > 0) {
+              const firstCompany = companies[0];
+              const cid = firstCompany.companyId || firstCompany.id;
+              console.log('[SYNC] Usando primeiro companyId encontrado:', cid);
+              authToken = await getAuthToken(cid);
+            }
           }
 
           // Sincronizar todos os dados
