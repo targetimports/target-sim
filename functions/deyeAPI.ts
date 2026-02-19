@@ -373,6 +373,12 @@ Deno.serve(async (req) => {
 
           case 'test_connection': {
             try {
+              // Usar token business context (companyId configurado)
+              if (config.companyId) {
+                console.log('[TEST] Regenerando token com companyId:', config.companyId);
+                authToken = await getAuthToken(config.companyId);
+              }
+
               const stationId = integration?.station_id;
               console.log('[TEST] Buscando station_id:', stationId);
 
