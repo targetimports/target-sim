@@ -43,6 +43,8 @@ export default function DeyeIntegration() {
   const [logs, setLogs] = useState([]);
   const [listingStations, setListingStations] = useState(false);
   const [availableStations, setAvailableStations] = useState([]);
+  const [stationSearch, setStationSearch] = useState('');
+  const [showStationDropdown, setShowStationDropdown] = useState(false);
   
   const [formData, setFormData] = useState({
     power_plant_id: '',
