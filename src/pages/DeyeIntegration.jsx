@@ -117,18 +117,10 @@ export default function DeyeIntegration() {
     setLogs([]);
     addLog('Iniciando sincronização...');
     try {
-      const config = settings[0];
-      if (!config?.manualToken) {
-        addLog('❌ Token manual não configurado');
-        setSyncingId(null);
-        return;
-      }
-
-      addLog('Token encontrado, chamando API...');
+      addLog('Chamando API...');
       const response = await base44.functions.invoke('deyeAPI', {
         action,
-        integration_id: integrationId,
-        manual_token: config.manualToken
+        integration_id: integrationId
       });
       
       addLog(`Resposta recebida: ${JSON.stringify(response)}`);
