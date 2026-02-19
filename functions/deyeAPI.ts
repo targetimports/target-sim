@@ -637,16 +637,16 @@ Deno.serve(async (req) => {
           // Sincronizar geração mensal (últimos 12 meses)
           const now = new Date();
           const stationIdNum = parseInt(integration.station_id, 10);
+          const stationIdStr = String(integration.station_id);
 
-          // Deye /v1.0/station/history para granularity=3 (mensal) quer: startAt yyyy-MM, endAt yyyy-MM
           const endDate = now.toISOString().substring(0, 7); // YYYY-MM
           const startDate = new Date(now.getFullYear() - 1, now.getMonth(), 1);
           const startDateStr = startDate.toISOString().substring(0, 7); // YYYY-MM
 
           let historyResult = null;
 
-          // Tentativa 1: /v1.0/station/history
-          console.log('[SYNC] Tentativa 1: /v1.0/station/history com stationId:', stationIdNum);
+          // Tentativa 1: /v1.0/station/history com stationId como int
+          console.log('[SYNC] T1: /station/history (stationId int)');
           try {
             historyResult = await callDeyeAPI('/v1.0/station/history', {
               stationId: stationIdNum,
@@ -654,23 +654,37 @@ Deno.serve(async (req) => {
               endAt: endDate,
               granularity: 3
             });
-            console.log('[SYNC] ✅ /station/history sucesso');
+            console.log('[SYNC] ✅ T1 sucesso');
           } catch (err1) {
-            console.log('[SYNC] ❌ /station/history falhou:', err1.message);
+            console.log('[SYNC] T1 falhou:', err1.message);
 
-            // Tentativa 2: /v1.0/device/history (pode ser que history seja por device, não station)
-            console.log('[SYNC] Tentativa 2: /v1.0/device/history');
+            // Tentativa 2: /v1.0/station/history com stationId como string
+            console.log('[SYNC] T2: /station/history (stationId string)');
             try {
-              historyResult = await callDeyeAPI('/v1.0/device/history', {
-                deviceId: stationIdNum,
+              historyResult = await callDeyeAPI('/v1.0/station/history', {
+                stationId: stationIdStr,
                 startAt: startDateStr,
                 endAt: endDate,
                 granularity: 3
               });
-              console.log('[SYNC] ✅ /device/history sucesso');
+              console.log('[SYNC] ✅ T2 sucesso');
             } catch (err2) {
-              console.log('[SYNC] ❌ /device/history falhou:', err2.message);
-              historyResult = { success: false, stationMonthList: [] };
+              console.log('[SYNC] T2 falhou:', err2.message);
+
+              // Tentativa 3: /v1.0/device/history
+              console.log('[SYNC] T3: /device/history (deviceId int)');
+              try {
+                historyResult = await callDeyeAPI('/v1.0/device/history', {
+                  deviceId: stationIdNum,
+                  startAt: startDateStr,
+                  endAt: endDate,
+                  granularity: 3
+                });
+                console.log('[SYNC] ✅ T3 sucesso');
+              } catch (err3) {
+                console.log('[SYNC] T3 falhou:', err3.message);
+                historyResult = { success: false, stationMonthList: [] };
+              }
             }
           }
 
