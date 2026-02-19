@@ -576,14 +576,14 @@ Deno.serve(async (req) => {
 
           // Sincronizar geração mensal (últimos 12 meses)
           const now = new Date();
-          const endMonth = now.toISOString().substring(0, 7);
+          const endDate = now.toISOString().split('T')[0]; // YYYY-MM-DD
           const startDate = new Date(now.getFullYear() - 1, now.getMonth(), 1);
-          const startMonth = startDate.toISOString().substring(0, 7);
+          const startDateStr = startDate.toISOString().split('T')[0]; // YYYY-MM-DD
 
           const historyResult = await callDeyeAPI('/v1.0/station/history', {
             stationId: integration.station_id,
-            startTime: `${startMonth}-01`,
-            endTime: endMonth
+            startTime: startDateStr,
+            endTime: endDate
           });
           results.monthly_generation = historyResult;
 
