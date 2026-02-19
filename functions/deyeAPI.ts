@@ -635,43 +635,22 @@ Deno.serve(async (req) => {
 
           // Sincronizar geração mensal (últimos 12 meses)
           const now = new Date();
-          const endDate = now.toISOString().split('T')[0]; // YYYY-MM-DD
-          const startDate = new Date(now.getFullYear() - 1, now.getMonth(), 1);
-          const startDateStr = startDate.toISOString().split('T')[0]; // YYYY-MM-DD
-
           const stationIdNum = parseInt(integration.station_id, 10);
-          // Tentar diferentes formatos de data e stationId para descobrir o formato correto
-          console.log('[SYNC] Tentando /station/history com stationId int:', stationIdNum);
-          
-          // Tentar diferentes formatos - a API pode precisar de timestamp em ms
-          const startMonthStr = startDateStr.substring(0, 7);
-          const endMonthStr = endDate.substring(0, 7);
-          
-          // Converter YYYY-MM para timestamps em milissegundos (início e fim do mês)
-          const startTs = new Date(startMonthStr + '-01T00:00:00Z').getTime();
-          const endTs = new Date(endDate + 'T23:59:59Z').getTime();
-          
-          console.log('[SYNC] Tentando com timestamps: startTs:', startTs, 'endTs:', endTs);
+
+          // Deye /v1.0/station/history para granularity=3 (mensal) quer: startAt yyyy-MM, endAt yyyy-MM
+          const endDate = now.toISOString().substring(0, 7); // YYYY-MM
+          const startDate = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+          const startDateStr = startDate.toISOString().substring(0, 7); // YYYY-MM
+
+          console.log('[SYNC] Chamando /v1.0/station/history:', { stationId: stationIdNum, startAt: startDateStr, endAt: endDate, granularity: 3 });
+
           let historyResult = null;
-          
-          // /v1.0/station/history espera: stationId (int64), startAt (yyyy-MM), endAt (yyyy-MM), granularity (int)
-          let historyResult = null;
-          
-          console.log('[SYNC] /station/history params:', {
-            stationId: stationIdNum,
-            stationIdType: typeof stationIdNum,
-            startAt: startMonthStr,
-            endAt: endMonthStr,
-            granularity: 3,
-            granularityType: typeof 3
-          });
-          
           try {
             historyResult = await callDeyeAPI('/v1.0/station/history', {
-              stationId: stationIdNum,       // int64
-              startAt: startMonthStr,        // yyyy-MM
-              endAt: endMonthStr,            // yyyy-MM
-              granularity: 3                 // int (1=day, 2=weekly, 3=monthly, 4=yearly)
+              stationId: stationIdNum,
+              startAt: startDateStr,
+              endAt: endDate,
+              granularity: 3
             });
             console.log('[SYNC] ✅ /station/history sucesso:', JSON.stringify(historyResult).substring(0, 300));
           } catch (histErr) {
