@@ -162,7 +162,15 @@ export default function DeyeIntegration() {
       });
       
       if (response?.data?.status === 'success') {
-        const stations = response.data.stations || [];
+        const raw = response.data.stations || [];
+        // Deduplicar por ID
+        const seen = new Set();
+        const stations = raw.filter(s => {
+          const id = String(s.stationId || s.id);
+          if (seen.has(id)) return false;
+          seen.add(id);
+          return true;
+        });
         setAvailableStations(stations);
         addLog(`✅ Sucesso! ${stations.length} estações encontradas`);
         addLog(`Contexto: ${response.data.context}`);
