@@ -233,6 +233,8 @@ export default function DeyeIntegration() {
       auto_import_generation: false
     });
     setEditingIntegration(null);
+    setStationSearch('');
+    setShowStationDropdown(false);
   };
 
   const openEditDialog = (integration) => {
