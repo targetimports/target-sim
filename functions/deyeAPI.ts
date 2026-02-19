@@ -628,12 +628,13 @@ Deno.serve(async (req) => {
           console.log('[SYNC] Tentando com timestamps: startTs:', startTs, 'endTs:', endTs);
           let historyResult = null;
           
-          // Granularity: 1=hora, 2=dia, 3=mês, 4=ano
-          // Para geração mensal usamos granularity=3 (mês)
+          // Conforme documentação oficial Deye:
+          // /v1.0/station/history com granularity=3: startTime e endTime em formato 'yyyy-MM'
+          // retorna dados mensais
           historyResult = await callDeyeAPI('/v1.0/station/history', {
             stationId: stationIdNum,
-            startTime: startTs,
-            endTime: endTs,
+            startTime: startMonthStr,   // yyyy-MM
+            endTime: endMonthStr,        // yyyy-MM
             granularity: 3
           });
           console.log('[SYNC] historyResult:', JSON.stringify(historyResult).substring(0, 500));
