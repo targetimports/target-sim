@@ -31,88 +31,47 @@ Deno.serve(async (req) => {
           const { action, integration_id, power_plant_id, start_time, end_time, manual_token, includeBusinessContext } = body;
           console.log('[PARAMS] action:', action, 'integration_id:', integration_id, 'power_plant_id:', power_plant_id);
 
-    // Buscar configuração - pode ser DeyeIntegration ou DeyeSettings
-    let config;
-    let configType;
-    let integration;
+    // Sempre buscar DeyeSettings para credenciais de autenticação
+    let config; // credenciais (sempre DeyeSettings)
+    let configType = 'settings';
+    let integration; // DeyeIntegration (se aplicável)
 
-    // Para list_stations, buscar settings (não precisa manual_token)
-        if (action === 'list_stations') {
-          console.log('[INIT] Buscando DeyeSettings...');
-          const settings = await base44.asServiceRole.entities.DeyeSettings.list();
-          console.log('[INIT] Settings encontradas:', settings.length);
+    console.log('[INIT] Buscando DeyeSettings...');
+    const settingsList = await base44.asServiceRole.entities.DeyeSettings.list();
+    if (!settingsList || settingsList.length === 0) {
+      return Response.json({ status: 'error', message: 'Configuração Deye Settings não encontrada' }, { status: 404 });
+    }
+    const rawSettings = settingsList[0];
+    config = rawSettings.data ?? rawSettings;
 
-          if (!settings || settings.length === 0) {
-            console.log('[INIT] ❌ DeyeSettings não encontrada');
-            return Response.json({
-              status: 'error',
-              message: 'Configuração Deye Settings não encontrada'
-            }, { status: 404 });
-          }
+    console.log('[INIT] config.region:', config.region);
+    console.log('[INIT] config.appId:', config.appId);
+    console.log('[INIT] config.appSecret:', config.appSecret ? '✓' : '❌');
+    console.log('[INIT] config.email:', config.email);
+    console.log('[INIT] config.password:', config.password ? '✓' : '❌');
 
-          // ✅ DESEMPACOTAR .data (o objeto real está dentro de "data")
-          const raw = settings[0];
-          config = raw.data ?? raw;
+    const required = ['appId', 'appSecret', 'email', 'password'];
+    const missing = required.filter(k => !String(config?.[k] ?? '').trim());
+    if (missing.length > 0) {
+      return Response.json({ status: 'error', message: `Config Deye incompleta: faltando ${missing.join(', ')}` }, { status: 400 });
+    }
 
-          console.log('[INIT] Keys na raiz:', Object.keys(raw).slice(0, 10));
-          console.log('[INIT] Keys em .data:', Object.keys(raw.data || {}).slice(0, 10));
-          console.log('[INIT] ✅ DeyeSettings desempacotada');
-          console.log('[INIT] config.region:', config.region);
-          console.log('[INIT] config.appId:', config.appId);
-          console.log('[INIT] config.appSecret:', config.appSecret ? '✓' : '❌');
-          console.log('[INIT] config.email:', config.email);
-          console.log('[INIT] config.password:', config.password ? '✓' : '❌');
-
-          // ✅ Validar campos obrigatórios ANTES de tentar auth
-          const required = ['appId', 'appSecret', 'email', 'password'];
-          const missing = required.filter(k => !String(config?.[k] ?? '').trim());
-          if (missing.length > 0) {
-            console.log('[INIT] ❌ Config Deye incompleta:', missing);
-            return Response.json({
-              status: 'error',
-              message: `Config Deye incompleta: faltando ${missing.join(', ')}`
-            }, { status: 400 });
-          }
-
-          configType = 'settings';
-        } else {
-      // Para outras ações, buscar integração específica
+    // Para ações que precisam de integração específica, buscá-la separadamente
+    if (action !== 'list_stations') {
       try {
         if (integration_id) {
-          const integrations = await base44.asServiceRole.entities.DeyeIntegration.filter({
-            id: integration_id
-          });
+          const integrations = await base44.asServiceRole.entities.DeyeIntegration.filter({ id: integration_id });
           integration = integrations[0];
-          config = integration;
-          configType = 'integration';
         } else if (power_plant_id) {
-          const integrations = await base44.asServiceRole.entities.DeyeIntegration.filter({
-            power_plant_id,
-            is_active: true
-          });
+          const integrations = await base44.asServiceRole.entities.DeyeIntegration.filter({ power_plant_id, is_active: true });
           integration = integrations[0];
-          config = integration;
-          configType = 'integration';
-        } else {
-          // Tentar usar DeyeSettings como fallback
-          const settings = await base44.asServiceRole.entities.DeyeSettings.list();
-          if (settings && settings.length > 0) {
-            config = settings[0];
-            configType = 'settings';
-          }
         }
 
-        if (!config) {
-          return Response.json({
-            status: 'error',
-            message: 'Configuração Deye não encontrada'
-          }, { status: 404 });
+        if (!integration && action !== 'list_stations') {
+          return Response.json({ status: 'error', message: 'Integração Deye não encontrada' }, { status: 404 });
         }
       } catch (error) {
-        return Response.json({
-          status: 'error',
-          message: `Erro ao buscar configuração: ${error.message}`
-        }, { status: 400 });
+        return Response.json({ status: 'error', message: `Erro ao buscar integração: ${error.message}` }, { status: 400 });
       }
     }
 
