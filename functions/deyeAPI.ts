@@ -194,12 +194,17 @@ Deno.serve(async (req) => {
       }
     };
 
-    // Obter token OpenAPI inicial
-    try {
-      console.log('[INIT] 🚀 Obtendo token inicial (contexto pessoal)...');
-      authToken = await getAuthToken();
-      console.log('[INIT] ✅ Token obtido com sucesso');
-    } catch (error) {
+    // Obter token OpenAPI inicial - usar companyId se disponível (contexto business)
+      try {
+        if (config.companyId) {
+          console.log('[INIT] 🚀 Obtendo token inicial com companyId (contexto business):', config.companyId);
+          authToken = await getAuthToken(config.companyId);
+        } else {
+          console.log('[INIT] 🚀 Obtendo token inicial (contexto pessoal)...');
+          authToken = await getAuthToken();
+        }
+        console.log('[INIT] ✅ Token obtido com sucesso');
+      } catch (error) {
       console.log('[INIT] ❌ Erro ao obter token:', error.message);
       return Response.json({
         status: 'error',
