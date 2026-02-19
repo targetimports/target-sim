@@ -55,7 +55,18 @@ Deno.serve(async (req) => {
       return Response.json({ status: 'error', message: 'Configuração Deye Settings não encontrada' }, { status: 404 });
     }
     const rawSettings = settingsList[0];
-    config = rawSettings.data ?? rawSettings;
+    config = (rawSettings && (rawSettings.data || rawSettings)) || {};
+
+    // Validação de campos obrigatórios
+    const requiredFields = ['appId', 'appSecret', 'email', 'password', 'region'];
+    const missing = requiredFields.filter(k => !String(config?.[k] ?? '').trim());
+    if (missing.length > 0) {
+      return Response.json({ 
+        status: 'error', 
+        message: `Configuração DeyeSettings incompleta: faltando ${missing.join(', ')}`,
+        debug: { keys: Object.keys(config || {}), missing }
+      }, { status: 400 });
+    }
 
     console.log('[INIT] config.region:', config.region);
     console.log('[INIT] config.appId:', config.appId);
