@@ -245,6 +245,10 @@ export default function DeyeIntegration() {
       is_active: integration.is_active,
       auto_import_generation: integration.auto_import_generation || false
     });
+    // Pre-fill search with current station name if available
+    const existing = availableStations.find(s => String(s.stationId || s.id) === String(integration.station_id));
+    setStationSearch(existing ? (existing.name || existing.stationName || '') : integration.station_id || '');
+    setShowStationDropdown(false);
     setIsDialogOpen(true);
   };
 
