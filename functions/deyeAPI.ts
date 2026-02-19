@@ -652,7 +652,7 @@ Deno.serve(async (req) => {
           let historyResult = null;
 
           // Tentativa 1: /v1.0/station/history com stationId como int
-          console.log('[SYNC] T1: /station/history (stationId int)');
+          console.log('[SYNC] T1: /station/history', { stationId: stationIdNum, startAt: startDateStr, endAt: endDate, granularity: 3 });
           try {
             historyResult = await callDeyeAPI('/v1.0/station/history', {
               stationId: stationIdNum,
@@ -660,7 +660,7 @@ Deno.serve(async (req) => {
               endAt: endDate,
               granularity: 3
             });
-            console.log('[SYNC] ✅ T1 sucesso');
+            console.log('[SYNC] ✅ T1 sucesso:', JSON.stringify(historyResult).substring(0, 200));
           } catch (err1) {
             console.log('[SYNC] T1 falhou:', err1.message);
 
