@@ -126,7 +126,8 @@ Deno.serve(async (req) => {
       console.log('[AUTH]   config.email:', config.email);
       console.log('[AUTH]   config.password:', config.password ? '✓ presente' : '❌ FALTANDO');
 
-      let baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES[DEFAULT_REGION];
+      const region = normalizeRegion(config.region);
+      const baseUrl = DEYE_API_BASES[region] || DEYE_API_BASES[DEFAULT_REGION];
       console.log('[AUTH] baseUrl:', baseUrl);
 
       // Método de settings (email + password SHA-256) - é o padrão
