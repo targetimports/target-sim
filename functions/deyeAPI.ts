@@ -145,7 +145,7 @@ Deno.serve(async (req) => {
           appSecret: config.appSecret,
           email: config.email,
           password: passwordHash,
-          ...(companyId && { companyId: companyId })
+          ...(companyId ? { companyId: String(companyId) } : {})
         };
 
         console.log('[AUTH] 📡 POST', tokenUrl);
