@@ -212,14 +212,12 @@ Deno.serve(async (req) => {
 
         let data = JSON.parse(text);
         console.log('[ACCOUNT] Parsed data:', JSON.stringify(data).substring(0, 1000));
-        console.log('[ACCOUNT] data.data:', JSON.stringify(data.data).substring(0, 500));
-        console.log('[ACCOUNT] data.companyList:', JSON.stringify(data.companyList).substring(0, 500));
         
-        // Deye retorna em data.data ou diretamente em data
-        const accountInfo = data.data || data;
-        console.log('[ACCOUNT] accountInfo:', JSON.stringify(accountInfo).substring(0, 500));
+        // Deye retorna orgInfoList com a lista de empresas
+        // Estrutura: { orgInfoList: [{companyId, companyName, roleName}] }
+        const companies = data.orgInfoList || data.data?.orgInfoList || data.data?.companyList || data.companyList || data.data?.companies || [];
         
-        const companies = accountInfo.companyList || accountInfo.companies || [];
+        console.log('[ACCOUNT] Companies raw:', JSON.stringify(companies).substring(0, 500));
         
         console.log('[ACCOUNT] Companies encontradas:', companies.length);
         console.log('[ACCOUNT] Companies array:', JSON.stringify(companies).substring(0, 500));
