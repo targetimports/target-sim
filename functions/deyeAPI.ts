@@ -717,6 +717,13 @@ Deno.serve(async (req) => {
 
           results.monthly_generation = historyResult;
 
+          // Logs detalhados sobre o resultado
+          console.log('[SYNC] 📊 Analisando historyResult:');
+          console.log('[SYNC]   - success:', historyResult.success);
+          console.log('[SYNC]   - stationMonthList:', historyResult.stationMonthList ? 'presente' : 'AUSENTE');
+          console.log('[SYNC]   - stationMonthList.length:', historyResult.stationMonthList?.length || 0);
+          console.log('[SYNC]   - Conteúdo completo:', JSON.stringify(historyResult).substring(0, 1000));
+
           // Atualizar MonthlyGeneration se houver dados
           if (historyResult.success === true && historyResult.stationMonthList && historyResult.stationMonthList.length > 0) {
             const plants = await base44.asServiceRole.entities.PowerPlant.filter({
