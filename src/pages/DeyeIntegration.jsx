@@ -496,22 +496,59 @@ export default function DeyeIntegration() {
             <div className="space-y-2">
               <Label>Station ID *</Label>
               {availableStations.length > 0 ? (
-                <Select 
-                  value={formData.station_id} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, station_id: value }))}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma estação" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableStations.map(station => (
-                      <SelectItem key={station.stationId || station.id} value={String(station.stationId || station.id)}>
-                        {station.stationName || station.name} (ID: {station.stationId || station.id})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="relative">
+                  <Input
+                    value={stationSearch}
+                    onChange={(e) => {
+                      setStationSearch(e.target.value);
+                      setShowStationDropdown(true);
+                      if (!e.target.value) setFormData(prev => ({ ...prev, station_id: '' }));
+                    }}
+                    onFocus={() => setShowStationDropdown(true)}
+                    placeholder="Pesquisar estação por nome..."
+                    autoComplete="off"
+                  />
+                  {formData.station_id && (
+                    <p className="text-xs text-blue-600 mt-1">ID selecionado: {formData.station_id}</p>
+                  )}
+                  {showStationDropdown && stationSearch && (
+                    <div className="absolute z-50 w-full bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-y-auto mt-1">
+                      {availableStations
+                        .filter(s => {
+                          const name = (s.name || s.stationName || '').toLowerCase();
+                          const id = String(s.stationId || s.id);
+                          return name.includes(stationSearch.toLowerCase()) || id.includes(stationSearch);
+                        })
+                        .slice(0, 50)
+                        .map(station => {
+                          const id = String(station.stationId || station.id);
+                          const name = station.name || station.stationName || '';
+                          return (
+                            <button
+                              key={id}
+                              type="button"
+                              className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-100 ${formData.station_id === id ? 'bg-blue-50 text-blue-700' : ''}`}
+                              onClick={() => {
+                                setFormData(prev => ({ ...prev, station_id: id }));
+                                setStationSearch(name);
+                                setShowStationDropdown(false);
+                              }}
+                            >
+                              <span className="font-medium">{name}</span>
+                              <span className="text-slate-400 ml-2 text-xs">ID: {id}</span>
+                            </button>
+                          );
+                        })}
+                      {availableStations.filter(s => {
+                        const name = (s.name || s.stationName || '').toLowerCase();
+                        const id = String(s.stationId || s.id);
+                        return name.includes(stationSearch.toLowerCase()) || id.includes(stationSearch);
+                      }).length === 0 && (
+                        <div className="px-3 py-2 text-sm text-slate-400">Nenhuma estação encontrada</div>
+                      )}
+                    </div>
+                  )}
+                </div>
               ) : (
                 <Input
                   value={formData.station_id}
