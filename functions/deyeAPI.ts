@@ -566,6 +566,14 @@ Deno.serve(async (req) => {
           // Sincronizar todos os dados
           const results = {};
 
+          // Info da estação (opcional, não bloqueia se falhar)
+          try {
+            const infoResult = await callDeyeAPI('/v1.0/station/latest', { stationId: integration.station_id });
+            results.station_info = infoResult;
+          } catch (e) {
+            console.log('[SYNC] /station/latest falhou (ignorando):', e.message);
+          }
+
           // Sincronizar geração mensal (últimos 12 meses)
           const now = new Date();
           const endMonth = now.toISOString().substring(0, 7);
