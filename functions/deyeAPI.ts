@@ -570,6 +570,12 @@ Deno.serve(async (req) => {
 
       case 'sync_all': {
         try {
+          // Garantir contexto business para sincronização
+          if (config.companyId) {
+            console.log('[SYNC] Usando contexto business (companyId):', config.companyId);
+            authToken = await getAuthToken(config.companyId);
+          }
+
           // Sincronizar todos os dados
           const results = {};
 
