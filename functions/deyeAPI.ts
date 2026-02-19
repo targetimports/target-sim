@@ -373,31 +373,22 @@ Deno.serve(async (req) => {
 
           case 'test_connection': {
             try {
-              // Testar conexão buscando estação específica
-              const result = await callDeyeAPI('/v1.0/station/latest', {
-                stationId: integration.station_id
-              });
+              // Testar conexão listando estações (rota que funciona com token pessoal)
+              const result = await callDeyeAPI('/v1.0/station/list', { page: 1, size: 1 });
 
           console.log('[TEST] Result completo:', JSON.stringify(result));
 
-          // API Deye retorna success: true para sucesso
-          const isSuccess = result.success === true;
+          // Sucesso se retornou uma resposta válida (mesmo que 0 estações)
+          const isSuccess = result.success === true || result.stationList !== undefined || result.total !== undefined;
           const errorMessage = !isSuccess ? (result.msg || result.message || `Código: ${result.code}`) : null;
 
           console.log('[TEST] isSuccess:', isSuccess, 'errorMessage:', errorMessage);
 
-          // Atualizar status apenas se for uma integração (não settings)
           if (integration) {
             await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
               sync_status: isSuccess ? 'success' : 'error',
               error_message: errorMessage,
               last_sync: new Date().toISOString()
-            });
-          } else if (configType === 'settings') {
-            await base44.asServiceRole.entities.DeyeSettings.update(config.id, {
-              lastTestStatus: isSuccess ? 'success' : 'failed',
-              lastTestMessage: isSuccess ? 'Conexão testada com sucesso' : errorMessage,
-              lastTestDate: new Date().toISOString()
             });
           }
 
@@ -415,12 +406,6 @@ Deno.serve(async (req) => {
               sync_status: 'error',
               error_message: error.message,
               last_sync: new Date().toISOString()
-            });
-          } else if (configType === 'settings') {
-            await base44.asServiceRole.entities.DeyeSettings.update(config.id, {
-              lastTestStatus: 'failed',
-              lastTestMessage: error.message,
-              lastTestDate: new Date().toISOString()
             });
           }
 
