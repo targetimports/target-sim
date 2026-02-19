@@ -257,8 +257,8 @@ export default function DeyeIntegration() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.station_id || !formData.power_plant_id) {
-      alert('Por favor, selecione a usina e o ID da estação');
+    if (!formData.station_id || !formData.power_plant_id || !formData.app_id || !formData.app_secret) {
+      alert('Por favor, preencha todos os campos obrigatórios');
       return;
     }
     if (editingIntegration) {
