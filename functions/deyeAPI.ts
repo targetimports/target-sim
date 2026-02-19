@@ -281,31 +281,40 @@ Deno.serve(async (req) => {
                     return allStations;
                   };
 
-                  // Sempre usar contexto business se companyId configurado
+                  // 1️⃣ Buscar com token pessoal (sem companyId)
+                  console.log('[LIST] 1️⃣ Listando estações (contexto pessoal)...');
+                  authToken = await getAuthToken(null);
+                  let personalStations = await fetchAllStations();
+                  console.log(`[LIST] Pessoal: ${personalStations.length} estações`);
+
+                  // 2️⃣ Se tem companyId, buscar também com contexto business
+                  let businessStations = [];
                   if (config.companyId) {
-                    console.log('[LIST] 🏢 Usando contexto business (companyId):', config.companyId);
+                    console.log('[LIST] 2️⃣ Listando estações (contexto business, companyId:', config.companyId, ')...');
                     authToken = await getAuthToken(config.companyId);
+                    businessStations = await fetchAllStations();
+                    console.log(`[LIST] Business: ${businessStations.length} estações`);
                   }
 
-                  console.log('[LIST] 1️⃣ Listando todas as estações...');
-                  let allStations = await fetchAllStations();
-                  console.log(`[LIST] ✅ Total: ${allStations.length} estações`);
-
-                  // Deduplicar por stationId
+                  // Mesclar e deduplicar
                   const seen = new Set();
-                  allStations = allStations.filter(s => {
+                  let allStations = [...personalStations, ...businessStations].filter(s => {
                     const id = String(s.stationId || s.id);
                     if (seen.has(id)) return false;
                     seen.add(id);
                     return true;
                   });
 
+                  console.log(`[LIST] ✅ Total após dedup: ${allStations.length} estações`);
+
                   if (allStations.length > 0) {
+                    const ctx = personalStations.length > 0 && businessStations.length > 0 ? 'both'
+                      : businessStations.length > 0 ? 'business' : 'personal';
                     return Response.json({
                       status: 'success',
                       total: allStations.length,
                       stations: allStations,
-                      context: config.companyId ? 'business' : 'personal'
+                      context: ctx
                     });
                   }
 
