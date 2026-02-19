@@ -576,8 +576,12 @@ export default function DeyeIntegration() {
                 value={formData.app_id}
                 onChange={(e) => setFormData(prev => ({ ...prev, app_id: e.target.value }))}
                 placeholder="ID da aplicação Deye Cloud"
-                required
+                readOnly
+                className="bg-slate-100 cursor-not-allowed"
               />
+              {!formData.app_id && (
+                <p className="text-xs text-red-600">Configure o App ID em DeyeConfiguration</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -587,8 +591,12 @@ export default function DeyeIntegration() {
                 value={formData.app_secret}
                 onChange={(e) => setFormData(prev => ({ ...prev, app_secret: e.target.value }))}
                 placeholder="Secret da aplicação Deye Cloud"
-                required
+                readOnly
+                className="bg-slate-100 cursor-not-allowed"
               />
+              {!formData.app_secret && (
+                <p className="text-xs text-red-600">Configure o App Secret em DeyeConfiguration</p>
+              )}
             </div>
 
             <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
