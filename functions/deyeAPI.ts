@@ -628,33 +628,15 @@ Deno.serve(async (req) => {
           console.log('[SYNC] Tentando com timestamps: startTs:', startTs, 'endTs:', endTs);
           let historyResult = null;
           
-          // Tentativa 1: com timestamps em ms
-          try {
-            historyResult = await callDeyeAPI('/v1.0/station/history', {
-              stationId: stationIdNum,
-              startTime: startTs,
-              endTime: endTs
-            });
-            console.log('[SYNC] ✅ Formato timestamp funcionou');
-          } catch (e1) {
-            console.log('[SYNC] ❌ Formato timestamp falhou:', e1.message);
-            // Tentativa 2: formato YYYY-MM
-            try {
-              historyResult = await callDeyeAPI('/v1.0/station/history', {
-                stationId: stationIdNum,
-                startTime: startMonthStr,
-                endTime: endMonthStr
-              });
-              console.log('[SYNC] ✅ Formato YYYY-MM funcionou');
-            } catch (e2) {
-              console.log('[SYNC] ❌ Formato YYYY-MM falhou:', e2.message);
-              // Tentativa 3: sem datas (só stationId)
-              historyResult = await callDeyeAPI('/v1.0/station/history', {
-                stationId: stationIdNum
-              });
-              console.log('[SYNC] ✅ Sem datas funcionou');
-            }
-          }
+          // Granularity: 1=hora, 2=dia, 3=mês, 4=ano
+          // Para geração mensal usamos granularity=3 (mês)
+          historyResult = await callDeyeAPI('/v1.0/station/history', {
+            stationId: stationIdNum,
+            startTime: startTs,
+            endTime: endTs,
+            granularity: 3
+          });
+          console.log('[SYNC] historyResult:', JSON.stringify(historyResult).substring(0, 500));
           results.monthly_generation = historyResult;
 
           // Atualizar MonthlyGeneration se houver dados
