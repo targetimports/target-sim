@@ -476,10 +476,12 @@ Deno.serve(async (req) => {
       case 'get_monthly_generation': {
         // Buscar geração mensal da API Deye
         try {
+          // start_time e end_time devem estar no formato yyyy-MM
           const result = await callDeyeAPI('/v1.0/station/history', {
-            stationId: integration.station_id,
-            ...(start_time && { startTime: start_time }),
-            ...(end_time && { endTime: end_time })
+            stationId: parseInt(integration.station_id, 10),
+            ...(start_time && { startAt: start_time }),
+            ...(end_time && { endAt: end_time }),
+            granularity: 3
           });
 
           if (result.success === true && result.stationMonthList && result.stationMonthList.length > 0) {
