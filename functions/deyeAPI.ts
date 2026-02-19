@@ -733,40 +733,54 @@ Deno.serve(async (req) => {
           // Atualizar MonthlyGeneration se houver dados
           // A API retorna stationDataItems (não stationMonthList)
           const dataArray = historyResult.stationDataItems || historyResult.stationMonthList || [];
+          console.log('[SYNC] 🔍 dataArray length:', dataArray.length);
+          console.log('[SYNC] 🔍 historyResult.success:', historyResult.success);
+          
           if (historyResult.success === true && dataArray && dataArray.length > 0) {
+            console.log('[SYNC] ✅ Iniciando busca de usina...');
             const plants = await base44.asServiceRole.entities.PowerPlant.filter({
               id: integration.power_plant_id
             });
 
+            console.log('[SYNC] 🏭 PowerPlant encontrada:', plants.length > 0 ? plants[0].name : 'NENHUMA');
+            console.log('[SYNC] 🏭 integration.power_plant_id:', integration.power_plant_id);
+
             if (plants.length > 0) {
               const plant = plants[0];
               let syncedCount = 0;
+              console.log('[SYNC] 📊 Processando', dataArray.length, 'itens...');
 
-              for (const item of dataArray) {
+              for (let idx = 0; idx < dataArray.length; idx++) {
+                const item = dataArray[idx];
                 try {
                   // Construir referenceMonth a partir de year e month
                   const year = item.year;
                   const month = item.month;
                   const referenceMonth = `${year}-${String(month).padStart(2, '0')}`;
                   
-                  console.log('[SYNC] 📅 Processando item:', JSON.stringify(item).substring(0, 300));
-                  console.log('[SYNC]   - referenceMonth (construído):', referenceMonth);
+                  console.log(`[SYNC] Item ${idx + 1}/${dataArray.length}:`);
+                  console.log('[SYNC]   - referenceMonth:', referenceMonth);
                   console.log('[SYNC]   - generationValue:', item.generationValue);
                   
                   if (!referenceMonth || !/^\d{4}-\d{2}$/.test(referenceMonth)) {
-                    console.log('[SYNC]   ⚠️ SKIPPED: referenceMonth inválido');
+                    console.log('[SYNC]   ❌ SKIPPED: referenceMonth inválido');
                     continue;
                   }
 
                   const isCurrentMonth = referenceMonth === currentMonth;
+                  console.log('[SYNC]   - isCurrentMonth:', isCurrentMonth);
+                  console.log('[SYNC]   - Buscando registros existentes...');
+                  
                   const existing = await base44.asServiceRole.entities.MonthlyGeneration.filter({
                     power_plant_id: integration.power_plant_id,
                     reference_month: referenceMonth
                   });
 
+                  console.log('[SYNC]   - Registros existentes:', existing.length);
+
                   // Pular meses antigos que já estão preenchidos (exceto mês atual que sempre atualiza)
                   if (existing.length > 0 && !isCurrentMonth) {
-                    console.log('[SYNC] ℹ️ Mês', referenceMonth, 'já existe, pulando');
+                    console.log('[SYNC]   ⏭️ Pulando mês antigo já preenchido');
                     continue;
                   }
 
@@ -784,24 +798,33 @@ Deno.serve(async (req) => {
                     notes: `Sincronizado via Deye Cloud API (${new Date().toLocaleString('pt-BR')})`
                   };
 
+                  console.log('[SYNC]   - genData:', JSON.stringify(genData));
+
                   if (existing.length > 0) {
-                    console.log('[SYNC] 🔄 Atualizando mês', referenceMonth, '(atual)');
-                    await base44.asServiceRole.entities.MonthlyGeneration.update(
+                    console.log('[SYNC]   🔄 Atualizando...');
+                    const updateResult = await base44.asServiceRole.entities.MonthlyGeneration.update(
                       existing[0].id,
                       genData
                     );
+                    console.log('[SYNC]   ✅ Atualizado:', updateResult?.id);
                   } else {
-                    console.log('[SYNC] ✨ Criando mês', referenceMonth);
-                    await base44.asServiceRole.entities.MonthlyGeneration.create(genData);
+                    console.log('[SYNC]   ✨ Criando novo...');
+                    const createResult = await base44.asServiceRole.entities.MonthlyGeneration.create(genData);
+                    console.log('[SYNC]   ✅ Criado:', createResult?.id);
                   }
                   syncedCount++;
                 } catch (itemError) {
-                  console.error('[SYNC] Erro ao processar:', itemError.message);
+                  console.error('[SYNC] ❌ Erro ao processar item', idx + 1, ':', itemError.message);
+                  console.error('[SYNC]    Stack:', itemError.stack);
                 }
               }
 
-              console.log('[SYNC] Total de meses sincronizados:', syncedCount);
+              console.log('[SYNC] ✅ Total de meses sincronizados:', syncedCount);
+            } else {
+              console.log('[SYNC] ❌ PowerPlant não encontrada!');
             }
+          } else {
+            console.log('[SYNC] ❌ Nenhum dado para sincronizar');
           }
 
           await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
