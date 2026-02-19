@@ -14,22 +14,35 @@ const DEFAULT_REGION = 'US';
 
 Deno.serve(async (req) => {
         try {
-          console.log('[START] 🚀 deyeAPI function iniciada');
-          const base44 = createClientFromRequest(req);
+                  console.log('[START] 🚀 deyeAPI function iniciada');
+                  const base44 = createClientFromRequest(req);
 
-          console.log('[AUTH] Verificando autenticação...');
-          const user = await base44.auth.me();
-          if (!user) {
-            console.log('[AUTH] ❌ Usuário NÃO autenticado');
-            return Response.json({ status: 'error', message: 'Não autenticado' }, { status: 401 });
-          }
-          console.log('[AUTH] ✅ Usuário autenticado:', user.email);
+                  console.log('[AUTH] Verificando autenticação...');
+                  const user = await base44.auth.me();
+                  if (!user) {
+                    console.log('[AUTH] ❌ Usuário NÃO autenticado');
+                    return Response.json({ status: 'error', message: 'Não autenticado' }, { status: 401 });
+                  }
+                  console.log('[AUTH] ✅ Usuário autenticado:', user.email);
 
-          const body = await req.json();
-          console.log('[BODY] Body recebido:', JSON.stringify(body).substring(0, 200));
+                  const body = await req.json();
+                  console.log('[BODY] Body recebido:', JSON.stringify(body).substring(0, 200));
 
-          const { action, integration_id, power_plant_id, start_time, end_time, manual_token, includeBusinessContext } = body;
-          console.log('[PARAMS] action:', action, 'integration_id:', integration_id, 'power_plant_id:', power_plant_id);
+                  const { action, integration_id, power_plant_id, start_time, end_time, manual_token, includeBusinessContext } = body;
+                  console.log('[PARAMS] action:', action, 'integration_id:', integration_id, 'power_plant_id:', power_plant_id);
+
+                  // Validação obrigatória
+                  if (!action) {
+                    return Response.json({ status: 'error', message: "Parâmetro 'action' é obrigatório" }, { status: 400 });
+                  }
+
+                  const actionsRequiringIntegration = ['sync_all', 'get_monthly_generation', 'test_connection', 'get_station_by_id', 'get_station_info', 'get_realtime_data', 'get_daily_generation'];
+                  if (actionsRequiringIntegration.includes(action) && !integration_id && !power_plant_id) {
+                    return Response.json({ 
+                      status: 'error', 
+                      message: `Ação '${action}' requer 'integration_id' ou 'power_plant_id'` 
+                    }, { status: 400 });
+                  }
 
     // Sempre buscar DeyeSettings para credenciais de autenticação
     let config; // credenciais (sempre DeyeSettings)
