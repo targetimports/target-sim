@@ -614,12 +614,18 @@ Deno.serve(async (req) => {
             authToken = await getAuthToken(config.companyId);
           } else {
             console.log('[SYNC] Sem companyId, tentando buscar companyId via account/info...');
-            const companies = await getAccountInfo();
-            if (companies.length > 0) {
-              const firstCompany = companies[0];
-              const cid = firstCompany.companyId || firstCompany.id;
-              console.log('[SYNC] Usando primeiro companyId encontrado:', cid);
-              authToken = await getAuthToken(cid);
+            try {
+              const companies = await getAccountInfo();
+              if (companies.length > 0) {
+                const firstCompany = companies[0];
+                const cid = firstCompany.companyId || firstCompany.id;
+                console.log('[SYNC] Usando primeiro companyId encontrado:', cid);
+                authToken = await getAuthToken(cid);
+              } else {
+                console.log('[SYNC] Nenhuma empresa encontrada, usando token padrão');
+              }
+            } catch (acErr) {
+              console.log('[SYNC] account/info falhou, continuando com token atual:', acErr.message);
             }
           }
 
