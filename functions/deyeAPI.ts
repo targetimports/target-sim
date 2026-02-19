@@ -12,6 +12,24 @@ const DEYE_API_BASES = {
 // Validar que a região está configurada corretamente
 const DEFAULT_REGION = 'US';
 
+// Normalizar região (AMEA/US1/EMEA etc.)
+const normalizeRegion = (r) => {
+  const x = String(r || '').trim().toUpperCase();
+  if (['AMEA', 'AMERICA', 'US1', 'USA'].includes(x)) return 'US';
+  if (['EMEA', 'EU1', 'EUROPE'].includes(x)) return 'EU';
+  if (x === 'US' || x === 'EU') return x;
+  return DEFAULT_REGION;
+};
+
+// Extrair token de resposta Deye (múltiplas variações)
+const pickTokenFromResponse = (data) => (
+  data?.data?.accessToken ||
+  data?.data?.token ||
+  data?.accessToken ||
+  data?.token ||
+  null
+);
+
 Deno.serve(async (req) => {
         try {
                   console.log('[START] 🚀 deyeAPI function iniciada');
