@@ -281,69 +281,38 @@ Deno.serve(async (req) => {
                     return allStations;
                   };
 
-                  // Listar no contexto pessoal
-                  console.log('[LIST] 1️⃣ Listando estações (contexto pessoal)...');
-                  let allStations = await fetchAllStations();
-                  console.log(`[LIST] ✅ Personal: ${allStations.length} estações`);
+                  // Sempre usar contexto business se companyId configurado
+                  if (config.companyId) {
+                    console.log('[LIST] 🏢 Usando contexto business (companyId):', config.companyId);
+                    authToken = await getAuthToken(config.companyId);
+                  }
 
-                  // Se achou estações E não quer forçar Business context, retorna
-                  if (allStations.length > 0 && !includeBusinessContext) {
+                  console.log('[LIST] 1️⃣ Listando todas as estações...');
+                  let allStations = await fetchAllStations();
+                  console.log(`[LIST] ✅ Total: ${allStations.length} estações`);
+
+                  // Deduplicar por stationId
+                  const seen = new Set();
+                  allStations = allStations.filter(s => {
+                    const id = String(s.stationId || s.id);
+                    if (seen.has(id)) return false;
+                    seen.add(id);
+                    return true;
+                  });
+
+                  if (allStations.length > 0) {
                     return Response.json({
                       status: 'success',
                       total: allStations.length,
                       stations: allStations,
-                      context: 'personal'
+                      context: config.companyId ? 'business' : 'personal'
                     });
                   }
 
-              // Fallback: tentar Business context (descobrir empresas)
-              console.log('[LIST] 2️⃣ Tentando descobrir empresas (Business context)...');
-              const companies = await getAccountInfo();
-
-              let businessStations = [];
-
-              if (companies && companies.length > 0) {
-                console.log(`[LIST] 🏢 Encontradas ${companies.length} empresas`);
-
-                // Tentar cada empresa
-                for (const company of companies) {
-                  console.log(`[LIST] 🔍 Testando empresa: ${company.companyId} (${company.companyName})`);
-                  try {
-                    // Regenerar token com companyId
-                    authToken = await getAuthToken(company.companyId);
-
-                    const companyStations = await fetchAllStations();
-
-                    if (companyStations.length > 0) {
-                      businessStations = businessStations.concat(companyStations);
-                      console.log(`[LIST] ✅ Empresa ${company.companyId}: +${companyStations.length}`);
-                    } else {
-                      console.log(`[LIST] - Empresa ${company.companyId}: 0 estações`);
-                    }
-                  } catch (err) {
-                    console.log(`[LIST] ⚠️ Erro na empresa ${company.companyId}:`, err.message);
-                  }
-                }
-              } else {
-                console.log('[LIST] ⚠️ Nenhuma empresa encontrada no Business context');
-              }
-
-              const totalStations = allStations.concat(businessStations);
-              console.log(`[LIST] 📊 Total: ${allStations.length} pessoal + ${businessStations.length} business = ${totalStations.length}`);
-
-              if (totalStations.length > 0) {
-                return Response.json({
-                  status: 'success',
-                  total: totalStations.length,
-                  stations: totalStations,
-                  context: allStations.length > 0 && businessStations.length > 0 ? 'both' : (businessStations.length > 0 ? 'business' : 'personal')
-                });
-              }
-
-              return Response.json({
-                status: 'error',
-                message: 'Nenhuma estação encontrada'
-              }, { status: 404 });
+                  return Response.json({
+                    status: 'error',
+                    message: 'Nenhuma estação encontrada'
+                  }, { status: 404 });
             } catch (error) {
               console.error('[LIST] Erro:', error);
               return Response.json({
