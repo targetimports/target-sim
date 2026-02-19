@@ -656,7 +656,7 @@ Deno.serve(async (req) => {
             console.log('[SYNC] /station/latest falhou (ignorando):', e.message);
           }
 
-          // Sincronizar geração mensal (últimos 12 meses + atual)
+          // Sincronizar geração mensal (últimos 11 meses + atual = 12 meses dentro do limite)
           const now = new Date();
           const stationIdNum = parseInt(integration.station_id, 10);
           const stationIdStr = String(integration.station_id);
@@ -664,11 +664,17 @@ Deno.serve(async (req) => {
           // Mês atual
           const currentMonth = now.toISOString().substring(0, 7); // YYYY-MM
           
-          // Calcular mês de 12 meses atrás
-          const startDate = new Date(now.getFullYear(), now.getMonth() - 12, 1);
+          // Calcular mês de 11 meses atrás (para garantir que fica dentro do limite de 12 meses)
+          const startDate = new Date(now.getFullYear(), now.getMonth() - 11, 1);
           const startDateStr = startDate.toISOString().substring(0, 7); // YYYY-MM
           
           const endDate = currentMonth;
+          
+          console.log('[SYNC] 📅 Intervalo de datas:')
+          console.log('[SYNC]   - now:', now.toISOString());
+          console.log('[SYNC]   - startDateStr:', startDateStr);
+          console.log('[SYNC]   - endDate:', endDate);
+          console.log('[SYNC]   - dias entre:', Math.floor((now - startDate) / (1000 * 60 * 60 * 24)));
 
           let historyResult = null;
 
