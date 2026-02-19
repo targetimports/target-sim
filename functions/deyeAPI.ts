@@ -661,9 +661,14 @@ Deno.serve(async (req) => {
           const stationIdNum = parseInt(integration.station_id, 10);
           const stationIdStr = String(integration.station_id);
 
-          const endDate = now.toISOString().substring(0, 7); // YYYY-MM
-          const startDate = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+          // Mês atual
+          const currentMonth = now.toISOString().substring(0, 7); // YYYY-MM
+          
+          // Calcular mês de 12 meses atrás
+          const startDate = new Date(now.getFullYear(), now.getMonth() - 12, 1);
           const startDateStr = startDate.toISOString().substring(0, 7); // YYYY-MM
+          
+          const endDate = currentMonth;
 
           let historyResult = null;
 
