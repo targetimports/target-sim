@@ -65,6 +65,18 @@ export default function DeyeIntegration() {
     queryFn: () => base44.entities.DeyeSettings.list()
   });
 
+  // Auto-preencher app_id e app_secret das configurações
+  React.useEffect(() => {
+    if (settings.length > 0 && !editingIntegration) {
+      const config = settings[0];
+      setFormData(prev => ({
+        ...prev,
+        app_id: config.appId || '',
+        app_secret: config.appSecret || ''
+      }));
+    }
+  }, [settings, editingIntegration]);
+
   const { data: integrations = [] } = useQuery({
     queryKey: ['deye-integrations'],
     queryFn: () => base44.entities.DeyeIntegration.list('-created_date')
