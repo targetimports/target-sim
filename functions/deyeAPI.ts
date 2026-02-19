@@ -31,36 +31,36 @@ const pickTokenFromResponse = (data) => (
 );
 
 Deno.serve(async (req) => {
-        try {
-                  console.log('[START] 🚀 deyeAPI function iniciada');
-                  const base44 = createClientFromRequest(req);
+  try {
+    console.log('[START] 🚀 deyeAPI function iniciada');
+    const base44 = createClientFromRequest(req);
 
-                  console.log('[AUTH] Verificando autenticação...');
-                  const user = await base44.auth.me();
-                  if (!user) {
-                    console.log('[AUTH] ❌ Usuário NÃO autenticado');
-                    return Response.json({ status: 'error', message: 'Não autenticado' }, { status: 401 });
-                  }
-                  console.log('[AUTH] ✅ Usuário autenticado:', user.email);
+    console.log('[AUTH] Verificando autenticação...');
+    const user = await base44.auth.me();
+    if (!user) {
+      console.log('[AUTH] ❌ Usuário NÃO autenticado');
+      return Response.json({ status: 'error', message: 'Não autenticado' }, { status: 401 });
+    }
+    console.log('[AUTH] ✅ Usuário autenticado:', user.email);
 
-                  const body = await req.json();
-                  console.log('[BODY] Body recebido:', JSON.stringify(body).substring(0, 200));
+    const body = await req.json();
+    console.log('[BODY] Body recebido:', JSON.stringify(body).substring(0, 200));
 
-                  const { action, integration_id, power_plant_id, start_time, end_time, manual_token, includeBusinessContext } = body;
-                  console.log('[PARAMS] action:', action, 'integration_id:', integration_id, 'power_plant_id:', power_plant_id);
+    const { action, integration_id, power_plant_id, start_time, end_time, manual_token, includeBusinessContext } = body;
+    console.log('[PARAMS] action:', action, 'integration_id:', integration_id, 'power_plant_id:', power_plant_id);
 
-                  // Validação obrigatória
-                  if (!action) {
-                    return Response.json({ status: 'error', message: "Parâmetro 'action' é obrigatório" }, { status: 400 });
-                  }
+    // Validação obrigatória
+    if (!action) {
+      return Response.json({ status: 'error', message: "Parâmetro 'action' é obrigatório" }, { status: 400 });
+    }
 
-                  const actionsRequiringIntegration = ['sync_all', 'get_monthly_generation', 'test_connection', 'get_station_by_id', 'get_station_info', 'get_realtime_data', 'get_daily_generation'];
-                  if (actionsRequiringIntegration.includes(action) && !integration_id && !power_plant_id) {
-                    return Response.json({ 
-                      status: 'error', 
-                      message: `Ação '${action}' requer 'integration_id' ou 'power_plant_id'` 
-                    }, { status: 400 });
-                  }
+    const actionsRequiringIntegration = ['sync_all', 'get_monthly_generation', 'test_connection', 'get_station_by_id', 'get_station_info', 'get_realtime_data', 'get_daily_generation'];
+    if (actionsRequiringIntegration.includes(action) && !integration_id && !power_plant_id) {
+      return Response.json({ 
+        status: 'error', 
+        message: `Ação '${action}' requer 'integration_id' ou 'power_plant_id'` 
+      }, { status: 400 });
+    }
 
     // Sempre buscar DeyeSettings para credenciais de autenticação
     let config; // credenciais (sempre DeyeSettings)
@@ -234,16 +234,16 @@ Deno.serve(async (req) => {
     };
 
     // Obter token OpenAPI inicial - usar companyId se disponível (contexto business)
-      try {
-        if (config.companyId) {
-          console.log('[INIT] 🚀 Obtendo token inicial com companyId (contexto business):', config.companyId);
-          authToken = await getAuthToken(config.companyId);
-        } else {
-          console.log('[INIT] 🚀 Obtendo token inicial (contexto pessoal)...');
-          authToken = await getAuthToken();
-        }
-        console.log('[INIT] ✅ Token obtido com sucesso');
-      } catch (error) {
+    try {
+      if (config.companyId) {
+        console.log('[INIT] 🚀 Obtendo token inicial com companyId (contexto business):', config.companyId);
+        authToken = await getAuthToken(config.companyId);
+      } else {
+        console.log('[INIT] 🚀 Obtendo token inicial (contexto pessoal)...');
+        authToken = await getAuthToken();
+      }
+      console.log('[INIT] ✅ Token obtido com sucesso');
+    } catch (error) {
       console.log('[INIT] ❌ Erro ao obter token:', error.message);
       return Response.json({
         status: 'error',
@@ -296,149 +296,149 @@ Deno.serve(async (req) => {
     };
 
     switch (action) {
-          case 'list_stations': {
-                try {
-                  console.log('[LIST] ⚙️ list_stations - includeBusinessContext:', includeBusinessContext);
+      case 'list_stations': {
+        try {
+          console.log('[LIST] ⚙️ list_stations - includeBusinessContext:', includeBusinessContext);
 
-                  // Função para buscar TODAS as páginas de estações
-                  const fetchAllStations = async () => {
-                    const PAGE_SIZE = 100;
-                    let page = 1;
-                    let allStations = [];
-                    let total = null;
+          // Função para buscar TODAS as páginas de estações
+          const fetchAllStations = async () => {
+            const PAGE_SIZE = 100;
+            let page = 1;
+            let allStations = [];
+            let total = null;
 
-                    while (true) {
-                      const result = await callDeyeAPI('/v1.0/station/list', { page, size: PAGE_SIZE });
-                      const list = result.stationList || [];
-                      allStations = allStations.concat(list);
+            while (true) {
+              const result = await callDeyeAPI('/v1.0/station/list', { page, size: PAGE_SIZE });
+              const list = result.stationList || [];
+              allStations = allStations.concat(list);
 
-                      if (total === null) total = result.total || 0;
-                      console.log(`[LIST] Página ${page}: +${list.length} estações (${allStations.length}/${total})`);
+              if (total === null) total = result.total || 0;
+              console.log(`[LIST] Página ${page}: +${list.length} estações (${allStations.length}/${total})`);
 
-                      if (list.length < PAGE_SIZE || allStations.length >= total) break;
-                      page++;
-                    }
-                    return allStations;
-                  };
+              if (list.length < PAGE_SIZE || allStations.length >= total) break;
+              page++;
+            }
+            return allStations;
+          };
 
-                  // 1️⃣ Buscar com token pessoal (sem companyId)
-                  console.log('[LIST] 1️⃣ Listando estações (contexto pessoal)...');
-                  authToken = await getAuthToken(null);
-                  let personalStations = await fetchAllStations();
-                  console.log(`[LIST] Pessoal: ${personalStations.length} estações`);
+          // 1️⃣ Buscar com token pessoal (sem companyId)
+          console.log('[LIST] 1️⃣ Listando estações (contexto pessoal)...');
+          authToken = await getAuthToken(null);
+          let personalStations = await fetchAllStations();
+          console.log(`[LIST] Pessoal: ${personalStations.length} estações`);
 
-                  // 2️⃣ Se tem companyId, buscar também com contexto business
-                  let businessStations = [];
-                  if (config.companyId) {
-                    console.log('[LIST] 2️⃣ Listando estações (contexto business, companyId:', config.companyId, ')...');
-                    authToken = await getAuthToken(config.companyId);
-                    businessStations = await fetchAllStations();
-                    console.log(`[LIST] Business: ${businessStations.length} estações`);
-                  }
+          // 2️⃣ Se tem companyId, buscar também com contexto business
+          let businessStations = [];
+          if (config.companyId) {
+            console.log('[LIST] 2️⃣ Listando estações (contexto business, companyId:', config.companyId, ')...');
+            authToken = await getAuthToken(config.companyId);
+            businessStations = await fetchAllStations();
+            console.log(`[LIST] Business: ${businessStations.length} estações`);
+          }
 
-                  // Mesclar e deduplicar
-                  const seen = new Set();
-                  let allStations = [...personalStations, ...businessStations].filter(s => {
-                    const id = String(s.stationId || s.id);
-                    if (seen.has(id)) return false;
-                    seen.add(id);
-                    return true;
-                  });
+          // Mesclar e deduplicar
+          const seen = new Set();
+          let allStations = [...personalStations, ...businessStations].filter(s => {
+            const id = String(s.stationId || s.id);
+            if (seen.has(id)) return false;
+            seen.add(id);
+            return true;
+          });
 
-                  console.log(`[LIST] ✅ Total após dedup: ${allStations.length} estações`);
+          console.log(`[LIST] ✅ Total após dedup: ${allStations.length} estações`);
 
-                  if (allStations.length > 0) {
-                    const ctx = personalStations.length > 0 && businessStations.length > 0 ? 'both'
-                      : businessStations.length > 0 ? 'business' : 'personal';
-                    return Response.json({
-                      status: 'success',
-                      total: allStations.length,
-                      stations: allStations,
-                      context: ctx
-                    });
-                  }
+          if (allStations.length > 0) {
+            const ctx = personalStations.length > 0 && businessStations.length > 0 ? 'both'
+              : businessStations.length > 0 ? 'business' : 'personal';
+            return Response.json({
+              status: 'success',
+              total: allStations.length,
+              stations: allStations,
+              context: ctx
+            });
+          }
 
-                  return Response.json({
-                    status: 'error',
-                    message: 'Nenhuma estação encontrada'
-                  }, { status: 404 });
-            } catch (error) {
-              console.error('[LIST] Erro:', error);
-              return Response.json({
-                status: 'error',
-                message: error.message
-              }, { status: 400 });
+          return Response.json({
+            status: 'error',
+            message: 'Nenhuma estação encontrada'
+          }, { status: 404 });
+        } catch (error) {
+          console.error('[LIST] Erro:', error);
+          return Response.json({
+            status: 'error',
+            message: error.message
+          }, { status: 400 });
+        }
+      }
+
+      case 'get_station_by_id': {
+        // Buscar estação específica por ID
+        try {
+          const result = await callDeyeAPI('/v1.0/station/latest', {
+            stationId: integration.station_id
+          });
+
+          if (result.success === true) {
+            return Response.json({
+              status: 'success',
+              data: result
+            });
+          } else {
+            throw new Error(result.msg || 'Estação não encontrada');
+          }
+        } catch (error) {
+          return Response.json({
+            status: 'error',
+            message: error.message
+          }, { status: 400 });
+        }
+      }
+
+      case 'test_connection': {
+        try {
+          // Usar token business context (companyId configurado)
+          if (config.companyId) {
+            console.log('[TEST] Regenerando token com companyId:', config.companyId);
+            authToken = await getAuthToken(config.companyId);
+          }
+
+          const stationId = String(integration?.station_id || '');
+          console.log('[TEST] Buscando station_id diretamente:', stationId);
+
+          // Buscar a estação diretamente pelo ID (não depende de paginação)
+          let stationData = null;
+          try {
+            const infoResult = await callDeyeAPI('/v1.0/station/info', { stationId });
+            stationData = infoResult.stationInfo || infoResult.data || infoResult;
+            console.log('[TEST] ✅ Estação encontrada via /station/info');
+          } catch (infoErr) {
+            console.log('[TEST] /station/info falhou, tentando /station/latest:', infoErr.message);
+            try {
+              const latestResult = await callDeyeAPI('/v1.0/station/latest', { stationId });
+              stationData = latestResult.data || latestResult;
+              console.log('[TEST] ✅ Estação encontrada via /station/latest');
+            } catch (latestErr) {
+              console.log('[TEST] /station/latest também falhou:', latestErr.message);
+              // Mesmo sem dados da estação, se o token funcionou = conexão OK
+              stationData = null;
             }
           }
 
-          case 'get_station_by_id': {
-            // Buscar estação específica por ID
-            try {
-              const result = await callDeyeAPI('/v1.0/station/latest', {
-                stationId: integration.station_id
-              });
-
-              if (result.success === true) {
-                return Response.json({
-                  status: 'success',
-                  data: result
-                });
-              } else {
-                throw new Error(result.msg || 'Estação não encontrada');
-              }
-            } catch (error) {
-              return Response.json({
-                status: 'error',
-                message: error.message
-              }, { status: 400 });
-            }
+          if (integration) {
+            await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
+              sync_status: 'success',
+              error_message: null,
+              last_sync: new Date().toISOString(),
+              ...(stationData && { last_data: stationData })
+            });
           }
 
-          case 'test_connection': {
-            try {
-              // Usar token business context (companyId configurado)
-              if (config.companyId) {
-                console.log('[TEST] Regenerando token com companyId:', config.companyId);
-                authToken = await getAuthToken(config.companyId);
-              }
-
-              const stationId = String(integration?.station_id || '');
-              console.log('[TEST] Buscando station_id diretamente:', stationId);
-
-              // Buscar a estação diretamente pelo ID (não depende de paginação)
-              let stationData = null;
-              try {
-                const infoResult = await callDeyeAPI('/v1.0/station/info', { stationId });
-                stationData = infoResult.stationInfo || infoResult.data || infoResult;
-                console.log('[TEST] ✅ Estação encontrada via /station/info');
-              } catch (infoErr) {
-                console.log('[TEST] /station/info falhou, tentando /station/latest:', infoErr.message);
-                try {
-                  const latestResult = await callDeyeAPI('/v1.0/station/latest', { stationId });
-                  stationData = latestResult.data || latestResult;
-                  console.log('[TEST] ✅ Estação encontrada via /station/latest');
-                } catch (latestErr) {
-                  console.log('[TEST] /station/latest também falhou:', latestErr.message);
-                  // Mesmo sem dados da estação, se o token funcionou = conexão OK
-                  stationData = null;
-                }
-              }
-
-              if (integration) {
-                await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
-                  sync_status: 'success',
-                  error_message: null,
-                  last_sync: new Date().toISOString(),
-                  ...(stationData && { last_data: stationData })
-                });
-              }
-
-              return Response.json({
-                status: 'success',
-                message: `Conexão testada com sucesso! Station ${stationId} acessível.`,
-                data: stationData,
-                debug: { stationId, hasData: !!stationData }
-              });
+          return Response.json({
+            status: 'success',
+            message: `Conexão testada com sucesso! Station ${stationId} acessível.`,
+            data: stationData,
+            debug: { stationId, hasData: !!stationData }
+          });
         } catch (error) {
           console.log('[TEST] Erro:', error.message);
 
@@ -656,7 +656,7 @@ Deno.serve(async (req) => {
             console.log('[SYNC] /station/latest falhou (ignorando):', e.message);
           }
 
-          // Sincronizar geração mensal (últimos 12 meses)
+          // Sincronizar geração mensal (últimos 12 meses + atual)
           const now = new Date();
           const stationIdNum = parseInt(integration.station_id, 10);
           const stationIdStr = String(integration.station_id);
@@ -732,10 +732,17 @@ Deno.serve(async (req) => {
                   const referenceMonth = item.statisticsMonth;
                   if (!referenceMonth || !/^\d{4}-\d{2}$/.test(referenceMonth)) continue;
 
+                  const isCurrentMonth = referenceMonth === currentMonth;
                   const existing = await base44.asServiceRole.entities.MonthlyGeneration.filter({
                     power_plant_id: integration.power_plant_id,
                     reference_month: referenceMonth
                   });
+
+                  // Pular meses antigos que já estão preenchidos (exceto mês atual que sempre atualiza)
+                  if (existing.length > 0 && !isCurrentMonth) {
+                    console.log('[SYNC] ℹ️ Mês', referenceMonth, 'já existe, pulando');
+                    continue;
+                  }
 
                   const inverterGeneration = parseFloat(item.energy) || 0;
 
@@ -752,11 +759,13 @@ Deno.serve(async (req) => {
                   };
 
                   if (existing.length > 0) {
+                    console.log('[SYNC] 🔄 Atualizando mês', referenceMonth, '(atual)');
                     await base44.asServiceRole.entities.MonthlyGeneration.update(
                       existing[0].id,
                       genData
                     );
                   } else {
+                    console.log('[SYNC] ✨ Criando mês', referenceMonth);
                     await base44.asServiceRole.entities.MonthlyGeneration.create(genData);
                   }
                   syncedCount++;
@@ -817,4 +826,4 @@ Deno.serve(async (req) => {
       debug: error?.response?.data || null
     }, { status: httpStatus === 500 ? 500 : 400 });
   }
-  });
+});
