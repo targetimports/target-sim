@@ -98,8 +98,7 @@ Deno.serve(async (req) => {
     if (action !== 'list_stations') {
       try {
         if (integration_id) {
-          const integrations = await base44.asServiceRole.entities.DeyeIntegration.filter({ id: integration_id });
-          integration = integrations[0];
+          integration = await base44.asServiceRole.entities.DeyeIntegration.get(integration_id);
         } else if (power_plant_id) {
           const integrations = await base44.asServiceRole.entities.DeyeIntegration.filter({ power_plant_id, is_active: true });
           integration = integrations[0];
