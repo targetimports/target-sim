@@ -628,16 +628,38 @@ Deno.serve(async (req) => {
           console.log('[SYNC] Tentando com timestamps: startTs:', startTs, 'endTs:', endTs);
           let historyResult = null;
           
-          // Conforme documentação oficial Deye:
-          // /v1.0/station/history com granularity=3: startTime e endTime em formato 'yyyy-MM'
-          // retorna dados mensais
-          historyResult = await callDeyeAPI('/v1.0/station/history', {
-            stationId: stationIdNum,
-            startTime: startMonthStr,   // yyyy-MM
-            endTime: endMonthStr,        // yyyy-MM
-            granularity: 3
-          });
-          console.log('[SYNC] historyResult:', JSON.stringify(historyResult).substring(0, 500));
+          // Testar diferentes combinações de campos para descobrir o formato correto
+          // Pode ser startAt/endAt em vez de startTime/endTime
+          let historyResult = null;
+          
+          // Tentativa com startAt/endAt (formato que /device/history usa) + granularity=3 YYYY-MM
+          try {
+            historyResult = await callDeyeAPI('/v1.0/station/history', {
+              stationId: stationIdNum,
+              startAt: startMonthStr,
+              endAt: endMonthStr,
+              granularity: 3
+            });
+            console.log('[SYNC] ✅ startAt/endAt + granularity funcionou:', JSON.stringify(historyResult).substring(0, 300));
+          } catch (e1) {
+            console.log('[SYNC] ❌ startAt/endAt falhou:', e1.message);
+            // Tentativa sem granularity usando startTime/endTime YYYY-MM
+            try {
+              historyResult = await callDeyeAPI('/v1.0/station/history', {
+                stationId: stationIdNum,
+                startTime: startMonthStr,
+                endTime: endMonthStr
+              });
+              console.log('[SYNC] ✅ startTime/endTime sem granularity funcionou:', JSON.stringify(historyResult).substring(0, 300));
+            } catch (e2) {
+              console.log('[SYNC] ❌ startTime/endTime falhou:', e2.message);
+              // Tentativa só com stationId
+              historyResult = await callDeyeAPI('/v1.0/station/history', {
+                stationId: stationIdNum
+              });
+              console.log('[SYNC] ✅ só stationId funcionou:', JSON.stringify(historyResult).substring(0, 300));
+            }
+          }
           results.monthly_generation = historyResult;
 
           // Atualizar MonthlyGeneration se houver dados
