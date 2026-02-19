@@ -73,16 +73,18 @@ Deno.serve(async (req) => {
       return Response.json({ status: 'error', message: 'Configuração Deye Settings não encontrada' }, { status: 404 });
     }
     const rawSettings = settingsList[0];
-    config = (rawSettings && (rawSettings.data || rawSettings)) || {};
+    config = rawSettings?.data ?? rawSettings ?? {};
+
+    config.region = normalizeRegion(config.region);
 
     // Validação de campos obrigatórios
-    const requiredFields = ['appId', 'appSecret', 'email', 'password', 'region'];
-    const missing = requiredFields.filter(k => !String(config?.[k] ?? '').trim());
-    if (missing.length > 0) {
-      return Response.json({ 
-        status: 'error', 
-        message: `Configuração DeyeSettings incompleta: faltando ${missing.join(', ')}`,
-        debug: { keys: Object.keys(config || {}), missing }
+    const requiredFields = ['appId', 'appSecret', 'email', 'password'];
+    const missingFields = requiredFields.filter(k => !String(config?.[k] ?? '').trim());
+    if (missingFields.length > 0) {
+      return Response.json({
+        status: 'error',
+        message: `Configuração DeyeSettings incompleta: faltando ${missingFields.join(', ')}`,
+        debug: { keys: Object.keys(config || {}), missingFields }
       }, { status: 400 });
     }
 
@@ -91,12 +93,6 @@ Deno.serve(async (req) => {
     console.log('[INIT] config.appSecret:', config.appSecret ? '✓' : '❌');
     console.log('[INIT] config.email:', config.email);
     console.log('[INIT] config.password:', config.password ? '✓' : '❌');
-
-    const required = ['appId', 'appSecret', 'email', 'password'];
-    const missing = required.filter(k => !String(config?.[k] ?? '').trim());
-    if (missing.length > 0) {
-      return Response.json({ status: 'error', message: `Config Deye incompleta: faltando ${missing.join(', ')}` }, { status: 400 });
-    }
 
     // Para ações que precisam de integração específica, buscá-la separadamente
     if (action !== 'list_stations') {
