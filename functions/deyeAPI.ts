@@ -771,10 +771,17 @@ Deno.serve(async (req) => {
     }
 
   } catch (error) {
+    console.error('[ERROR] Erro não tratado:', error.message);
+    const httpStatus = error?.response?.status || 500;
+    const upstreamData = error?.response?.data || null;
+    const message = upstreamData?.message || upstreamData?.msg || error?.message || 'Erro inesperado';
+
     return Response.json({
       status: 'error',
-      message: error.message,
-      stack: error.stack
-    }, { status: 500 });
+      message: `deyeAPI falhou: ${message}`,
+      httpStatus,
+      upstreamData,
+      debug: error?.response?.data || null
+    }, { status: httpStatus === 500 ? 500 : 400 });
   }
-});
+  });
