@@ -628,33 +628,46 @@ Deno.serve(async (req) => {
           console.log('[SYNC] Tentando com timestamps: startTs:', startTs, 'endTs:', endTs);
           let historyResult = null;
           
-          // Usar /v1.0/station/history/power que usa timestamps em segundos (mais confiável)
-          // OU usar a lista de estações que já retornou os dados de geração
-          // Por enquanto, tentar /station/history com diferentes payloads
-          
-          // Abordagem: usar o endpoint de lista de estações que JÁ retornou os dados
-          // e extrair a geração da estação específica
-          const stationListResult = await callDeyeAPI('/v1.0/station/list', {
-            page: 1,
-            size: 1,
-            stationId: stationIdNum
-          });
-          console.log('[SYNC] stationListResult:', JSON.stringify(stationListResult).substring(0, 500));
-          
-          // Também tentar station history com campos corretos
+          // Tentar /station/history com stationId como string (pode ser que a API espere string para este endpoint)
           let historyResult = null;
+          const stationIdStr = String(integration.station_id);
+          
+          // Tentativa 1: stationId string + startAt/endAt + granularity=3
           try {
-            // Tentar como aparece em alguns exemplos da API - apenas stationId e meses
             historyResult = await callDeyeAPI('/v1.0/station/history', {
-              stationId: stationIdNum,
+              stationId: stationIdStr,
               startAt: startMonthStr,
               endAt: endMonthStr,
               granularity: 3
             });
-            console.log('[SYNC] historyResult:', JSON.stringify(historyResult).substring(0, 500));
-          } catch (histErr) {
-            console.log('[SYNC] /station/history falhou:', histErr.message);
-            historyResult = { success: false, stationMonthList: [] };
+            console.log('[SYNC] ✅ stationId string + startAt/endAt:', JSON.stringify(historyResult).substring(0, 300));
+          } catch (e1) {
+            console.log('[SYNC] ❌ stationId string + startAt/endAt:', e1.message);
+            // Tentativa 2: stationId int + startAt/endAt + granularity=3
+            try {
+              historyResult = await callDeyeAPI('/v1.0/station/history', {
+                stationId: stationIdNum,
+                startAt: startMonthStr,
+                endAt: endMonthStr,
+                granularity: 3
+              });
+              console.log('[SYNC] ✅ stationId int + startAt/endAt:', JSON.stringify(historyResult).substring(0, 300));
+            } catch (e2) {
+              console.log('[SYNC] ❌ stationId int + startAt/endAt:', e2.message);
+              // Tentativa 3: sem granularity, stationId string
+              try {
+                historyResult = await callDeyeAPI('/v1.0/station/history', {
+                  stationId: stationIdStr,
+                  startTime: startMonthStr,
+                  endTime: endMonthStr
+                });
+                console.log('[SYNC] ✅ startTime/endTime string:', JSON.stringify(historyResult).substring(0, 300));
+              } catch (e3) {
+                console.log('[SYNC] ❌ startTime/endTime string:', e3.message);
+                // Se tudo falhar, retornar sem dados de histórico
+                historyResult = { success: false, stationMonthList: [] };
+              }
+            }
           }
           results.monthly_generation = historyResult;
 
