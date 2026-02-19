@@ -776,7 +776,6 @@ Deno.serve(async (req) => {
                     reference_month: referenceMonth,
                     reading_date: new Date().toISOString().split('T')[0],
                     inverter_generation_kwh: inverterGeneration,
-                    generated_kwh: inverterGeneration,
                     status: 'confirmed',
                     source: 'other',
                     notes: `Sincronizado via Deye Cloud API`
