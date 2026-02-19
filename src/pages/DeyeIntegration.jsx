@@ -503,7 +503,6 @@ export default function DeyeIntegration() {
                   onChange={(e) => {
                     setStationSearch(e.target.value);
                     if (availableStations.length > 0) setShowStationDropdown(true);
-                    // Permitir digitar ID diretamente
                     const numId = e.target.value.replace(/\D/g, '');
                     if (numId) setFormData(prev => ({ ...prev, station_id: numId }));
                   }}
@@ -557,6 +556,27 @@ export default function DeyeIntegration() {
                   Clique em "Listar Estações" no topo para ver as estações disponíveis
                 </p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>App ID *</Label>
+              <Input
+                value={formData.app_id}
+                onChange={(e) => setFormData(prev => ({ ...prev, app_id: e.target.value }))}
+                placeholder="ID da aplicação Deye Cloud"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>App Secret *</Label>
+              <Input
+                type="password"
+                value={formData.app_secret}
+                onChange={(e) => setFormData(prev => ({ ...prev, app_secret: e.target.value }))}
+                placeholder="Secret da aplicação Deye Cloud"
+                required
+              />
             </div>
 
             <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
