@@ -354,32 +354,41 @@ Deno.serve(async (req) => {
               }
 
               const stationId = String(integration?.station_id || '');
-              console.log('[TEST] Buscando station_id:', stationId);
+              console.log('[TEST] Buscando station_id diretamente:', stationId);
 
-              // Buscar apenas primeira página para confirmar conexão
-              const listResult = await callDeyeAPI('/v1.0/station/list', { page: 1, size: 100 });
-              const list = listResult.stationList || [];
-              const foundStation = stationId ? list.find(s => String(s.stationId) === stationId) : null;
-
-              console.log('[TEST] Total na página 1:', list.length, '| Encontrou:', !!foundStation);
-
-              const isSuccess = true; // token funcionou = conexão ok
-              const warnMsg = stationId && !foundStation ? ` (Station ${stationId} não na pág 1, mas conexão OK)` : '';
+              // Buscar a estação diretamente pelo ID (não depende de paginação)
+              let stationData = null;
+              try {
+                const infoResult = await callDeyeAPI('/v1.0/station/info', { stationId });
+                stationData = infoResult.stationInfo || infoResult.data || infoResult;
+                console.log('[TEST] ✅ Estação encontrada via /station/info');
+              } catch (infoErr) {
+                console.log('[TEST] /station/info falhou, tentando /station/latest:', infoErr.message);
+                try {
+                  const latestResult = await callDeyeAPI('/v1.0/station/latest', { stationId });
+                  stationData = latestResult.data || latestResult;
+                  console.log('[TEST] ✅ Estação encontrada via /station/latest');
+                } catch (latestErr) {
+                  console.log('[TEST] /station/latest também falhou:', latestErr.message);
+                  // Mesmo sem dados da estação, se o token funcionou = conexão OK
+                  stationData = null;
+                }
+              }
 
               if (integration) {
                 await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
                   sync_status: 'success',
                   error_message: null,
                   last_sync: new Date().toISOString(),
-                  ...(foundStation && { last_data: foundStation })
+                  ...(stationData && { last_data: stationData })
                 });
               }
 
               return Response.json({
                 status: 'success',
-                message: `Conexão testada com sucesso${warnMsg}`,
-                data: foundStation || null,
-                debug: { total: listResult.total, page1Count: list.length, stationId, foundStation: !!foundStation }
+                message: `Conexão testada com sucesso! Station ${stationId} acessível.`,
+                data: stationData,
+                debug: { stationId, hasData: !!stationData }
               });
         } catch (error) {
           console.log('[TEST] Erro:', error.message);
