@@ -797,8 +797,16 @@ Deno.serve(async (req) => {
             }
           }
 
+          // Salvar resumo apenas (não dados completos que são gigantes)
+          const lastDataSummary = {
+            station_power: results.station_info?.generationPower || null,
+            last_update: results.station_info?.lastUpdateTime || null,
+            total_months: historyResult.total || 0,
+            last_month_kwh: items.length > 0 ? items[items.length - 1].generationValue : null
+          };
+
           await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
-            last_data: results,
+            last_data: lastDataSummary,
             sync_status: 'success',
             last_sync: new Date().toISOString(),
             error_message: null
