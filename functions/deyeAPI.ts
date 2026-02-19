@@ -354,7 +354,7 @@ Deno.serve(async (req) => {
                       businessStations = businessStations.concat(companyStations);
                       console.log(`[LIST] ✅ Empresa ${company.companyId}: +${companyStations.length}`);
                     } else {
-                      console.log(`[LIST] - Empresa ${company.companyId}: sem estações`);
+                      console.log(`[LIST] - Empresa ${company.companyId}: 0 estações`);
                     }
                   } catch (err) {
                     console.log(`[LIST] ⚠️ Erro na empresa ${company.companyId}:`, err.message);
