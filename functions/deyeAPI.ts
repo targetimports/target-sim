@@ -325,10 +325,10 @@ Deno.serve(async (req) => {
               console.log('[LIST] 2️⃣ Tentando descobrir empresas (Business context)...');
               const companies = await getAccountInfo();
 
+              let businessStations = [];
+
               if (companies && companies.length > 0) {
                 console.log(`[LIST] 🏢 Encontradas ${companies.length} empresas`);
-
-                let businessStations = [];
 
                 // Tentar cada empresa
                 for (const company of companies) {
@@ -349,18 +349,20 @@ Deno.serve(async (req) => {
                     console.log(`[LIST] ⚠️ Erro na empresa ${company.companyId}:`, err.message);
                   }
                 }
+              } else {
+                console.log('[LIST] ⚠️ Nenhuma empresa encontrada no Business context');
+              }
 
-                const totalStations = allStations.concat(businessStations);
-                console.log(`[LIST] 📊 Total: ${allStations.length} pessoal + ${businessStations.length} business = ${totalStations.length}`);
+              const totalStations = allStations.concat(businessStations);
+              console.log(`[LIST] 📊 Total: ${allStations.length} pessoal + ${businessStations.length} business = ${totalStations.length}`);
 
-                if (totalStations.length > 0) {
-                  return Response.json({
-                    status: 'success',
-                    total: totalStations.length,
-                    stations: totalStations,
-                    context: allStations.length > 0 && businessStations.length > 0 ? 'both' : (businessStations.length > 0 ? 'business' : 'personal')
-                  });
-                }
+              if (totalStations.length > 0) {
+                return Response.json({
+                  status: 'success',
+                  total: totalStations.length,
+                  stations: totalStations,
+                  context: allStations.length > 0 && businessStations.length > 0 ? 'both' : (businessStations.length > 0 ? 'business' : 'personal')
+                });
               }
 
               return Response.json({
