@@ -251,6 +251,10 @@ export default function DeyeIntegration() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!formData.station_id || !formData.power_plant_id) {
+      alert('Por favor, selecione a usina e o ID da estação');
+      return;
+    }
     if (editingIntegration) {
       updateIntegration.mutate({ id: editingIntegration.id, data: formData });
     } else {
