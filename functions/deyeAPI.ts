@@ -373,31 +373,72 @@ Deno.serve(async (req) => {
 
           case 'test_connection': {
             try {
-              // Testar conexão listando estações (rota que funciona com token pessoal)
-              const result = await callDeyeAPI('/v1.0/station/list', { page: 1, size: 1 });
+              const stationId = integration?.station_id;
+              console.log('[TEST] Buscando station_id:', stationId);
 
-          console.log('[TEST] Result completo:', JSON.stringify(result));
+              // Buscar todas as páginas até encontrar a estação
+              const PAGE_SIZE = 100;
+              let page = 1;
+              let foundStation = null;
+              let total = null;
 
-          // Sucesso se retornou uma resposta válida (mesmo que 0 estações)
-          const isSuccess = result.success === true || result.stationList !== undefined || result.total !== undefined;
-          const errorMessage = !isSuccess ? (result.msg || result.message || `Código: ${result.code}`) : null;
+              while (true) {
+                const result = await callDeyeAPI('/v1.0/station/list', { page, size: PAGE_SIZE });
+                const list = result.stationList || [];
+                if (total === null) total = result.total || 0;
 
-          console.log('[TEST] isSuccess:', isSuccess, 'errorMessage:', errorMessage);
+                if (stationId) {
+                  foundStation = list.find(s => String(s.stationId) === String(stationId));
+                  if (foundStation) break;
+                }
 
-          if (integration) {
-            await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
-              sync_status: isSuccess ? 'success' : 'error',
-              error_message: errorMessage,
-              last_sync: new Date().toISOString()
-            });
-          }
+                if (list.length < PAGE_SIZE || (total && page * PAGE_SIZE >= total)) break;
+                page++;
+              }
 
-          return Response.json({
-            status: isSuccess ? 'success' : 'error',
-            message: isSuccess ? 'Conexão testada com sucesso' : (errorMessage || 'Erro desconhecido'),
-            data: isSuccess ? result : null,
-            debug: { result, isSuccess }
-          });
+              // Se não achou no contexto pessoal, tentar business context
+              if (!foundStation && stationId) {
+                const companies = await getAccountInfo();
+                for (const company of companies) {
+                  try {
+                    authToken = await getAuthToken(company.companyId);
+                    page = 1; total = null;
+                    while (true) {
+                      const result = await callDeyeAPI('/v1.0/station/list', { page, size: PAGE_SIZE });
+                      const list = result.stationList || [];
+                      if (total === null) total = result.total || 0;
+                      foundStation = list.find(s => String(s.stationId) === String(stationId));
+                      if (foundStation) break;
+                      if (list.length < PAGE_SIZE || (total && page * PAGE_SIZE >= total)) break;
+                      page++;
+                    }
+                    if (foundStation) break;
+                  } catch (e) {
+                    console.log('[TEST] Erro na empresa:', e.message);
+                  }
+                }
+              }
+
+              const isSuccess = stationId ? !!foundStation : true;
+              const errorMessage = stationId && !foundStation ? `Station ID ${stationId} não encontrada na conta Deye` : null;
+
+              console.log('[TEST] isSuccess:', isSuccess, 'foundStation:', JSON.stringify(foundStation)?.substring(0, 200));
+
+              if (integration) {
+                await base44.asServiceRole.entities.DeyeIntegration.update(integration.id, {
+                  sync_status: isSuccess ? 'success' : 'error',
+                  error_message: errorMessage,
+                  last_sync: new Date().toISOString(),
+                  ...(foundStation && { last_data: foundStation })
+                });
+              }
+
+              return Response.json({
+                status: isSuccess ? 'success' : 'error',
+                message: isSuccess ? 'Conexão testada com sucesso' : (errorMessage || 'Erro desconhecido'),
+                data: foundStation || null,
+                debug: { foundStation, stationId }
+              });
         } catch (error) {
           console.log('[TEST] Erro:', error.message);
 
