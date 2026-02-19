@@ -617,17 +617,44 @@ Deno.serve(async (req) => {
           // Tentar diferentes formatos de data e stationId para descobrir o formato correto
           console.log('[SYNC] Tentando /station/history com stationId int:', stationIdNum);
           
-          // Testar com formato YYYY-MM primeiro
+          // Tentar diferentes formatos - a API pode precisar de timestamp em ms
           const startMonthStr = startDateStr.substring(0, 7);
           const endMonthStr = endDate.substring(0, 7);
-          console.log('[SYNC] startTime:', startMonthStr, 'endTime:', endMonthStr);
           
-          // Debugar: testar com apenas 1 mês para identificar o problema
-          const historyResult = await callDeyeAPI('/v1.0/station/history', {
-            stationId: stationIdNum,
-            startTime: endMonthStr,  // apenas o mês atual
-            endTime: endMonthStr
-          });
+          // Converter YYYY-MM para timestamps em milissegundos (início e fim do mês)
+          const startTs = new Date(startMonthStr + '-01T00:00:00Z').getTime();
+          const endTs = new Date(endDate + 'T23:59:59Z').getTime();
+          
+          console.log('[SYNC] Tentando com timestamps: startTs:', startTs, 'endTs:', endTs);
+          let historyResult = null;
+          
+          // Tentativa 1: com timestamps em ms
+          try {
+            historyResult = await callDeyeAPI('/v1.0/station/history', {
+              stationId: stationIdNum,
+              startTime: startTs,
+              endTime: endTs
+            });
+            console.log('[SYNC] ✅ Formato timestamp funcionou');
+          } catch (e1) {
+            console.log('[SYNC] ❌ Formato timestamp falhou:', e1.message);
+            // Tentativa 2: formato YYYY-MM
+            try {
+              historyResult = await callDeyeAPI('/v1.0/station/history', {
+                stationId: stationIdNum,
+                startTime: startMonthStr,
+                endTime: endMonthStr
+              });
+              console.log('[SYNC] ✅ Formato YYYY-MM funcionou');
+            } catch (e2) {
+              console.log('[SYNC] ❌ Formato YYYY-MM falhou:', e2.message);
+              // Tentativa 3: sem datas (só stationId)
+              historyResult = await callDeyeAPI('/v1.0/station/history', {
+                stationId: stationIdNum
+              });
+              console.log('[SYNC] ✅ Sem datas funcionou');
+            }
+          }
           results.monthly_generation = historyResult;
 
           // Atualizar MonthlyGeneration se houver dados
