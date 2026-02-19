@@ -614,13 +614,18 @@ Deno.serve(async (req) => {
           const startDateStr = startDate.toISOString().split('T')[0]; // YYYY-MM-DD
 
           const stationIdNum = parseInt(integration.station_id, 10);
-          // API Deye /station/history espera startTime e endTime no formato YYYY-MM
-          const startMonthStr = startDateStr.substring(0, 7); // YYYY-MM
-          const endMonthStr = endDate.substring(0, 7); // YYYY-MM
-          console.log('[SYNC] stationId (int):', stationIdNum, 'startTime:', startMonthStr, 'endTime:', endMonthStr);
+          // Tentar diferentes formatos de data e stationId para descobrir o formato correto
+          console.log('[SYNC] Tentando /station/history com stationId int:', stationIdNum);
+          
+          // Testar com formato YYYY-MM primeiro
+          const startMonthStr = startDateStr.substring(0, 7);
+          const endMonthStr = endDate.substring(0, 7);
+          console.log('[SYNC] startTime:', startMonthStr, 'endTime:', endMonthStr);
+          
+          // Debugar: testar com apenas 1 mês para identificar o problema
           const historyResult = await callDeyeAPI('/v1.0/station/history', {
             stationId: stationIdNum,
-            startTime: startMonthStr,
+            startTime: endMonthStr,  // apenas o mês atual
             endTime: endMonthStr
           });
           results.monthly_generation = historyResult;
