@@ -189,7 +189,8 @@ Deno.serve(async (req) => {
     // Obter companyIds disponíveis
     const getAccountInfo = async () => {
       try {
-        const baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES[DEFAULT_REGION];
+        const region = normalizeRegion(config.region);
+        const baseUrl = DEYE_API_BASES[region] || DEYE_API_BASES[DEFAULT_REGION];
         
         // Primeiro, obter token pessoal (sem companyId)
         let personalToken = await getAuthToken(null);
@@ -199,7 +200,7 @@ Deno.serve(async (req) => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${personalToken}`
+            'Authorization': `bearer ${personalToken}`
           },
           body: JSON.stringify({})
         });
