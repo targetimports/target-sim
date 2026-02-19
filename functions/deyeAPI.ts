@@ -568,11 +568,12 @@ Deno.serve(async (req) => {
       }
 
       case 'get_daily_generation': {
-        // Buscar geração diária
-        const result = await callDeyeAPI('/v1.0/station/history/power', {
-          stationId: integration.station_id,
-          startTime: start_time,
-          endTime: end_time
+        // Buscar geração diária - parâmetros devem ser startAt/endAt (yyyy-MM-dd para granularity=2)
+        const result = await callDeyeAPI('/v1.0/station/history', {
+          stationId: parseInt(integration.station_id, 10),
+          startAt: start_time,
+          endAt: end_time,
+          granularity: 2  // 2 = dia
         });
 
         return Response.json({
