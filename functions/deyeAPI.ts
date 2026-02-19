@@ -580,8 +580,9 @@ Deno.serve(async (req) => {
           const startDate = new Date(now.getFullYear() - 1, now.getMonth(), 1);
           const startDateStr = startDate.toISOString().split('T')[0]; // YYYY-MM-DD
 
+          console.log('[SYNC] stationId:', integration.station_id, 'startTime:', startDateStr, 'endTime:', endDate);
           const historyResult = await callDeyeAPI('/v1.0/station/history', {
-            stationId: integration.station_id,
+            stationId: String(integration.station_id),
             startTime: startDateStr,
             endTime: endDate
           });
