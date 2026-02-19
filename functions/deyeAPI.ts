@@ -737,7 +737,13 @@ Deno.serve(async (req) => {
               for (const item of historyResult.stationMonthList) {
                 try {
                   const referenceMonth = item.statisticsMonth;
-                  if (!referenceMonth || !/^\d{4}-\d{2}$/.test(referenceMonth)) continue;
+                  console.log('[SYNC] 📅 Processando item:', JSON.stringify(item).substring(0, 300));
+                  console.log('[SYNC]   - statisticsMonth:', referenceMonth);
+                  console.log('[SYNC]   - energy:', item.energy);
+                  if (!referenceMonth || !/^\d{4}-\d{2}$/.test(referenceMonth)) {
+                    console.log('[SYNC]   ⚠️ SKIPPED: referenceMonth inválido');
+                    continue;
+                  }
 
                   const isCurrentMonth = referenceMonth === currentMonth;
                   const existing = await base44.asServiceRole.entities.MonthlyGeneration.filter({
