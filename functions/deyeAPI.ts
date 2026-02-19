@@ -731,7 +731,9 @@ Deno.serve(async (req) => {
           console.log('[SYNC]   - Conteúdo completo:', JSON.stringify(historyResult).substring(0, 1000));
 
           // Atualizar MonthlyGeneration se houver dados
-          if (historyResult.success === true && historyResult.stationMonthList && historyResult.stationMonthList.length > 0) {
+          // A API retorna stationDataItems (não stationMonthList)
+          const dataArray = historyResult.stationDataItems || historyResult.stationMonthList || [];
+          if (historyResult.success === true && dataArray && dataArray.length > 0) {
             const plants = await base44.asServiceRole.entities.PowerPlant.filter({
               id: integration.power_plant_id
             });
@@ -740,12 +742,17 @@ Deno.serve(async (req) => {
               const plant = plants[0];
               let syncedCount = 0;
 
-              for (const item of historyResult.stationMonthList) {
+              for (const item of dataArray) {
                 try {
-                  const referenceMonth = item.statisticsMonth;
+                  // Construir referenceMonth a partir de year e month
+                  const year = item.year;
+                  const month = item.month;
+                  const referenceMonth = `${year}-${String(month).padStart(2, '0')}`;
+                  
                   console.log('[SYNC] 📅 Processando item:', JSON.stringify(item).substring(0, 300));
-                  console.log('[SYNC]   - statisticsMonth:', referenceMonth);
-                  console.log('[SYNC]   - energy:', item.energy);
+                  console.log('[SYNC]   - referenceMonth (construído):', referenceMonth);
+                  console.log('[SYNC]   - generationValue:', item.generationValue);
+                  
                   if (!referenceMonth || !/^\d{4}-\d{2}$/.test(referenceMonth)) {
                     console.log('[SYNC]   ⚠️ SKIPPED: referenceMonth inválido');
                     continue;
@@ -763,7 +770,7 @@ Deno.serve(async (req) => {
                     continue;
                   }
 
-                  const inverterGeneration = parseFloat(item.energy) || 0;
+                  const inverterGeneration = parseFloat(item.generationValue) || 0;
 
                   const genData = {
                     power_plant_id: integration.power_plant_id,
