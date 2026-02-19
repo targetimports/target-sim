@@ -254,7 +254,8 @@ Deno.serve(async (req) => {
     // Função auxiliar para fazer requisições à API Deye com token
     const callDeyeAPI = async (endpoint, params = {}) => {
       try {
-        const baseUrl = DEYE_API_BASES[config.region] || DEYE_API_BASES[DEFAULT_REGION];
+        const region = normalizeRegion(config.region);
+        const baseUrl = DEYE_API_BASES[region] || DEYE_API_BASES[DEFAULT_REGION];
         const url = `${baseUrl}${endpoint}`;
 
         console.log('[API] 📡 POST', url);
